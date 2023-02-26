@@ -1,0 +1,10 @@
+[Unit]
+Description=Admin & scoring service for OSC Linux workshop
+Wants=linux-workshop-admin.timer
+
+[Service]
+ExecStart=/.ws/linux-workshop-admin
+Type=oneshot
+
+[Install]
+WantedBy=multi-user.target

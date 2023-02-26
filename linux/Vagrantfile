@@ -1,0 +1,28 @@
+Vagrant.configure("2") do |config|
+  box = "debian/bullseye64"
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.cpus   = 2
+    vb.memory = 2048
+  end
+
+  if Vagrant.has_plugin?("vagrant-vbguest")
+    config.vbguest.auto_update = false
+  end
+
+  config.vm.define "ws" do |ws|
+    ws.vm.box = box
+
+    ws.vm.network "forwarded_port", guest: 8080, host: 8080, protocol: "tcp"
+
+    mc.vm.synced_folder ".", "/vagrant", disabled: true
+
+    mc.vm.provision "file", source: "./scripts", destination: "/tmp/scripts"
+    mc.vm.provision "file", source: "./services", destination: "/tmp/services"
+
+    mc.vm.provision "shell",
+      inline: <<-SCRIPT
+        bash /tmp/scripts/init.sh
+      SCRIPT
+  end
+end

@@ -1,0 +1,13 @@
+[Unit]
+Description=Periodically run admin & scoring service for OSC Linux workshop
+Requires=linux-workshop-admin.service
+
+[Timer]
+Unit=linux-workshop-admin.service
+OnBootSec=10s
+OnUnitActiveSec=10s
+AccuracySec=1s
+Persistent=true
+
+[Install]
+WantedBy=timers.target
