@@ -15,11 +15,8 @@ accrue-points() {
   sqlite3 "${db}" "INSERT INTO score VALUES (DATETIME(), (100 * ${which_step}));"
 }
 
-# TODO: we need to figure out either under what conditions to call this, OR to
-# find a way to make it idempotent if the team hasn't finished the step they're
-# currently on
 score-for-step() {
-  which_step="${1:-}" # "$(sqlite3 ${db} 'SELECT (current_step + 1) FROM step;')"
+  which_step="${1:-}"
   if [[ ! -f "/home/admin/step_${which_step}.md" ]]; then
     cp "${wsroot}/instructions/${which_step}.md" "/home/admin/step_${which_step}.md"
   fi
