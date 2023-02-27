@@ -3,7 +3,7 @@ Description=Admin & scoring service for OSC Linux workshop
 Wants=linux-workshop-admin.timer
 
 [Service]
-ExecStart=/.ws/linux-workshop-admin
+ExecStart=/.ws/scripts/linux-workshop-admin.sh
 Type=oneshot
 
 [Install]
