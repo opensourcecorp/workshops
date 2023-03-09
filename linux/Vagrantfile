@@ -31,13 +31,6 @@ Vagrant.configure("2") do |config|
 
     ws.vm.provision "shell",
       inline: <<-SCRIPT
-        # Set up admin user
-        useradd -m admin || true
-        usermod -aG sudo admin
-        printf 'admin ALL=(ALL) NOPASSWD:ALL\n' > /etc/sudoers.d/admin
-        printf 'admin\nadmin\n' | sudo passwd admin
-        chsh --shell $(which bash) admin
-
         bash /tmp/scripts/init.sh
       SCRIPT
   end

@@ -1,4 +1,5 @@
-# Firefights!
+Linux System Breakfixing
+========================
 
-Firefights are a series of fun group activities used to teach people
-IT & other software skills in a fast-paced, competitive environment.
+In this workshop, teams will work to fix the broken deployment of an application
+running on a Linux server.

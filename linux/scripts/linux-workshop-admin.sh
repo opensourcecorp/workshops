@@ -11,17 +11,33 @@ set -euo pipefail
 wsroot='/.ws'
 db="${wsroot}/main.db"
 
-accrue-points() {
-  sqlite3 "${db}" "INSERT INTO score VALUES (DATETIME(), (100 * ${which_step}));"
-}
-
 score-for-step() {
   which_step="${1:-}"
-  if [[ ! -f "/home/admin/step_${which_step}.md" ]]; then
-    cp "${wsroot}/instructions/${which_step}.md" "/home/admin/step_${which_step}.md"
+
+  if [[ -z "${which_step}" ]] ; then
+    printf 'ERROR: current step number not provided to score-for-step\n' > /dev/stderr
+    return 1
   fi
-  sqlite3 "${db}" "UPDATE step SET current_step = ${which_step};"
+
+  printf 'Successful completion of Step %s!\n' "${which_step}"
   accrue-points "${which_step}"
+
+  next_step="$((which_step + 1))"
+
+  if [[ ! -f "/home/admin/step_${next_step}.md" ]]; then
+    printf 'Providing instruction to user for Step %s\n' "${next_step}"
+    cp "${wsroot}/instructions/step_${next_step}.md" /home/admin/
+  fi
+  sqlite3 "${db}" "UPDATE step SET current_step = ${next_step};"
+}
+
+# accrue-points adds monotonically-increasing point values based on how many
+# steps have been completed, but the overall score is exponentially-increasing
+# since this is called for each check defined. A completed Step 1 would add 100
+# points each tick, a completed Step 2 adds an additional 200 points each tick,
+# etc.
+accrue-points() {
+  sqlite3 "${db}" "INSERT INTO score VALUES (DATETIME(), (100 * ${which_step}));"
 }
 
 ###
