@@ -10,13 +10,6 @@ fi
 wsroot='/.ws'
 mkdir -p "${wsroot}"
 
-# All source directories are expected to have landed in /tmp
-cp -r /tmp/{scripts,services,instructions} "${wsroot}"/
-mkdir -p /opt/app
-cp -r /tmp/app-src/* /opt/app
-chown -R admin:admin /opt/app
-rm -rf /tmp/{scripts,services,instructions,app-src}
-
 # Install any system packages we might need
 apt-get update && apt-get install -y \
   bats \
@@ -45,6 +38,13 @@ usermod -aG sudo admin
 printf 'admin ALL=(ALL) NOPASSWD:ALL\n' > /etc/sudoers.d/admin
 printf 'admin\nadmin\n' | passwd admin
 chsh --shell "$(command -v bash)" admin
+
+# All source directories are expected to have landed in /tmp
+cp -r /tmp/{scripts,services,instructions} "${wsroot}"/
+mkdir -p /opt/app
+cp -r /tmp/app-src/* /opt/app
+chown -R admin:admin /opt/app
+rm -rf /tmp/{scripts,services,instructions,app-src}
 
 # Dump the first instruction to the team's homedir
 cp "${wsroot}"/instructions/step_1.md /home/admin/
