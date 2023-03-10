@@ -12,10 +12,14 @@ mkdir -p "${wsroot}"
 
 # All source directories are expected to have landed in /tmp
 cp -r /tmp/{scripts,services,instructions} "${wsroot}"/
-rm -rf /tmp/{scripts,services,instructions}
+mkdir -p /opt/app
+cp -r /tmp/app-src/* /opt/app
+chown -R admin:admin /opt/app
+rm -rf /tmp/{scripts,services,instructions,app-src}
 
 # Install any system packages we might need
 apt-get update && apt-get install -y \
+  bats \
   git \
   golang \
   sqlite3 \
@@ -29,16 +33,10 @@ systemctl enable linux-workshop-admin.timer
 systemctl start linux-workshop-admin.timer
 
 sqlite3 "${wsroot}"/main.db '
-CREATE TABLE IF NOT EXISTS score (
+CREATE TABLE IF NOT EXISTS scoring (
   timestamp TIMESTAMP,
-  value INTEGER
+  score INTEGER
 );
-
-CREATE TABLE IF NOT EXISTS step (
-  current_step INTEGER
-);
-
-INSERT INTO step (current_step) VALUES (1);
 '
 
 # Set up admin user

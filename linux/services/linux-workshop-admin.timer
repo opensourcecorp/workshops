@@ -4,7 +4,7 @@ Requires=linux-workshop-admin.service
 
 [Timer]
 Unit=linux-workshop-admin.service
-OnBootSec=10s
+OnBootSec=5s
 OnUnitActiveSec=5s
 AccuracySec=1s
 Persistent=true

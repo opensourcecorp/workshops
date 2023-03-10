@@ -15,11 +15,11 @@ score-for-step() {
   which_step="${1:-}"
 
   if [[ -z "${which_step}" ]] ; then
-    printf 'ERROR: current step number not provided to score-for-step\n' > /dev/stderr
+    printf 'ERROR: current step number not provided to score-for-step\n'
     return 1
   fi
 
-  printf 'Successful completion of Step %s!\n' "${which_step}"
+  printf 'Successful completion of Step %s! Adding points to score\n' "${which_step}"
   accrue-points "${which_step}"
 
   next_step="$((which_step + 1))"
@@ -28,7 +28,6 @@ score-for-step() {
     printf 'Providing instruction to user for Step %s\n' "${next_step}"
     cp "${wsroot}/instructions/step_${next_step}.md" /home/admin/
   fi
-  sqlite3 "${db}" "UPDATE step SET current_step = ${next_step};"
 }
 
 # accrue-points adds monotonically-increasing point values based on how many
@@ -37,7 +36,7 @@ score-for-step() {
 # points each tick, a completed Step 2 adds an additional 200 points each tick,
 # etc.
 accrue-points() {
-  sqlite3 "${db}" "INSERT INTO score VALUES (DATETIME(), (100 * ${which_step}));"
+  sqlite3 "${db}" "INSERT INTO scoring VALUES (DATETIME(), (100 * ${which_step}));"
 }
 
 ###
@@ -51,7 +50,7 @@ check-binary-built() {
 }
 
 check-symlink() {
-  if [[ -L /usr/local/bin/run-app ]] ; then
+  if [[ -L /usr/local/bin/run-app ]] && file /usr/local/bin/run-app | grep -q -v 'broken' ; then
     score-for-step 2
   fi
 }
@@ -62,21 +61,14 @@ check-systemd-service-running() {
   fi
 }
 
-check-firewall-rules() {
-  if [[ 0 -eq 1 ]] ; then
-    score-for-step 4
-  fi
-}
-
 ###
 # Main wrapper def & callable for scorables
 ###
 
-_main() {
+main() {
   check-binary-built
   check-symlink
   check-systemd-service-running
-  check-firewall-rules
 }
 
-_main
+main
