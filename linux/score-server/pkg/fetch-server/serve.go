@@ -26,24 +26,28 @@ func Dashboard(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "Dashboard:os.ReadFile: %v\n", err)
+		return
 	}
 
 	tpl, err := template.New("index").Parse(string(tplBytes))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "Dashboard:template.Parse: %v\n", err)
+		return
 	}
 
 	data, err := getScoresFromServers() // TODO: provide server IPs, etc.
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "Dashboard:%v\n", err)
+		return
 	}
 
 	resp, err := renderHTMLTemplateBytes(tpl, data)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "Dashboard:%v\n", err)
+		return
 	}
 
 	fmt.Fprint(w, resp)

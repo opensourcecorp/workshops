@@ -3,7 +3,7 @@ Description=Web server that can be queried for the team's current score
 
 [Service]
 # That path to Go is a newer version of Go, put there in advance
-ExecStart=/.ws/go/bin/go run /.ws/score-server/main.go
+ExecStart=sh -c '/.ws/go/bin/go mod tidy && /.ws/go/bin/go run /.ws/score-server/main.go'
 WorkingDirectory=/.ws/score-server
 User=root
 Restart=always
