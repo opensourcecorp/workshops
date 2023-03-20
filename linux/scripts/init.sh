@@ -33,10 +33,12 @@ apt-get update && apt-get install -y \
   sqlite3 \
   sudo
 
-printf 'Installing a newer version of Go so our own tools can use it...\n'
-curl -fsSL -o "${wsroot}"/go.tar.gz 'https://go.dev/dl/go1.19.7.linux-amd64.tar.gz'
-tar -C "${wsroot}" -xzf "${wsroot}"/go.tar.gz
-cp "${wsroot}"/go/bin/go /go
+
+if [[ ! -f "${wsroot}"/go/bin/go ]] ; then
+  printf 'Installing a newer version of Go so our own tools can use it...\n'
+  curl -fsSL -o "${wsroot}"/go.tar.gz 'https://go.dev/dl/go1.19.7.linux-amd64.tar.gz'
+  tar -C "${wsroot}" -xzf "${wsroot}"/go.tar.gz
+fi
 
 # Set up systemd timer(s) & service(s)
 cp "${wsroot}"/services/* /etc/systemd/system/
@@ -55,5 +57,5 @@ CREATE TABLE IF NOT EXISTS scoring (
 );
 '
 
-# Dump the first instruction to the team's homedir
-cp "${wsroot}"/instructions/step_1.md /home/admin/
+# Dump the first instruction(s) to the team's homedir
+cp "${wsroot}"/instructions/step_{0,1}.md /home/admin/
