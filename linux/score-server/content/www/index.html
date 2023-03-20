@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Linux Workshop</title>
+    <meta charset="utf-8">
+    <meta http-equiv="refresh" content="10"> <!-- refresh page every N seconds -->
+    <style>
+     table {
+          width: 30%;
+          margin-left: auto;
+          margin-right: auto;
+      }
+      table, caption, th, td {
+        text-align: center;
+        border: 1px solid black;
+        border-collapse: collapse;
+        padding: 10px;
+      }
+    </style>
+  </head>
+  <table>
+    <caption>Linux Workshop</caption>
+    <tr>
+      <th>Team</th>
+      <th>Score</th>
+    </tr>
+    <!-- Incoming slice of team data is expected to be pre-sorted in descending order by score -->
+    <!-- Also, you could just do `range .` but I need the index value for the hideous JS hack for getting commas in the score -->
+    {{ range $i, $e := . }}
+    <tr>
+      <td>{{ $e.Name }}</td>
+      <td id="score{{ $i }}">
+        <script>
+          document.getElementById("score{{ $i }}").innerHTML = Number({{ $e.Score }}).toLocaleString('en');
+        </script>
+      </td>
+    </tr>
+    {{ end }}
+  </table>
+</html>

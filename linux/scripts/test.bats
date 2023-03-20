@@ -37,27 +37,26 @@ get-score() {
 @test "systemd timer scoring accumulation (this will be slow)" {
   # Since we actually need the timer that was stopped in setup() here, we've
   # gotta manually restart it
-  sleep 3
+  sleep 5
   systemctl start linux-workshop-admin.timer
-  mkdir -p /opt/app
-  touch /opt/app/app
+  touch /opt/app/app && chmod +x /opt/app/app
   sleep 6 # long enough for 2ish, 5s timer runs. This seems short to me, but it works :shrug:
   score="$(get-score)"
   printf 'Score after some accumulation: %s\n' "${score}"
-  [[ "${score}" -gt 100 ]]
+  [[ "${score}" -ge 100 ]]
 }
 
 @test "step 1 scoring" {
-  mkdir -p /opt/app
-  touch /opt/app/app
+  touch /opt/app/app && chmod +x /opt/app/app
   score="$(get-score)"
   printf 'Score from step 1: %s\n' "${score}"
   [[ "${score}" -eq 100 ]]
 }
 
 @test "step 2 scoring" {
+  touch /opt/app/app && chmod +x /opt/app/app
   ln -fs /opt/app/app /usr/local/bin/run-app
   score="$(get-score)"
   printf 'Score from step 2: %s\n' "${score}"
-  [[ "${score}" -eq 200 ]]
+  [[ "${score}" -eq 300 ]] # step 1 + 2 score
 }

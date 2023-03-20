@@ -44,7 +44,7 @@ accrue-points() {
 ###
 
 check-binary-built() {
-  if [[ -f /opt/app/app ]] ; then
+  if [[ -x /opt/app/app ]] ; then
     score-for-step 1
   fi
 }
