@@ -58,5 +58,5 @@ get-score() {
   ln -fs /opt/app/app /usr/local/bin/run-app
   score="$(get-score)"
   printf 'Score from step 2: %s\n' "${score}"
-  [[ "${score}" -eq 300 ]] # step 1 + 2 score
+  [[ "${score}" -eq 200 ]] # step 1 + 2 score
 }

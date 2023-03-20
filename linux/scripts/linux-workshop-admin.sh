@@ -31,12 +31,10 @@ score-for-step() {
 }
 
 # accrue-points adds monotonically-increasing point values based on how many
-# steps have been completed, but the overall score is exponentially-increasing
-# since this is called for each check defined. A completed Step 1 would add 100
-# points each tick, a completed Step 2 adds an additional 200 points each tick,
-# etc.
+# steps have been completed
 accrue-points() {
-  sqlite3 "${db}" "INSERT INTO scoring VALUES (DATETIME(), (100 * ${which_step}));"
+  # TODO: add bonus for first-time completion?
+  sqlite3 "${db}" "INSERT INTO scoring VALUES (DATETIME(), 100);"
 }
 
 ###

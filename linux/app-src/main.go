@@ -1,7 +1,18 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 func main() {
-	fmt.PrintLine("The app was built, and can run!")
+	printMoney()
+}
+
+func printMoney() {
+	fmt.PrintLine("printing money...")
+	for {
+		fmt.PrintLine("CHA-CHING!")
+		time.Sleep(1 * time.Second)
+	}
 }
