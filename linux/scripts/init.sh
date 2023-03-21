@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ $(id -u) -ne 0 ]]; then
+if [[ "$(id -u)" -ne 0 ]]; then
   printf 'ERROR: script must be run as root.\n' > /dev/stderr
   exit 1
 fi
@@ -30,6 +30,7 @@ apt-get update && apt-get install -y \
   curl \
   git \
   golang \
+  postgresql-client \
   sqlite3 \
   sudo
 
