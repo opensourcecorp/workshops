@@ -15,6 +15,8 @@ if [[ "$(id -u)" -ne 0 ]] ; then
   exit 1
 fi
 
+source /.ws/env || exit 1
+
 setup() {
   teardown
   systemctl stop linux-workshop-admin.timer
@@ -23,14 +25,14 @@ setup() {
 teardown() {
   rm -f /opt/app/app
   rm -f /usr/local/bin/run-app
-  sqlite3 /.ws/main.db 'UPDATE scoring SET score = 0;'
+  psql -U postgres -h "${db_addr:-NOT_SET}" -c 'UPDATE scoring SET score = 0;'
   sleep 3
   systemctl start linux-workshop-admin.timer
 }
 
 get-score() {
   systemctl start linux-workshop-admin.service --wait
-  score="$(sqlite3 /.ws/main.db 'SELECT SUM(score) FROM scoring;')"
+  score="$(psql -U postgres -h "${db_addr:-NOT_SET}" -tAc 'SELECT SUM(score) FROM scoring;')"
   printf '%s' "${score}"
 }
 

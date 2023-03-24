@@ -34,3 +34,5 @@ CREATE TABLE IF NOT EXISTS scoring (
   score INTEGER
 );
 '
+
+printf 'All done!\n'

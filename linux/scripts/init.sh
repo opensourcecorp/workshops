@@ -6,6 +6,11 @@ if [[ "$(id -u)" -ne 0 ]]; then
   exit 1
 fi
 
+if [[ -z "${db_addr}" ]]; then
+  printf 'ERROR: env var "db_addr" not set at runtime.\n' > /dev/stderr
+  exit 1
+fi
+
 # Set up admin user
 useradd -m admin || true
 usermod -aG sudo admin
@@ -41,6 +46,10 @@ if [[ ! -f "${wsroot}"/go/bin/go ]] ; then
   tar -C "${wsroot}" -xzf "${wsroot}"/go.tar.gz
 fi
 
+# Write out vars to env file(s) for systemd services
+rm -f "${wsroot}"/env && touch "${wsroot}"/env
+printf "db_addr=%s\n" "${db_addr}" >> "${wsroot}"/env
+
 # Set up systemd timer(s) & service(s)
 cp "${wsroot}"/services/* /etc/systemd/system/
 systemctl daemon-reload
@@ -50,13 +59,17 @@ systemctl start linux-workshop-admin.timer
 systemctl enable score-server.service
 systemctl start score-server.service
 
-# Set up DB
-sqlite3 "${wsroot}"/main.db '
-CREATE TABLE IF NOT EXISTS scoring (
-  timestamp TIMESTAMP,
-  score INTEGER
-);
-'
+# Confirm DB connectivity
+printf 'Waiting for DB to be reachable...\n'
+timeout 180 sh -c "
+  until timeout 2 psql -U postgres -h ${db_addr} -c 'SELECT NOW();' > /dev/null ; do
+     printf 'Still waiting for DB to be reachable...\n'
+     sleep 5
+  done
+"
+printf 'Successfully reached DB\n'
 
 # Dump the first instruction(s) to the team's homedir
 cp "${wsroot}"/instructions/step_{0,1}.md /home/admin/
+
+printf 'All done!\n'

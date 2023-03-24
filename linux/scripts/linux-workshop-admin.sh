@@ -9,7 +9,6 @@ set -euo pipefail
 ################################################################################
 
 wsroot='/.ws'
-db="${wsroot}/main.db"
 
 score-for-step() {
   which_step="${1:-}"
@@ -34,7 +33,7 @@ score-for-step() {
 # steps have been completed
 accrue-points() {
   # TODO: add bonus for first-time completion?
-  sqlite3 "${db}" "INSERT INTO scoring VALUES (DATETIME(), 100);"
+  psql -U postgres -h "${db_addr:-NOT_SET}" -c "INSERT INTO scoring VALUES (NOW(), 100);"
 }
 
 ###
