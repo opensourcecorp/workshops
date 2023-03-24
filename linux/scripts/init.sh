@@ -6,9 +6,20 @@ if [[ "$(id -u)" -ne 0 ]]; then
   exit 1
 fi
 
+if [[ -z "${team_name}" ]]; then
+  printf 'ERROR: env var "team_name" not set at runtime.\n' > /dev/stderr
+  exit 1
+fi
+
 if [[ -z "${db_addr}" ]]; then
   printf 'ERROR: env var "db_addr" not set at runtime.\n' > /dev/stderr
   exit 1
+fi
+
+# Set hostname to be equal to team name
+hostnamectl set-hostname "${team_name}"
+if grep -v -q "${team_name}" /etc/hosts ; then
+  printf '\n 127.0.0.1    %s\n' "${team_name}" >> /etc/hosts
 fi
 
 # Set up admin user
@@ -39,16 +50,18 @@ apt-get update && apt-get install -y \
   sqlite3 \
   sudo
 
-
 if [[ ! -f "${wsroot}"/go/bin/go ]] ; then
   printf 'Installing a newer version of Go so our own tools can use it...\n'
   curl -fsSL -o "${wsroot}"/go.tar.gz 'https://go.dev/dl/go1.19.7.linux-amd64.tar.gz'
   tar -C "${wsroot}" -xzf "${wsroot}"/go.tar.gz
 fi
 
-# Write out vars to env file(s) for systemd services
+# Write out vars to env file(s) for services
 rm -f "${wsroot}"/env && touch "${wsroot}"/env
-printf "db_addr=%s\n" "${db_addr}" >> "${wsroot}"/env
+{
+  printf 'db_addr=%s\n' "${db_addr}"
+  printf 'team_name=%s\n' "$(hostname)"
+} >> "${wsroot}"/env
 
 # Set up systemd timer(s) & service(s)
 cp "${wsroot}"/services/* /etc/systemd/system/
@@ -56,8 +69,6 @@ systemctl daemon-reload
 systemctl disable linux-workshop-admin.service
 systemctl enable linux-workshop-admin.timer
 systemctl start linux-workshop-admin.timer
-systemctl enable score-server.service
-systemctl start score-server.service
 
 # Confirm DB connectivity
 printf 'Waiting for DB to be reachable...\n'

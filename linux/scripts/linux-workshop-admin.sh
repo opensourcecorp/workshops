@@ -33,7 +33,18 @@ score-for-step() {
 # steps have been completed
 accrue-points() {
   # TODO: add bonus for first-time completion?
-  psql -U postgres -h "${db_addr:-NOT_SET}" -c "INSERT INTO scoring VALUES (NOW(), 100);"
+  psql -U postgres -h "${db_addr:-NOT_SET}" -c "
+    INSERT INTO scoring (
+      timestamp,
+      team_name,
+      score
+    )
+    VALUES (
+      NOW(),
+      '$(hostname)',
+      100
+    );
+  "
 }
 
 ###

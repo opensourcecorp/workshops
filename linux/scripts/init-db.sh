@@ -31,6 +31,7 @@ systemctl is-active "${postgres_service}"
 psql -U postgres -c '
 CREATE TABLE IF NOT EXISTS scoring (
   timestamp TIMESTAMP,
+  team_name TEXT,
   score INTEGER
 );
 '

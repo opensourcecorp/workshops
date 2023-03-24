@@ -8,12 +8,10 @@ import (
 	"os"
 
 	fetchserver "github.com/opensourcecorp/workshops/linux/score-fetcher/pkg/fetch-server"
-	teamserver "github.com/opensourcecorp/workshops/linux/score-fetcher/pkg/team-server"
 )
 
 func main() {
-	http.HandleFunc("/dashboard", fetchserver.Dashboard)
-	http.HandleFunc("/score", teamserver.Score)
+	http.HandleFunc("/", fetchserver.Root)
 
 	addr := net.JoinHostPort("0.0.0.0", "8080")
 	fmt.Printf("Starting server on %s\n", addr)

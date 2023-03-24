@@ -2,7 +2,7 @@ Vagrant.configure("2") do |config|
   box = "debian/bullseye64"
 
   cpus   = 2
-  memory = 1024
+  memory = 768
 
   config.vm.provider "virtualbox" do |vb|
     vb.cpus   = cpus
@@ -38,27 +38,29 @@ Vagrant.configure("2") do |config|
       SCRIPT
   end
 
-  config.vm.define "team" do |team|
-    team.vm.box = box
+  (1..2).each do |i|
+    config.vm.define "team#{i}" do |team|
+      team.vm.box = box
 
-    # TODO: this looks as gross as it does b/c maybe we'll loop over it later
-    # when we're simulating more teams
-    i = 1
-    team.vm.network "private_network", ip: ip_bytes[0..2].join(".") + "." + String(Integer(ip_bytes[-1]) + i)
+      # TODO: this looks as gross as it does b/c maybe we'll loop over it later
+      # when we're simulating more teams
+      team.vm.network "private_network", ip: ip_bytes[0..2].join(".") + "." + String(Integer(ip_bytes[-1]) + i)
 
-    team.vm.synced_folder ".", "/vagrant", disabled: true
+      team.vm.synced_folder ".", "/vagrant", disabled: true
 
-    team.vm.provision "file", source: "./scripts", destination: "/tmp/scripts"
-    team.vm.provision "file", source: "./services", destination: "/tmp/services"
-    team.vm.provision "file", source: "./instructions", destination: "/tmp/instructions"
-    team.vm.provision "file", source: "./app-src", destination: "/tmp/app-src"
-    team.vm.provision "file", source: "./score-server", destination: "/tmp/score-server"
+      team.vm.provision "file", source: "./scripts", destination: "/tmp/scripts"
+      team.vm.provision "file", source: "./services", destination: "/tmp/services"
+      team.vm.provision "file", source: "./instructions", destination: "/tmp/instructions"
+      team.vm.provision "file", source: "./app-src", destination: "/tmp/app-src"
+      team.vm.provision "file", source: "./score-server", destination: "/tmp/score-server"
 
-    team.vm.provision "shell",
-      inline: <<-SCRIPT
-        export db_addr='#{db_addr}'
-        bash /tmp/scripts/init.sh
-        bats -F pretty /.ws/scripts/test.bats
-      SCRIPT
+      team.vm.provision "shell",
+        inline: <<-SCRIPT
+          export team_name="Team-#{i}"
+          export db_addr='#{db_addr}'
+          bash /tmp/scripts/init.sh
+          bats -F pretty /.ws/scripts/test.bats
+        SCRIPT
+    end
   end
 end
