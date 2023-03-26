@@ -15,19 +15,30 @@ if [[ "$(id -u)" -ne 0 ]] ; then
   exit 1
 fi
 
+# This file should have been added to on init
 source /.ws/env || exit 1
 
-setup() {
-  teardown
+# setup* and teardown* are bats-specifically-named pre-/post-test hook
+# functions. <setup|teardown>_file run once, period, and <setup|teardown> run
+# once *per test*
+setup_file() {
   systemctl stop linux-workshop-admin.timer
+  reset-score
 }
 
 teardown() {
   rm -f /opt/app/app
   rm -f /usr/local/bin/run-app
-  psql -U postgres -h "${db_addr:-NOT_SET}" -c 'UPDATE scoring SET score = 0;'
-  sleep 3
+  reset-score
+}
+
+teardown_file() {
+  teardown
   systemctl start linux-workshop-admin.timer
+}
+
+reset-score() {
+  psql -U postgres -h "${db_addr:-NOT_SET}" -c 'UPDATE scoring SET score = 0;'
 }
 
 get-score() {
@@ -36,17 +47,7 @@ get-score() {
   printf '%s' "${score}"
 }
 
-@test "systemd timer scoring accumulation (this will be slow)" {
-  # Since we actually need the timer that was stopped in setup() here, we've
-  # gotta manually restart it
-  sleep 5
-  systemctl start linux-workshop-admin.timer
-  touch /opt/app/app && chmod +x /opt/app/app
-  sleep 6 # long enough for 2ish, 5s timer runs. This seems short to me, but it works :shrug:
-  score="$(get-score)"
-  printf 'Score after some accumulation: %s\n' "${score}"
-  [[ "${score}" -ge 100 ]]
-}
+################################################################################
 
 @test "step 1 scoring" {
   touch /opt/app/app && chmod +x /opt/app/app
@@ -55,6 +56,8 @@ get-score() {
   [[ "${score}" -eq 100 ]]
 }
 
+# This test also end ups implicitly tests two steps' scores at once, which is
+# good
 @test "step 2 scoring" {
   touch /opt/app/app && chmod +x /opt/app/app
   ln -fs /opt/app/app /usr/local/bin/run-app
