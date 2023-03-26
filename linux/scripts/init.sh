@@ -36,9 +36,9 @@ mkdir -p "${wsroot}"
 # All source directories are expected to have landed in /tmp
 cp -r /tmp/{scripts,services,instructions,score-server} "${wsroot}"/
 mkdir -p /opt/app
-cp -r /tmp/app-src/* /opt/app
+cp -r /tmp/dummy-app-src/* /opt/app
 chown -R admin:admin /opt/app
-rm -rf /tmp/{scripts,services,instructions,app-src,score-server}
+rm -rf /tmp/{scripts,services,instructions,dummy-app-src,score-server}
 
 # Install any system packages we might need
 apt-get update && apt-get install -y \
