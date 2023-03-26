@@ -5,6 +5,7 @@ Wants=linux-workshop-admin.timer
 [Service]
 ExecStart=/.ws/scripts/linux-workshop-admin.sh
 EnvironmentFile=/.ws/env
+StartLimitIntervalSec=0
 Type=oneshot
 
 [Install]

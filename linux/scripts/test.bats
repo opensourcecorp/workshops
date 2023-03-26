@@ -34,6 +34,7 @@ teardown() {
 
 teardown_file() {
   teardown
+  rm -f /home/admin/step_{2..20}.md # just to be sure to catch any non-0 or 1 steps
   systemctl start linux-workshop-admin.timer
 }
 
@@ -42,6 +43,7 @@ reset-score() {
 }
 
 get-score() {
+  systemctl reset-failed # to reset rate limiter, if all else fails
   systemctl start linux-workshop-admin.service --wait
   score="$(psql -U postgres -h "${db_addr:-NOT_SET}" -tAc 'SELECT SUM(score) FROM scoring;')"
   printf '%s' "${score}"
@@ -49,11 +51,17 @@ get-score() {
 
 ################################################################################
 
+@test "init steps succeeded" {
+  [[ -f "/home/admin/step_0.md" ]]
+  [[ -f "/home/admin/step_1.md" ]]
+}
+
 @test "step 1 scoring" {
   touch /opt/app/app && chmod +x /opt/app/app
   score="$(get-score)"
-  printf 'Score from step 1: %s\n' "${score}"
+  printf 'DEBUG: Score from step 1: %s\n' "${score}"
   [[ "${score}" -eq 100 ]]
+  [[ -f "/home/admin/step_2.md" ]] # next instruction gets put in homedir
 }
 
 # This test also end ups implicitly tests two steps' scores at once, which is
@@ -62,6 +70,18 @@ get-score() {
   touch /opt/app/app && chmod +x /opt/app/app
   ln -fs /opt/app/app /usr/local/bin/run-app
   score="$(get-score)"
-  printf 'Score from step 2: %s\n' "${score}"
+  printf 'DEBUG: Score from step 2: %s\n' "${score}"
   [[ "${score}" -eq 200 ]] # step 1 + 2 score
+  [[ -f "/home/admin/step_3.md" ]]
+}
+
+@test "score accumulates if run multiple times" {
+  touch /opt/app/app && chmod +x /opt/app/app
+  # each of these assignments does NOT increment the score var, but assigning it
+  # suppresses the useless output from the first call anyway
+  score="$(get-score)"
+  score="$(get-score)"
+  score="$(get-score)"
+  printf 'DEBUG: Score after accumulation: %s\n' "${score}"
+  [[ "${score}" -eq 300 ]]
 }
