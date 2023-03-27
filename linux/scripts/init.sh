@@ -22,23 +22,27 @@ if grep -v -q "${team_name}" /etc/hosts ; then
   printf '\n 127.0.0.1    %s\n' "${team_name}" >> /etc/hosts
 fi
 
-# Set up admin user
-useradd -m admin || true
-usermod -aG sudo admin
-printf 'admin ALL=(ALL) NOPASSWD:ALL\n' > /etc/sudoers.d/admin
-printf 'admin\nadmin\n' | passwd admin
-chsh --shell "$(command -v bash)" admin
+# Enable SSH password access
+sed -i -E 's/.*PasswordAuthentication.*no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Set up appuser
+useradd -m appuser || true
+usermod -aG sudo appuser
+printf 'appuser ALL=(ALL) NOPASSWD:ALL\n' > /etc/sudoers.d/appuser
+printf 'appuser\nappuser\n' | passwd appuser
+chsh --shell "$(command -v bash)" appuser
 
 # Create the workshop root directory, which will contain workshop admin files
 wsroot='/.ws'
 mkdir -p "${wsroot}"
 
 # All source directories are expected to have landed in /tmp
-cp -r /tmp/{scripts,services,instructions,score-server} "${wsroot}"/
+cp -r /tmp/{scripts,services,instructions} "${wsroot}"/
 mkdir -p /opt/app
 cp -r /tmp/dummy-app-src/* /opt/app
-chown -R admin:admin /opt/app
-rm -rf /tmp/{scripts,services,instructions,dummy-app-src,score-server}
+chown -R appuser:appuser /opt/app
+rm -rf /tmp/{scripts,services,instructions,dummy-app-src}
 
 # Install any system packages we might need
 apt-get update && apt-get install -y \
@@ -49,12 +53,6 @@ apt-get update && apt-get install -y \
   postgresql-client \
   sqlite3 \
   sudo
-
-if [[ ! -f "${wsroot}"/go/bin/go ]] ; then
-  printf 'Installing a newer version of Go so our own tools can use it...\n'
-  curl -fsSL -o "${wsroot}"/go.tar.gz 'https://go.dev/dl/go1.19.7.linux-amd64.tar.gz'
-  tar -C "${wsroot}" -xzf "${wsroot}"/go.tar.gz
-fi
 
 # Write out vars to env file(s) for services
 rm -f "${wsroot}"/env && touch "${wsroot}"/env
@@ -81,6 +79,6 @@ timeout 180 sh -c "
 printf 'Successfully reached DB\n'
 
 # Dump the first instruction(s) to the team's homedir
-cp "${wsroot}"/instructions/step_{0,1}.md /home/admin/
+cp "${wsroot}"/instructions/step_{0,1}.md /home/appuser/
 
 printf 'All done!\n'

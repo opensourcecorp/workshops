@@ -23,9 +23,13 @@ score-for-step() {
 
   next_step="$((which_step + 1))"
 
-  if [[ ! -f "/home/admin/step_${next_step}.md" ]]; then
-    printf 'Providing instruction to user for Step %s\n' "${next_step}"
-    cp "${wsroot}/instructions/step_${next_step}.md" /home/admin/
+  if [[ ! -f "/home/appuser/step_${next_step}.md" ]]; then
+    if [[ -f "${wsroot}/instructions/step_${next_step}.md" ]] ; then
+      printf 'Providing instruction to user for Step %s\n' "${next_step}"
+      cp "${wsroot}/instructions/step_${next_step}.md" /home/appuser/
+    else
+      printf 'No instructions exist for next step -- it looks like Step %s was the last one\n' "${which_step}"
+    fi
   fi
 }
 

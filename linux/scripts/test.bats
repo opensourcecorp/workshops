@@ -15,7 +15,7 @@ if [[ "$(id -u)" -ne 0 ]] ; then
   exit 1
 fi
 
-# This file should have been added to on init
+# This file should have been populated on init
 source /.ws/env || exit 1
 
 # setup* and teardown* are bats-specifically-named pre-/post-test hook
@@ -27,14 +27,27 @@ setup_file() {
 }
 
 teardown() {
+  # Step 1
   rm -f /opt/app/app
+  sed -i 's/Println/PrintLine/g' /opt/app/main.go
+
+  # Step 2
   rm -f /usr/local/bin/run-app
+
+  # Step 3
+  systemctl list-units | grep -q app.service && {
+    systemctl stop app.service
+    systemctl disable app.service
+  }
+  systemctl daemon-reload
+  rm -f /etc/systemd/system/app.service
+
   reset-score
 }
 
 teardown_file() {
   teardown
-  rm -f /home/admin/step_{2..20}.md # just to be sure to catch any non-0 or 1 steps
+  rm -f /home/appuser/step_{2..20}.md # just to be sure to catch any non-0 or 1 steps
   systemctl start linux-workshop-admin.timer
 }
 
@@ -43,40 +56,74 @@ reset-score() {
 }
 
 get-score() {
-  systemctl reset-failed # to reset rate limiter, if all else fails
+  systemctl reset-failed # to reset systemd restart rate-limiter, if other means fail to do so
   systemctl start linux-workshop-admin.service --wait
   score="$(psql -U postgres -h "${db_addr:-NOT_SET}" -tAc 'SELECT SUM(score) FROM scoring;')"
   printf '%s' "${score}"
 }
 
+# Helpers for redundant stuff in tests, like solving steps, etc.
+solve-step-1() {
+  sed -i 's/PrintLine/Println/g' /opt/app/main.go
+  go build -o /opt/app/app /opt/app/main.go
+}
+
+solve-step-2() {
+  solve-step-1
+  ln -fs /opt/app/app /usr/local/bin/run-app
+}
+
+solve-step-3() {
+  solve-step-2
+  printf '[Unit]
+Description=Prints money!
+
+[Service]
+User=appuser
+ExecStart=/usr/local/bin/run-app
+Restart=always
+RestartSec=2s
+
+[Install]
+WantedBy=multi-user.target
+' > /etc/systemd/system/app.service
+  systemctl daemon-reload
+  systemctl enable app.service
+  systemctl start app.service
+}
+
 ################################################################################
 
 @test "init steps succeeded" {
-  [[ -f "/home/admin/step_0.md" ]]
-  [[ -f "/home/admin/step_1.md" ]]
+  [[ -f "/home/appuser/step_0.md" ]]
+  [[ -f "/home/appuser/step_1.md" ]]
 }
 
 @test "step 1 scoring" {
-  touch /opt/app/app && chmod +x /opt/app/app
+  solve-step-1
   score="$(get-score)"
   printf 'DEBUG: Score from step 1: %s\n' "${score}"
   [[ "${score}" -eq 100 ]]
-  [[ -f "/home/admin/step_2.md" ]] # next instruction gets put in homedir
+  [[ -f "/home/appuser/step_2.md" ]] # next instruction gets put in homedir
 }
 
 # This test also end ups implicitly tests two steps' scores at once, which is
 # good
 @test "step 2 scoring" {
-  touch /opt/app/app && chmod +x /opt/app/app
-  ln -fs /opt/app/app /usr/local/bin/run-app
+  solve-step-2
   score="$(get-score)"
   printf 'DEBUG: Score from step 2: %s\n' "${score}"
   [[ "${score}" -eq 200 ]] # step 1 + 2 score
-  [[ -f "/home/admin/step_3.md" ]]
+  [[ -f "/home/appuser/step_3.md" ]]
 }
 
-@test "score accumulates if run multiple times" {
-  touch /opt/app/app && chmod +x /opt/app/app
+@test "step 3 scoring" {
+  solve-step-3
+  systemctl is-active app.service
+}
+
+@test "simulate score accumulation" {
+  solve-step-1
   # each of these assignments does NOT increment the score var, but assigning it
   # suppresses the useless output from the first call anyway
   score="$(get-score)"
