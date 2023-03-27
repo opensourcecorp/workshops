@@ -39,8 +39,8 @@ teardown() {
     systemctl stop app.service
     systemctl disable app.service
   }
-  systemctl daemon-reload
   rm -f /etc/systemd/system/app.service
+  systemctl daemon-reload
 
   reset-score
 }
