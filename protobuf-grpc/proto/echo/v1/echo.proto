@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+// Proto packages should match the directory structure in your tree. The version
+// suffix is considered best-practice
+package proto.echo.v1;
+
+// So the Go output knows its own import path -- this needs to match the output
+// directory structure that your protoc invocation creates!
+option go_package = "github.com/opensourcecorp/workshops/protobuf-grpc/pb/echo/v1";
+
+// Service that shows a few ways to work with protobufs and gRPC
+service EchoService {
+  rpc Echo(EchoRequest) returns (EchoResponse);
+}
+
+message EchoRequest {
+  string msg = 1;
+}
+
+message EchoResponse {
+  string msg = 1;
+}

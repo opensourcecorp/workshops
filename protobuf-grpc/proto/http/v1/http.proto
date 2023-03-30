@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+// Proto packages should match the directory structure in your tree. The version
+// suffix is considered best-practice
+package proto.http.v1;
+
+// So the Go output knows its own import path -- this needs to match the output
+// directory structure that your protoc invocation creates!
+option go_package = "github.com/opensourcecorp/workshops/protobuf-grpc/pb/http/v1";
+
+// Allow for annotations/options to allow for HTTP transcoding of gRPC requests.
+// You can spec & gen these just fine without, but you'll need to use the
+// grpc-gateway plugin to take advantage of these annotations
+import "google/api/annotations.proto";
+
+// Service that shows a few ways to work with protobufs and gRPC
+service HttpService {
+  rpc GetRecord(GetRecordRequest) returns (GetRecordResponse) {
+    option (google.api.http) = {
+      get: "/http/v1/get_record/{name}"
+    };
+  }
+}
+
+message GetRecordRequest {
+  string name = 1;
+}
+
+message GetRecordResponse {
+  int64 id = 1;
+  string name = 2;
+  string birthday = 3;
+  repeated string details = 4;
+}
