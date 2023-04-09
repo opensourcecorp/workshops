@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 
@@ -12,12 +12,14 @@ import (
 	employeespb "github.com/ryapric/workshops/protobuf-grpc/pb/employees/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 const grpcAddr = "localhost:8080"
-const httpAddr = "localhost:8081"
+const httpAddr = "http://localhost:8081"
+const cliArgsMsg = "warning: not calling GetEmployee() because you must provide an employee's short name on the CLI. Did you look at the output of the ListEmployees() call?"
 
-func main() {
+func callGRPCServer() {
 	ctx := context.Background()
 
 	dialOpts := []grpc.DialOption{
@@ -26,37 +28,79 @@ func main() {
 
 	conn, err := grpc.Dial(grpcAddr, dialOpts...)
 	if err != nil {
-		log.Fatalf("error dialing grpc: %v\n", err)
+		log.Fatalf("error dialing gRPC: %v\n", err)
 	}
 	defer conn.Close()
 
+	// Echo call just returns the same message back
 	echoClient := echopb.NewEchoServiceClient(conn)
-	echoResponse, err := echoClient.Echo(context.TODO(), &echopb.EchoRequest{Msg: "hello grpc"})
+	msg := "Hello gRPC!"
+	echoResponse, err := echoClient.Echo(context.TODO(), &echopb.EchoRequest{Msg: msg})
 	if err != nil {
-		log.Fatalf("error calling rpc Echo(): %v\n", err)
+		log.Fatalf("error calling gRPC Echo(): %v\n", err)
 	}
-	fmt.Printf("called rcp Echo(): received Echo back: %s\n", echoResponse.Msg)
+	log.Printf("gRPC Echo('%s'): received Echo back: '%s'\n", msg, echoResponse.Msg)
 
-	employeeNames := make([]string, 1)
-	if len(os.Args) > 1 {
-		employeeNames = os.Args[1:]
-	} else {
-		employeeNames[0] = "Tom"
-	}
-
+	// This client is used for all the Employees Service calls
 	employeesClient := employeespb.NewEmployeesServiceClient(conn)
-	var responses []*employeespb.GetRecordResponse
-	for _, name := range employeeNames {
-		getRecordResponse, err := employeesClient.GetRecord(ctx, &employeespb.GetRecordRequest{Name: name})
-		if err != nil {
-			log.Fatalf("error calling rpc GetRecord(): %v\n", err)
-		}
-		responses = append(responses, getRecordResponse)
-	}
-	out, err := json.MarshalIndent(responses, "", "  ")
+
+	// ListEmployees returns a list of all employees' short names
+	shortNames, err := employeesClient.ListEmployees(ctx, &emptypb.Empty{})
 	if err != nil {
-		log.Fatalf("could not marshal json from response: %v", err)
+		log.Fatalf("error calling gRPC ListEmployees(): %v\n", err)
 	}
-	fmt.Printf("called rpc GetRecord(): Got the following JSON record(s) back for the name query for '%s':\n", strings.Join(employeeNames, ", "))
-	fmt.Println(string(out))
+	log.Printf("gRPC ListEmployees(): got the following short names: '%s'\n", strings.Join(shortNames.ShortNames, ", "))
+
+	// GetEmployee returns a single employee by their short name
+	var shortNameToGet string
+	if len(os.Args) < 2 {
+		log.Printf("gRPC: %s", cliArgsMsg)
+		return
+	} else {
+		shortNameToGet = os.Args[1]
+	}
+	getEmployeeResponse, err := employeesClient.GetEmployee(ctx, &employeespb.GetEmployeeRequest{ShortName: shortNameToGet})
+	if err != nil {
+		log.Fatalf("error calling gRPC GetEmployee('%s'): %v\n", shortNameToGet, err)
+	}
+	log.Printf("gRPC GetEmployee(%s): { %+v }\n", shortNameToGet, getEmployeeResponse)
+}
+
+// Now, let's call the same gRPC services, but over HTTP!
+func callHTTPServer() {
+	listResp, err := http.Get(httpAddr + "/employees/v1/list_employees")
+	if err != nil {
+		log.Fatalf("error calling ListEmployees service over HTTP: %v", err)
+	}
+
+	listBody, err := io.ReadAll(listResp.Body)
+	if err != nil {
+		log.Fatalf("error reading ListEmployees response body: %v", err)
+	}
+
+	log.Printf("HTTP ListEmployees(): %s", listBody)
+
+	if len(os.Args) < 2 {
+		log.Printf("HTTP: %s", cliArgsMsg)
+		return
+	} else {
+		shortNameToGet := os.Args[1]
+		getResp, err := http.Get(httpAddr + "/employees/v1/get_employee/" + shortNameToGet)
+		if err != nil {
+			log.Fatalf("error calling GetEmployee('%s') over HTTP: %v", shortNameToGet, err)
+		}
+
+		getBody, err := io.ReadAll(getResp.Body)
+		if err != nil {
+			log.Fatalf("error reading GetEmployee('%s') response body: %v", shortNameToGet, err)
+		}
+		defer getResp.Body.Close()
+
+		log.Printf("HTTP GetEmployee('%s'): %s", shortNameToGet, getBody)
+	}
+}
+
+func main() {
+	callGRPCServer()
+	callHTTPServer()
 }

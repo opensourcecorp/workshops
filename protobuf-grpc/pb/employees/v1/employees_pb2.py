@@ -12,9 +12,10 @@ _sym_db = _symbol_database.Default()
 
 
 from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
+from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1c\x65mployees/v1/employees.proto\x12\x0c\x65mployees.v1\x1a\x1cgoogle/api/annotations.proto\" \n\x10GetRecordRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"?\n\x11GetRecordResponse\x12\n\n\x02id\x18\x01 \x01(\x03\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x10\n\x08\x62irthday\x18\x03 \x01(\t2\x89\x01\n\x10\x45mployeesService\x12u\n\tGetRecord\x12\x1e.employees.v1.GetRecordRequest\x1a\x1f.employees.v1.GetRecordResponse\"\'\x82\xd3\xe4\x93\x02!\x12\x1f/employees/v1/get_record/{name}BCZAgithub.com/opensourcecorp/workshops/protobuf-grpc/pb/employees/v1b\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1c\x65mployees/v1/employees.proto\x12\x0c\x65mployees.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\";\n\x08\x45mployee\x12\n\n\x02id\x18\x01 \x01(\x03\x12\x11\n\tfull_name\x18\x02 \x01(\t\x12\x10\n\x08\x62irthday\x18\x03 \x01(\t\"(\n\x12GetEmployeeRequest\x12\x12\n\nshort_name\x18\x01 \x01(\t\"?\n\x13GetEmployeeResponse\x12(\n\x08\x65mployee\x18\x01 \x01(\x0b\x32\x16.employees.v1.Employee\",\n\x15ListEmployeesResponse\x12\x13\n\x0bshort_names\x18\x01 \x03(\t2\x8c\x02\n\x10\x45mployeesService\x12\x83\x01\n\x0bGetEmployee\x12 .employees.v1.GetEmployeeRequest\x1a!.employees.v1.GetEmployeeResponse\"/\x82\xd3\xe4\x93\x02)\x12\'/employees/v1/get_employee/{short_name}\x12r\n\rListEmployees\x12\x16.google.protobuf.Empty\x1a#.employees.v1.ListEmployeesResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/employees/v1/list_employeesBCZAgithub.com/opensourcecorp/workshops/protobuf-grpc/pb/employees/v1b\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'employees.v1.employees_pb2', globals())
@@ -22,12 +23,18 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'ZAgithub.com/opensourcecorp/workshops/protobuf-grpc/pb/employees/v1'
-  _EMPLOYEESSERVICE.methods_by_name['GetRecord']._options = None
-  _EMPLOYEESSERVICE.methods_by_name['GetRecord']._serialized_options = b'\202\323\344\223\002!\022\037/employees/v1/get_record/{name}'
-  _GETRECORDREQUEST._serialized_start=76
-  _GETRECORDREQUEST._serialized_end=108
-  _GETRECORDRESPONSE._serialized_start=110
-  _GETRECORDRESPONSE._serialized_end=173
-  _EMPLOYEESSERVICE._serialized_start=176
-  _EMPLOYEESSERVICE._serialized_end=313
+  _EMPLOYEESSERVICE.methods_by_name['GetEmployee']._options = None
+  _EMPLOYEESSERVICE.methods_by_name['GetEmployee']._serialized_options = b'\202\323\344\223\002)\022\'/employees/v1/get_employee/{short_name}'
+  _EMPLOYEESSERVICE.methods_by_name['ListEmployees']._options = None
+  _EMPLOYEESSERVICE.methods_by_name['ListEmployees']._serialized_options = b'\202\323\344\223\002\036\022\034/employees/v1/list_employees'
+  _EMPLOYEE._serialized_start=105
+  _EMPLOYEE._serialized_end=164
+  _GETEMPLOYEEREQUEST._serialized_start=166
+  _GETEMPLOYEEREQUEST._serialized_end=206
+  _GETEMPLOYEERESPONSE._serialized_start=208
+  _GETEMPLOYEERESPONSE._serialized_end=271
+  _LISTEMPLOYEESRESPONSE._serialized_start=273
+  _LISTEMPLOYEESRESPONSE._serialized_end=317
+  _EMPLOYEESSERVICE._serialized_start=320
+  _EMPLOYEESSERVICE._serialized_end=588
 # @@protoc_insertion_point(module_scope)

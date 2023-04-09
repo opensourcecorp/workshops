@@ -21,6 +21,7 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // Suppress "imported and not used" errors
@@ -31,8 +32,8 @@ var _ = runtime.String
 var _ = utilities.NewDoubleArray
 var _ = metadata.Join
 
-func request_EmployeesService_GetRecord_0(ctx context.Context, marshaler runtime.Marshaler, client EmployeesServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetRecordRequest
+func request_EmployeesService_GetEmployee_0(ctx context.Context, marshaler runtime.Marshaler, client EmployeesServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetEmployeeRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -42,23 +43,23 @@ func request_EmployeesService_GetRecord_0(ctx context.Context, marshaler runtime
 		_   = err
 	)
 
-	val, ok = pathParams["name"]
+	val, ok = pathParams["short_name"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "name")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "short_name")
 	}
 
-	protoReq.Name, err = runtime.String(val)
+	protoReq.ShortName, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "name", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "short_name", err)
 	}
 
-	msg, err := client.GetRecord(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.GetEmployee(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_EmployeesService_GetRecord_0(ctx context.Context, marshaler runtime.Marshaler, server EmployeesServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetRecordRequest
+func local_request_EmployeesService_GetEmployee_0(ctx context.Context, marshaler runtime.Marshaler, server EmployeesServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq GetEmployeeRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -68,17 +69,35 @@ func local_request_EmployeesService_GetRecord_0(ctx context.Context, marshaler r
 		_   = err
 	)
 
-	val, ok = pathParams["name"]
+	val, ok = pathParams["short_name"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "name")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "short_name")
 	}
 
-	protoReq.Name, err = runtime.String(val)
+	protoReq.ShortName, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "name", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "short_name", err)
 	}
 
-	msg, err := server.GetRecord(ctx, &protoReq)
+	msg, err := server.GetEmployee(ctx, &protoReq)
+	return msg, metadata, err
+
+}
+
+func request_EmployeesService_ListEmployees_0(ctx context.Context, marshaler runtime.Marshaler, client EmployeesServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq emptypb.Empty
+	var metadata runtime.ServerMetadata
+
+	msg, err := client.ListEmployees(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+
+}
+
+func local_request_EmployeesService_ListEmployees_0(ctx context.Context, marshaler runtime.Marshaler, server EmployeesServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq emptypb.Empty
+	var metadata runtime.ServerMetadata
+
+	msg, err := server.ListEmployees(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -89,7 +108,7 @@ func local_request_EmployeesService_GetRecord_0(ctx context.Context, marshaler r
 // Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterEmployeesServiceHandlerFromEndpoint instead.
 func RegisterEmployeesServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server EmployeesServiceServer) error {
 
-	mux.Handle("GET", pattern_EmployeesService_GetRecord_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_EmployeesService_GetEmployee_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -97,12 +116,12 @@ func RegisterEmployeesServiceHandlerServer(ctx context.Context, mux *runtime.Ser
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/employees.v1.EmployeesService/GetRecord", runtime.WithHTTPPathPattern("/employees/v1/get_record/{name}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/employees.v1.EmployeesService/GetEmployee", runtime.WithHTTPPathPattern("/employees/v1/get_employee/{short_name}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_EmployeesService_GetRecord_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_EmployeesService_GetEmployee_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
@@ -110,7 +129,32 @@ func RegisterEmployeesServiceHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 
-		forward_EmployeesService_GetRecord_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_EmployeesService_GetEmployee_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("GET", pattern_EmployeesService_ListEmployees_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/employees.v1.EmployeesService/ListEmployees", runtime.WithHTTPPathPattern("/employees/v1/list_employees"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_EmployeesService_ListEmployees_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_EmployeesService_ListEmployees_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -155,25 +199,47 @@ func RegisterEmployeesServiceHandler(ctx context.Context, mux *runtime.ServeMux,
 // "EmployeesServiceClient" to call the correct interceptors.
 func RegisterEmployeesServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client EmployeesServiceClient) error {
 
-	mux.Handle("GET", pattern_EmployeesService_GetRecord_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_EmployeesService_GetEmployee_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/employees.v1.EmployeesService/GetRecord", runtime.WithHTTPPathPattern("/employees/v1/get_record/{name}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/employees.v1.EmployeesService/GetEmployee", runtime.WithHTTPPathPattern("/employees/v1/get_employee/{short_name}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_EmployeesService_GetRecord_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_EmployeesService_GetEmployee_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_EmployeesService_GetRecord_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_EmployeesService_GetEmployee_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("GET", pattern_EmployeesService_ListEmployees_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/employees.v1.EmployeesService/ListEmployees", runtime.WithHTTPPathPattern("/employees/v1/list_employees"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_EmployeesService_ListEmployees_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_EmployeesService_ListEmployees_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -181,9 +247,13 @@ func RegisterEmployeesServiceHandlerClient(ctx context.Context, mux *runtime.Ser
 }
 
 var (
-	pattern_EmployeesService_GetRecord_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"employees", "v1", "get_record", "name"}, ""))
+	pattern_EmployeesService_GetEmployee_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"employees", "v1", "get_employee", "short_name"}, ""))
+
+	pattern_EmployeesService_ListEmployees_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"employees", "v1", "list_employees"}, ""))
 )
 
 var (
-	forward_EmployeesService_GetRecord_0 = runtime.ForwardResponseMessage
+	forward_EmployeesService_GetEmployee_0 = runtime.ForwardResponseMessage
+
+	forward_EmployeesService_ListEmployees_0 = runtime.ForwardResponseMessage
 )

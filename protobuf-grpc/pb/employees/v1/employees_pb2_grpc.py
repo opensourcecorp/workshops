@@ -2,6 +2,7 @@
 import grpc
 
 from . import employees_pb2 as employees_dot_v1_dot_employees__pb2
+from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
 class EmployeesServiceStub(object):
@@ -14,10 +15,15 @@ class EmployeesServiceStub(object):
     Args:
       channel: A grpc.Channel.
     """
-    self.GetRecord = channel.unary_unary(
-        '/employees.v1.EmployeesService/GetRecord',
-        request_serializer=employees_dot_v1_dot_employees__pb2.GetRecordRequest.SerializeToString,
-        response_deserializer=employees_dot_v1_dot_employees__pb2.GetRecordResponse.FromString,
+    self.GetEmployee = channel.unary_unary(
+        '/employees.v1.EmployeesService/GetEmployee',
+        request_serializer=employees_dot_v1_dot_employees__pb2.GetEmployeeRequest.SerializeToString,
+        response_deserializer=employees_dot_v1_dot_employees__pb2.GetEmployeeResponse.FromString,
+        )
+    self.ListEmployees = channel.unary_unary(
+        '/employees.v1.EmployeesService/ListEmployees',
+        request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+        response_deserializer=employees_dot_v1_dot_employees__pb2.ListEmployeesResponse.FromString,
         )
 
 
@@ -25,7 +31,14 @@ class EmployeesServiceServicer(object):
   """Service that shows a few ways to work with protobufs and gRPC
   """
 
-  def GetRecord(self, request, context):
+  def GetEmployee(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def ListEmployees(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -35,10 +48,15 @@ class EmployeesServiceServicer(object):
 
 def add_EmployeesServiceServicer_to_server(servicer, server):
   rpc_method_handlers = {
-      'GetRecord': grpc.unary_unary_rpc_method_handler(
-          servicer.GetRecord,
-          request_deserializer=employees_dot_v1_dot_employees__pb2.GetRecordRequest.FromString,
-          response_serializer=employees_dot_v1_dot_employees__pb2.GetRecordResponse.SerializeToString,
+      'GetEmployee': grpc.unary_unary_rpc_method_handler(
+          servicer.GetEmployee,
+          request_deserializer=employees_dot_v1_dot_employees__pb2.GetEmployeeRequest.FromString,
+          response_serializer=employees_dot_v1_dot_employees__pb2.GetEmployeeResponse.SerializeToString,
+      ),
+      'ListEmployees': grpc.unary_unary_rpc_method_handler(
+          servicer.ListEmployees,
+          request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+          response_serializer=employees_dot_v1_dot_employees__pb2.ListEmployeesResponse.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(

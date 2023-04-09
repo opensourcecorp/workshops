@@ -15,23 +15,28 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 const grpcAddr = "localhost:8080"
 const httpAddr = "localhost:8081"
 
 // Used to simulate a database of employee records
-var employeeData = map[string]*employeespb.GetRecordResponse{
-	// Tom is the current defaultcdoded in client.go
+var employeeData = map[string]*employeespb.Employee{
 	"Tom": {
-		Name:     "Thomas Anderson",
+		FullName: "Thomas Anderson",
 		Id:       1,
 		Birthday: "1999-03-31",
 	},
 	"Michelle": {
-		Name:     "Michelle Yeoh",
+		FullName: "Michelle Yeoh",
 		Id:       2,
 		Birthday: "1962-08-06",
+	},
+	"Sabrina": {
+		FullName: "Sabrina Spellman",
+		Id:       3,
+		Birthday: "1980-09-27",
 	},
 }
 
@@ -54,25 +59,38 @@ type employeesServiceServer struct {
 // Echo implements the Echo message of the EchoServiceServer interface, as
 // defined in the relevant proto file
 func (s *echoServiceServer) Echo(ctx context.Context, req *echopb.EchoRequest) (*echopb.EchoResponse, error) {
-	log.Printf("rpc call to 'Echo', received msg: '%s' -- responding in kind\n", req.Msg)
+	log.Printf("rpc call to 'Echo': received msg: '%s' -- responding in kind\n", req.Msg)
 	return &echopb.EchoResponse{Msg: req.Msg}, nil
 }
 
-// GetRecord implements the GetRecord message of the HttpServiceServer
-// interface, as defined in the relevant proto file
-func (s *employeesServiceServer) GetRecord(ctx context.Context, req *employeespb.GetRecordRequest) (*employeespb.GetRecordResponse, error) {
-	log.Printf("Received the following request on 'GetRecord' --> %+v", req)
+// GetEmployee implements the GetEmployee message of the EmployeesServiceServer
+// interface, as defined in the relevant proto file. It takes a short,
+// "friendly" name of an employee in the request, and returns that employee's
+// associated record
+func (s *employeesServiceServer) GetEmployee(ctx context.Context, req *employeespb.GetEmployeeRequest) (*employeespb.GetEmployeeResponse, error) {
+	log.Printf("rcp call to 'GetEmployee': %+v", req)
 
-	if req.Name == "*" {
-		return employeeData, nil
-	}
-
-	data, ok := employeeData[req.GetName()]
+	data, ok := employeeData[req.GetShortName()]
 	if ok {
-		return data, nil
+		resp := &employeespb.GetEmployeeResponse{Employee: data}
+		return resp, nil
 	} else {
-		return nil, status.Error(codes.NotFound, fmt.Sprintf("no employee data available for provided name '%s'", req.GetName()))
+		return nil, status.Error(codes.NotFound, fmt.Sprintf("no employee data available for provided name '%s'", req.GetShortName()))
 	}
+}
+
+// ListEmployees implements the ListEmployees message of the
+// EmployeesServiceServer interface, as defined in the relevant proto file. It
+// takes no special request information, and returns a list of all employee's
+// short names
+func (s *employeesServiceServer) ListEmployees(ctx context.Context, none *emptypb.Empty) (*employeespb.ListEmployeesResponse, error) {
+	log.Printf("rcp call to 'ListEmployees' (no request data)\n")
+
+	var shortNames []string
+	for shortName := range employeeData {
+		shortNames = append(shortNames, shortName)
+	}
+	return &employeespb.ListEmployeesResponse{ShortNames: shortNames}, nil
 }
 
 // TODO: put better docs here. I must have read tens of blogs, etc. (since the

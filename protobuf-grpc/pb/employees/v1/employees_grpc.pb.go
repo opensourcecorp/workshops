@@ -14,6 +14,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -22,14 +23,16 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	EmployeesService_GetRecord_FullMethodName = "/employees.v1.EmployeesService/GetRecord"
+	EmployeesService_GetEmployee_FullMethodName   = "/employees.v1.EmployeesService/GetEmployee"
+	EmployeesService_ListEmployees_FullMethodName = "/employees.v1.EmployeesService/ListEmployees"
 )
 
 // EmployeesServiceClient is the client API for EmployeesService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type EmployeesServiceClient interface {
-	GetRecord(ctx context.Context, in *GetRecordRequest, opts ...grpc.CallOption) (*GetRecordResponse, error)
+	GetEmployee(ctx context.Context, in *GetEmployeeRequest, opts ...grpc.CallOption) (*GetEmployeeResponse, error)
+	ListEmployees(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListEmployeesResponse, error)
 }
 
 type employeesServiceClient struct {
@@ -40,9 +43,18 @@ func NewEmployeesServiceClient(cc grpc.ClientConnInterface) EmployeesServiceClie
 	return &employeesServiceClient{cc}
 }
 
-func (c *employeesServiceClient) GetRecord(ctx context.Context, in *GetRecordRequest, opts ...grpc.CallOption) (*GetRecordResponse, error) {
-	out := new(GetRecordResponse)
-	err := c.cc.Invoke(ctx, EmployeesService_GetRecord_FullMethodName, in, out, opts...)
+func (c *employeesServiceClient) GetEmployee(ctx context.Context, in *GetEmployeeRequest, opts ...grpc.CallOption) (*GetEmployeeResponse, error) {
+	out := new(GetEmployeeResponse)
+	err := c.cc.Invoke(ctx, EmployeesService_GetEmployee_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *employeesServiceClient) ListEmployees(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListEmployeesResponse, error) {
+	out := new(ListEmployeesResponse)
+	err := c.cc.Invoke(ctx, EmployeesService_ListEmployees_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -53,15 +65,19 @@ func (c *employeesServiceClient) GetRecord(ctx context.Context, in *GetRecordReq
 // All implementations should embed UnimplementedEmployeesServiceServer
 // for forward compatibility
 type EmployeesServiceServer interface {
-	GetRecord(context.Context, *GetRecordRequest) (*GetRecordResponse, error)
+	GetEmployee(context.Context, *GetEmployeeRequest) (*GetEmployeeResponse, error)
+	ListEmployees(context.Context, *emptypb.Empty) (*ListEmployeesResponse, error)
 }
 
 // UnimplementedEmployeesServiceServer should be embedded to have forward compatible implementations.
 type UnimplementedEmployeesServiceServer struct {
 }
 
-func (UnimplementedEmployeesServiceServer) GetRecord(context.Context, *GetRecordRequest) (*GetRecordResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetRecord not implemented")
+func (UnimplementedEmployeesServiceServer) GetEmployee(context.Context, *GetEmployeeRequest) (*GetEmployeeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetEmployee not implemented")
+}
+func (UnimplementedEmployeesServiceServer) ListEmployees(context.Context, *emptypb.Empty) (*ListEmployeesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListEmployees not implemented")
 }
 
 // UnsafeEmployeesServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -75,20 +91,38 @@ func RegisterEmployeesServiceServer(s grpc.ServiceRegistrar, srv EmployeesServic
 	s.RegisterService(&EmployeesService_ServiceDesc, srv)
 }
 
-func _EmployeesService_GetRecord_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetRecordRequest)
+func _EmployeesService_GetEmployee_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetEmployeeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(EmployeesServiceServer).GetRecord(ctx, in)
+		return srv.(EmployeesServiceServer).GetEmployee(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: EmployeesService_GetRecord_FullMethodName,
+		FullMethod: EmployeesService_GetEmployee_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EmployeesServiceServer).GetRecord(ctx, req.(*GetRecordRequest))
+		return srv.(EmployeesServiceServer).GetEmployee(ctx, req.(*GetEmployeeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _EmployeesService_ListEmployees_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EmployeesServiceServer).ListEmployees(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: EmployeesService_ListEmployees_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EmployeesServiceServer).ListEmployees(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -101,8 +135,12 @@ var EmployeesService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*EmployeesServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetRecord",
-			Handler:    _EmployeesService_GetRecord_Handler,
+			MethodName: "GetEmployee",
+			Handler:    _EmployeesService_GetEmployee_Handler,
+		},
+		{
+			MethodName: "ListEmployees",
+			Handler:    _EmployeesService_ListEmployees_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
