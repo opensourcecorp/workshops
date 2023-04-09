@@ -34,8 +34,8 @@ func callGRPCServer() {
 
 	// Echo call just returns the same message back
 	echoClient := echopb.NewEchoServiceClient(conn)
-	msg := "Hello gRPC!"
-	echoResponse, err := echoClient.Echo(context.TODO(), &echopb.EchoRequest{Msg: msg})
+	msg := "Hello, gRPC!"
+	echoResponse, err := echoClient.Echo(ctx, &echopb.EchoRequest{Msg: msg})
 	if err != nil {
 		log.Fatalf("error calling gRPC Echo(): %v\n", err)
 	}

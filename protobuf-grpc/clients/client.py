@@ -11,12 +11,14 @@ sys.path.append(os.path.abspath("."))
 sys.path.append(os.path.abspath(".."))
 
 import grpc
-import pb.example.v1.example_pb2 as example_pb2
-import pb.example.v1.example_pb2_grpc as example_pb2_grpc
+import pb.echo.v1.echo_pb2 as echo_pb2
+import pb.echo.v1.echo_pb2_grpc as echo_pb2_grpc
+# import pb.employees.v1.employees_pb2 as employees_pb2
+# import pb.employees.v1.employees_pb2_grpc as employees_pb2_grpc
 
 if __name__ == "__main__":
     with grpc.insecure_channel("127.0.0.1:8080") as channel:
-        stub = example_pb2_grpc.ExampleServiceStub(channel)
+        echo_stub = echo_pb2_grpc.EchoServiceStub(channel)
 
         # This is pretty infuriating -- Python protobuf code isn't generated
         # directly, it generates a *Python* generator to generate the code at
@@ -24,10 +26,11 @@ if __name__ == "__main__":
         # editors because there's no data types to autofill etc. So, look at
         # your proto file and determine how you should be setting up your
         # requests!
-        echo_request = example_pb2.EchoRequest(msg = "hello grpc")
-        echo_response = stub.Echo(echo_request)
+        echo_request = echo_pb2.EchoRequest(msg = "Hello, gRPC!")
+        echo_response = echo_stub.Echo(echo_request)
         print(echo_response)
 
-        getrecord_request = example_pb2.GetRecordRequest(name = "Thomas Anderson")
-        getrecord_response = stub.GetRecord(getrecord_request)
-        print(getrecord_response)
+        # employees_stub = employees_pb2_grpc.EmployeesServiceStub(channel)
+        # list_request = employees_pb2.ListEmployeesRequest()
+        # list_response = employees_stub.ListEmployees(list_request)
+        # print(list_response)

@@ -9,6 +9,9 @@ proto_deps_import_flags :=	-I=. \
 														-I=../proto_deps/googleapis/googleapis \
 														-I=../proto_deps/google/protobuf/src
 
+# So that the Python generation works off of the virtual environment's dependencies
+pyvenv = source ../venv/bin/activate
+
 # To add new submodules in the lightest way possible, review these instructions:
 # https://stackoverflow.com/a/17692710
 submodules:
@@ -20,7 +23,8 @@ ensure-outdir:
 # Most langs code can be generated directly by protoc
 generate: ensure-outdir
 	@printf 'Generating protobuf code...\n'
-	@protoc \
+	@$(pyvenv) && \
+	protoc \
 		$(proto_deps_import_flags) \
 		--go_out=$(outdir) \
 		--go_opt=paths=source_relative \
@@ -38,7 +42,8 @@ generate: ensure-outdir
 # ... but Python gRPC seems to be an angry elf, so we have to use a protoc
 # distro that's in the grpcio_tools Python module
 	@printf 'Generating Python gRPC code, specifically...\n'
-	@python3 -m grpc_tools.protoc \
+	@$(pyvenv) && \
+	python3 -m grpc_tools.protoc \
 		$(proto_deps_import_flags) \
 		--grpc_python_out=$(outdir) \
 		$(proto_files)
