@@ -15,7 +15,7 @@ class EchoServiceStub(object):
       channel: A grpc.Channel.
     """
     self.Echo = channel.unary_unary(
-        '/proto.echo.v1.EchoService/Echo',
+        '/echo.v1.EchoService/Echo',
         request_serializer=echo_dot_v1_dot_echo__pb2.EchoRequest.SerializeToString,
         response_deserializer=echo_dot_v1_dot_echo__pb2.EchoResponse.FromString,
         )
@@ -42,5 +42,5 @@ def add_EchoServiceServicer_to_server(servicer, server):
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
-      'proto.echo.v1.EchoService', rpc_method_handlers)
+      'echo.v1.EchoService', rpc_method_handlers)
   server.add_generic_rpc_handlers((generic_handler,))

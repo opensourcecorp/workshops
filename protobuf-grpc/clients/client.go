@@ -5,19 +5,26 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
+	"strings"
 
 	echopb "github.com/ryapric/workshops/protobuf-grpc/pb/echo/v1"
-	httppb "github.com/ryapric/workshops/protobuf-grpc/pb/http/v1"
+	employeespb "github.com/ryapric/workshops/protobuf-grpc/pb/employees/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func runClient(uri string) {
-	var opts = []grpc.DialOption{
+const grpcAddr = "localhost:8080"
+const httpAddr = "localhost:8081"
+
+func main() {
+	ctx := context.Background()
+
+	dialOpts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	}
 
-	conn, err := grpc.Dial(uri, opts...)
+	conn, err := grpc.Dial(grpcAddr, dialOpts...)
 	if err != nil {
 		log.Fatalf("error dialing grpc: %v\n", err)
 	}
@@ -28,21 +35,28 @@ func runClient(uri string) {
 	if err != nil {
 		log.Fatalf("error calling rpc Echo(): %v\n", err)
 	}
-	fmt.Println("Received Echo back: ", echoResponse.Msg)
+	fmt.Printf("called rcp Echo(): received Echo back: %s\n", echoResponse.Msg)
 
-	httpClient := httppb.NewHttpServiceClient(conn)
-	getRecordResponse, err := httpClient.GetRecord(context.TODO(), &httppb.GetRecordRequest{Name: "Thomas Anderson"})
-	if err != nil {
-		log.Fatalf("error calling rpc Echo(): %v\n", err)
+	employeeNames := make([]string, 1)
+	if len(os.Args) > 1 {
+		employeeNames = os.Args[1:]
+	} else {
+		employeeNames[0] = "Tom"
 	}
-	dump, err := json.MarshalIndent(getRecordResponse, "", "  ")
+
+	employeesClient := employeespb.NewEmployeesServiceClient(conn)
+	var responses []*employeespb.GetRecordResponse
+	for _, name := range employeeNames {
+		getRecordResponse, err := employeesClient.GetRecord(ctx, &employeespb.GetRecordRequest{Name: name})
+		if err != nil {
+			log.Fatalf("error calling rpc GetRecord(): %v\n", err)
+		}
+		responses = append(responses, getRecordResponse)
+	}
+	out, err := json.MarshalIndent(responses, "", "  ")
 	if err != nil {
 		log.Fatalf("could not marshal json from response: %v", err)
 	}
-	fmt.Println("Got the following JSON record back for the name query:")
-	fmt.Println(string(dump))
-}
-
-func main() {
-	runClient("127.0.0.1:8080")
+	fmt.Printf("called rpc GetRecord(): Got the following JSON record(s) back for the name query for '%s':\n", strings.Join(employeeNames, ", "))
+	fmt.Println(string(out))
 }

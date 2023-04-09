@@ -10,17 +10,34 @@ import (
 	gwruntime "github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 
 	echopb "github.com/ryapric/workshops/protobuf-grpc/pb/echo/v1"
-	httppb "github.com/ryapric/workshops/protobuf-grpc/pb/http/v1"
+	employeespb "github.com/ryapric/workshops/protobuf-grpc/pb/employees/v1"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/status"
 )
 
 const grpcAddr = "localhost:8080"
 const httpAddr = "localhost:8081"
 
+// Used to simulate a database of employee records
+var employeeData = map[string]*employeespb.GetRecordResponse{
+	// Tom is the current defaultcdoded in client.go
+	"Tom": {
+		Name:     "Thomas Anderson",
+		Id:       1,
+		Birthday: "1999-03-31",
+	},
+	"Michelle": {
+		Name:     "Michelle Yeoh",
+		Id:       2,
+		Birthday: "1962-08-06",
+	},
+}
+
 type echoServiceServer struct {
-	// You can make this embedded struct required via a `protoc` Go option,
-	// which essentially allows you to NOT fully implement the generated
+	// You can make the following embedded struct required via a `protoc` Go
+	// option, which essentially allows you to NOT fully implement the generated
 	// interface (i.e. optionally leave out method definitions). We're removing
 	// it here because it makes it more clear when we've NOT implemented the
 	// interface (i.e. the compiler will complain if any methods are missing),
@@ -30,29 +47,32 @@ type echoServiceServer struct {
 	// echopb.UnimplementedEchoServiceServer
 }
 
-type httpServiceServer struct {
-	// httppb.UnimplementedHttpServiceServer
+type employeesServiceServer struct {
+	// employeespb.UnimplementedEmployeesServiceServer
 }
 
 // Echo implements the Echo message of the EchoServiceServer interface, as
 // defined in the relevant proto file
 func (s *echoServiceServer) Echo(ctx context.Context, req *echopb.EchoRequest) (*echopb.EchoResponse, error) {
-	msg := fmt.Sprintf("rpc call to 'Echo', received msg: '%s' -- responding in kind\n", req.Msg)
-	log.Println(msg)
+	log.Printf("rpc call to 'Echo', received msg: '%s' -- responding in kind\n", req.Msg)
 	return &echopb.EchoResponse{Msg: req.Msg}, nil
 }
 
 // GetRecord implements the GetRecord message of the HttpServiceServer
 // interface, as defined in the relevant proto file
-func (s *httpServiceServer) GetRecord(ctx context.Context, req *httppb.GetRecordRequest) (*httppb.GetRecordResponse, error) {
+func (s *employeesServiceServer) GetRecord(ctx context.Context, req *employeespb.GetRecordRequest) (*employeespb.GetRecordResponse, error) {
 	log.Printf("Received the following request on 'GetRecord' --> %+v", req)
 
-	return &httppb.GetRecordResponse{
-		Id:       1,
-		Name:     req.GetName(),
-		Birthday: "1991-01-01",
-		Details:  []string{"some", "other", "stuff", "about", req.GetName()},
-	}, nil
+	if req.Name == "*" {
+		return employeeData, nil
+	}
+
+	data, ok := employeeData[req.GetName()]
+	if ok {
+		return data, nil
+	} else {
+		return nil, status.Error(codes.NotFound, fmt.Sprintf("no employee data available for provided name '%s'", req.GetName()))
+	}
 }
 
 // TODO: put better docs here. I must have read tens of blogs, etc. (since the
@@ -68,7 +88,7 @@ func main() {
 	var serveOpts []grpc.ServerOption
 	grpcServer := grpc.NewServer(serveOpts...)
 	echopb.RegisterEchoServiceServer(grpcServer, &echoServiceServer{})
-	httppb.RegisterHttpServiceServer(grpcServer, &httpServiceServer{})
+	employeespb.RegisterEmployeesServiceServer(grpcServer, &employeesServiceServer{})
 
 	// Since we're going to support gRPC calls, but *also* proxy HTTP calls to
 	// this gRPC server, we send it off on its own goroutine
@@ -103,7 +123,7 @@ func main() {
 		log.Fatalf("error dialing gRPC server: %v", err)
 	}
 
-	err = httppb.RegisterHttpServiceHandler(ctx, gwmux, conn)
+	err = employeespb.RegisterEmployeesServiceHandler(ctx, gwmux, conn)
 	if err != nil {
 		log.Fatalf("error registering HTTP service handler: %v", err)
 	}

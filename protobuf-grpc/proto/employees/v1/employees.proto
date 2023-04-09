@@ -2,11 +2,11 @@ syntax = "proto3";
 
 // Proto packages should match the directory structure in your tree. The version
 // suffix is considered best-practice
-package proto.http.v1;
+package employees.v1;
 
 // So the Go output knows its own import path -- this needs to match the output
 // directory structure that your protoc invocation creates!
-option go_package = "github.com/opensourcecorp/workshops/protobuf-grpc/pb/http/v1";
+option go_package = "github.com/opensourcecorp/workshops/protobuf-grpc/pb/employees/v1";
 
 // Allow for annotations/options to allow for HTTP transcoding of gRPC requests.
 // You can spec & gen these just fine without, but you'll need to use the
@@ -14,10 +14,10 @@ option go_package = "github.com/opensourcecorp/workshops/protobuf-grpc/pb/http/v
 import "google/api/annotations.proto";
 
 // Service that shows a few ways to work with protobufs and gRPC
-service HttpService {
+service EmployeesService {
   rpc GetRecord(GetRecordRequest) returns (GetRecordResponse) {
     option (google.api.http) = {
-      get: "/http/v1/get_record/{name}"
+      get: "/employees/v1/get_record/{name}"
     };
   }
 }
@@ -30,5 +30,4 @@ message GetRecordResponse {
   int64 id = 1;
   string name = 2;
   string birthday = 3;
-  repeated string details = 4;
 }
