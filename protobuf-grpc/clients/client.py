@@ -13,8 +13,8 @@ sys.path.append(os.path.abspath(".."))
 import grpc
 import pb.echo.v1.echo_pb2 as echo_pb2
 import pb.echo.v1.echo_pb2_grpc as echo_pb2_grpc
-# import pb.employees.v1.employees_pb2 as employees_pb2
-# import pb.employees.v1.employees_pb2_grpc as employees_pb2_grpc
+import pb.employees.v1.employees_pb2 as employees_pb2
+import pb.employees.v1.employees_pb2_grpc as employees_pb2_grpc
 
 if __name__ == "__main__":
     with grpc.insecure_channel("127.0.0.1:8080") as channel:
@@ -30,7 +30,7 @@ if __name__ == "__main__":
         echo_response = echo_stub.Echo(echo_request)
         print(echo_response)
 
-        # employees_stub = employees_pb2_grpc.EmployeesServiceStub(channel)
-        # list_request = employees_pb2.ListEmployeesRequest()
-        # list_response = employees_stub.ListEmployees(list_request)
-        # print(list_response)
+        employees_stub = employees_pb2_grpc.EmployeesServiceStub(channel)
+        list_request = employees_pb2.ListEmployeesRequest()
+        list_response = employees_stub.ListEmployees(list_request)
+        print(list_response)
