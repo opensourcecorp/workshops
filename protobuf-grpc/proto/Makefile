@@ -1,21 +1,24 @@
-SHELL = /usr/bin/env bash
+SHELL = /usr/bin/env bash -euo pipefail
 
 outdir := ../pb
 
+# These are the input proto files, i.e. what is going to be compiled
 proto_files := ./*/*/*.proto
 
-# If you add a new submodule dep, be sure to update this var as well
+# Helper vars for proto dependencies (i.e. what are used in any referenced imports)
+proto_deps_rootdir := /tmp/proto-deps
+proto_deps_sources :=	github.com/googleapis/googleapis \
+											github.com/google/protobuf
 proto_deps_import_flags :=	-I=. \
-														-I=../proto_deps/googleapis/googleapis \
-														-I=../proto_deps/google/protobuf/src
+														-I=$(proto_deps_rootdir)/github.com/googleapis/googleapis \
+														-I=$(proto_deps_rootdir)/github.com/google/protobuf/src
 
 # So that the Python generation works off of the virtual environment's dependencies
 pyvenv = source ../venv/bin/activate
 
-# To add new submodules in the lightest way possible, review these instructions:
-# https://stackoverflow.com/a/17692710
-submodules:
-	@git submodule update --init --recursive
+get-proto-deps:
+	@mkdir -p /tmp/proto-deps
+	@for dep in $(proto_deps_sources) ; do git clone --depth=1 https://"$${dep}" $(proto_deps_rootdir)/"$${dep}" || true ; done
 
 ensure-outdir:
 	@mkdir -p $(outdir)

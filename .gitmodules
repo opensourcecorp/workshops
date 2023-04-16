@@ -1,8 +1,0 @@
-[submodule "protobuf-grpc/proto_deps/googleapis/googleapis"]
-	path = protobuf-grpc/proto_deps/googleapis/googleapis
-	url = https://github.com/googleapis/googleapis
-	shallow = true
-[submodule "protobuf-grpc/proto_deps/google/protobuf"]
-	path = protobuf-grpc/proto_deps/google/protobuf
-	url = https://github.com/google/protobuf
-	shallow = true
