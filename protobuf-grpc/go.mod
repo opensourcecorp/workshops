@@ -6,7 +6,6 @@ require (
 	github.com/bufbuild/buf v1.17.0
 	github.com/fullstorydev/grpcurl v1.8.7
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2
-	google.golang.org/api v0.116.0
 	google.golang.org/genproto v0.0.0-20230331144136-dcfb400f0633
 	google.golang.org/grpc v1.54.0
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.3.0
@@ -41,13 +40,9 @@ require (
 	github.com/gofrs/uuid/v5 v5.0.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/glog v1.0.0 // indirect
-	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-containerregistry v0.14.0 // indirect
 	github.com/google/pprof v0.0.0-20230323073829-e72429f035bd // indirect
-	github.com/google/uuid v1.3.0 // indirect
-	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
-	github.com/googleapis/gax-go/v2 v2.8.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jdxcode/netrc v0.0.0-20221124155335-4616370d1a84 // indirect
 	github.com/jhump/protoreflect v1.15.1 // indirect
@@ -69,7 +64,6 @@ require (
 	github.com/spf13/cobra v1.6.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/tetratelabs/wazero v1.0.1 // indirect
-	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/otel v1.14.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.14.0 // indirect
 	go.opentelemetry.io/otel/trace v1.14.0 // indirect
