@@ -21,13 +21,17 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Defines the record structure for each employee
 type Employee struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id       int64  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// Employee ID number
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// Employee full name
 	FullName string `protobuf:"bytes,2,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
+	// Employee birthday, in RFC 3339 date format
 	Birthday string `protobuf:"bytes,3,opt,name=birthday,proto3" json:"birthday,omitempty"`
 }
 
@@ -84,6 +88,7 @@ func (x *Employee) GetBirthday() string {
 	return ""
 }
 
+// For calling GetEmployee
 type GetEmployeeRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -131,11 +136,13 @@ func (x *GetEmployeeRequest) GetShortName() string {
 	return ""
 }
 
+// Response from the GetEmployee call
 type GetEmployeeResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// Contains Employee record details
 	Employee *Employee `protobuf:"bytes,1,opt,name=employee,proto3" json:"employee,omitempty"`
 }
 
@@ -219,11 +226,13 @@ func (*ListEmployeesRequest) Descriptor() ([]byte, []int) {
 	return file_employees_v1_employees_proto_rawDescGZIP(), []int{3}
 }
 
+// Response from the ListEmployees call
 type ListEmployeesResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// List of short (friendly) names for Employees
 	ShortNames []string `protobuf:"bytes,1,rep,name=short_names,json=shortNames,proto3" json:"short_names,omitempty"`
 }
 

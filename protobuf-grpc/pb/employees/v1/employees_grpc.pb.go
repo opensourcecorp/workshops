@@ -27,7 +27,11 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type EmployeesServiceClient interface {
+	// GetEmployee takes a short (friendly) name for a single employee, and
+	// returns that employee's associated record
 	GetEmployee(ctx context.Context, in *GetEmployeeRequest, opts ...grpc.CallOption) (*GetEmployeeResponse, error)
+	// ListEmployees returns all possible employees' short names that can be used
+	// in calls to GetEmployee
 	ListEmployees(ctx context.Context, in *ListEmployeesRequest, opts ...grpc.CallOption) (*ListEmployeesResponse, error)
 }
 
@@ -61,7 +65,11 @@ func (c *employeesServiceClient) ListEmployees(ctx context.Context, in *ListEmpl
 // All implementations should embed UnimplementedEmployeesServiceServer
 // for forward compatibility
 type EmployeesServiceServer interface {
+	// GetEmployee takes a short (friendly) name for a single employee, and
+	// returns that employee's associated record
 	GetEmployee(context.Context, *GetEmployeeRequest) (*GetEmployeeResponse, error)
+	// ListEmployees returns all possible employees' short names that can be used
+	// in calls to GetEmployee
 	ListEmployees(context.Context, *ListEmployeesRequest) (*ListEmployeesResponse, error)
 }
 

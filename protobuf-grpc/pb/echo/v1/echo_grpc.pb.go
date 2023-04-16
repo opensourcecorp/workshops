@@ -29,6 +29,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type EchoServiceClient interface {
+	// Echo responds to the caller with the same message they sent
 	Echo(ctx context.Context, in *EchoRequest, opts ...grpc.CallOption) (*EchoResponse, error)
 }
 
@@ -53,6 +54,7 @@ func (c *echoServiceClient) Echo(ctx context.Context, in *EchoRequest, opts ...g
 // All implementations should embed UnimplementedEchoServiceServer
 // for forward compatibility
 type EchoServiceServer interface {
+	// Echo responds to the caller with the same message they sent
 	Echo(context.Context, *EchoRequest) (*EchoResponse, error)
 }
 

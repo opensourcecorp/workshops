@@ -1,0 +1,146 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "employees/v1/employees.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "EmployeesService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/employees/v1/get_employee/{shortName}": {
+      "get": {
+        "summary": "GetEmployee takes a short (friendly) name for a single employee, and\nreturns that employee's associated record",
+        "operationId": "EmployeesService_GetEmployee",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetEmployeeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "shortName",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "EmployeesService"
+        ]
+      }
+    },
+    "/employees/v1/list_employees": {
+      "get": {
+        "summary": "ListEmployees returns all possible employees' short names that can be used\nin calls to GetEmployee",
+        "operationId": "EmployeesService_ListEmployees",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListEmployeesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "EmployeesService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1Employee": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64",
+          "title": "Employee ID number"
+        },
+        "fullName": {
+          "type": "string",
+          "title": "Employee full name"
+        },
+        "birthday": {
+          "type": "string",
+          "title": "Employee birthday, in RFC 3339 date format"
+        }
+      },
+      "title": "Defines the record structure for each employee"
+    },
+    "v1GetEmployeeResponse": {
+      "type": "object",
+      "properties": {
+        "employee": {
+          "$ref": "#/definitions/v1Employee",
+          "title": "Contains Employee record details"
+        }
+      },
+      "title": "Response from the GetEmployee call"
+    },
+    "v1ListEmployeesResponse": {
+      "type": "object",
+      "properties": {
+        "shortNames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "List of short (friendly) names for Employees"
+        }
+      },
+      "title": "Response from the ListEmployees call"
+    }
+  }
+}

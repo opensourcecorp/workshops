@@ -6,7 +6,8 @@ from . import employees_pb2 as employees_dot_v1_dot_employees__pb2
 
 
 class EmployeesServiceStub(object):
-    """Missing associated documentation comment in .proto file."""
+    """Service for interacting with an employee record database
+    """
 
     def __init__(self, channel):
         """Constructor.
@@ -27,16 +28,21 @@ class EmployeesServiceStub(object):
 
 
 class EmployeesServiceServicer(object):
-    """Missing associated documentation comment in .proto file."""
+    """Service for interacting with an employee record database
+    """
 
     def GetEmployee(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """GetEmployee takes a short (friendly) name for a single employee, and
+        returns that employee's associated record
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def ListEmployees(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """ListEmployees returns all possible employees' short names that can be used
+        in calls to GetEmployee
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -62,7 +68,8 @@ def add_EmployeesServiceServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class EmployeesService(object):
-    """Missing associated documentation comment in .proto file."""
+    """Service for interacting with an employee record database
+    """
 
     @staticmethod
     def GetEmployee(request,

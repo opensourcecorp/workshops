@@ -37,7 +37,8 @@ class EchoServiceServicer(object):
     """
 
     def Echo(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Echo responds to the caller with the same message they sent
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')

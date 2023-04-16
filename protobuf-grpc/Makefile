@@ -19,6 +19,7 @@ setup:
 gen:
 	@make -s -C ./proto generate
 
+# Wrappers for running clients & servers of each language
 server-go:
 	@go run ./servers/server.go
 
@@ -30,3 +31,12 @@ client-go:
 
 client-py:
 	@$(pyvenv) && python3 ./clients/client.py $(name)
+
+# Shows how to use grpcurl as well
+client-grpcurl:
+	@printf 'Echo("Hello, gRPC!"):\n'
+	@grpcurl -plaintext -protoset=./proto/protoset -d '{"msg": "Hello, gRPC!"}' localhost:8080 echo.v1.EchoService/Echo
+	@printf 'ListEmployees():\n'
+	@grpcurl -plaintext -protoset=./proto/protoset localhost:8080 employees.v1.EmployeesService/ListEmployees
+	@printf 'GetEmployee($(name)):\n'
+	@grpcurl -plaintext -protoset=./proto/protoset -d '{"short_name": "$(name)"}' localhost:8080 employees.v1.EmployeesService/GetEmployee

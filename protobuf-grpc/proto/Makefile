@@ -7,11 +7,13 @@ proto_files := ./*/*/*.proto
 
 # Helper vars for proto dependencies (i.e. what are used in any referenced imports)
 proto_deps_rootdir := /tmp/proto-deps
-proto_deps_sources :=	github.com/googleapis/googleapis \
-											github.com/google/protobuf
-proto_deps_import_flags :=	-I=. \
-														-I=$(proto_deps_rootdir)/github.com/googleapis/googleapis \
-														-I=$(proto_deps_rootdir)/github.com/google/protobuf/src
+proto_deps_sources :=	\
+	github.com/googleapis/googleapis \
+	github.com/google/protobuf
+proto_deps_import_flags := \
+	-I=. \
+	-I=$(proto_deps_rootdir)/github.com/googleapis/googleapis \
+	-I=$(proto_deps_rootdir)/github.com/google/protobuf/src \
 
 # So that the Python generation works off of the virtual environment's dependencies
 pyvenv = source ../venv/bin/activate
@@ -23,7 +25,11 @@ get-proto-deps:
 ensure-outdir:
 	@mkdir -p $(outdir)
 
-# Most langs code can be generated directly by protoc
+# This is a WAY heavier protoc call than you'd probably see in real life, but
+# this demonstrates how many outputs & options you can provide.
+#
+# Most lang/output code can be generated directly by a single call to protoc
+# with available plugins ...
 generate: ensure-outdir
 	@printf 'Generating protobuf code...\n'
 	@$(pyvenv) && \
@@ -38,6 +44,9 @@ generate: ensure-outdir
 		--grpc-gateway_opt=logtostderr=true \
     --grpc-gateway_opt=paths=source_relative \
     --grpc-gateway_opt=generate_unbound_methods=true \
+		--openapiv2_out=$(outdir) \
+		--openapiv2_opt=logtostderr=true \
+    --openapiv2_opt=generate_unbound_methods=true \
 		--python_out=$(outdir) \
 		--descriptor_set_out=./protoset \
 		--include_imports \

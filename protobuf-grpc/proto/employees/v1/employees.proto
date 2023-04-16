@@ -12,7 +12,10 @@ option go_package = "github.com/opensourcecorp/workshops/protobuf-grpc/pb/employ
 // these annotations
 import "google/api/annotations.proto";
 
+// Service for interacting with an employee record database
 service EmployeesService {
+  // GetEmployee takes a short (friendly) name for a single employee, and
+  // returns that employee's associated record
   rpc GetEmployee(GetEmployeeRequest) returns (GetEmployeeResponse) {
     // This is where you use those imported annotations above -- this maps GET
     // requests over HTTP to the path specified, for example
@@ -21,6 +24,8 @@ service EmployeesService {
     };
   }
 
+  // ListEmployees returns all possible employees' short names that can be used
+  // in calls to GetEmployee
   rpc ListEmployees(ListEmployeesRequest) returns (ListEmployeesResponse) {
     option (google.api.http) = {
       get: "/employees/v1/list_employees"
@@ -28,17 +33,24 @@ service EmployeesService {
   }
 }
 
+// Defines the record structure for each employee
 message Employee {
+  // Employee ID number
   int64 id = 1;
+  // Employee full name
   string full_name = 2;
+  // Employee birthday, in RFC 3339 date format
   string birthday = 3;
 }
 
+// For calling GetEmployee
 message GetEmployeeRequest {
   string short_name = 1;
 }
 
+// Response from the GetEmployee call
 message GetEmployeeResponse {
+  // Contains Employee record details
   Employee employee = 1;
 }
 
@@ -47,6 +59,8 @@ message GetEmployeeResponse {
 // forwards-compatibility in case you ever do add parameter details
 message ListEmployeesRequest {}
 
+// Response from the ListEmployees call
 message ListEmployeesResponse {
+  // List of short (friendly) names for Employees
   repeated string short_names = 1;
 }

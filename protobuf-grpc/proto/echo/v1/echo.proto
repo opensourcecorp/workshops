@@ -15,13 +15,18 @@ option go_package = "github.com/opensourcecorp/workshops/protobuf-grpc/pb/echo/v
 
 // Service that shows a few ways to work with protobufs and gRPC
 service EchoService {
+  // Echo responds to the caller with the same message they sent
   rpc Echo(EchoRequest) returns (EchoResponse);
 }
 
+// The request sent to the Echo Service's Echo method
 message EchoRequest {
+  // The message to be echo'd back to the caller
   string msg = 1;
 }
 
+// The response from the Echo Service's Echo method
 message EchoResponse {
+  // The message to be echo'd back to the caller
   string msg = 1;
 }
