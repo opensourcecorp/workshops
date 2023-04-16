@@ -6,7 +6,12 @@ from . import echo_pb2 as echo_dot_v1_dot_echo__pb2
 
 
 class EchoServiceStub(object):
-    """Service that shows a few ways to work with protobufs and gRPC
+    """TODO: once I figure out how Java works lol
+    // You also need to specify any other appropriate static options for other
+    // languages; here's where you specify the Java package name, for example
+    option java_package = "org.opensourcecorp.workshops.protobuf_grpc.echo.v1";
+
+    Service that shows a few ways to work with protobufs and gRPC
     """
 
     def __init__(self, channel):
@@ -23,7 +28,12 @@ class EchoServiceStub(object):
 
 
 class EchoServiceServicer(object):
-    """Service that shows a few ways to work with protobufs and gRPC
+    """TODO: once I figure out how Java works lol
+    // You also need to specify any other appropriate static options for other
+    // languages; here's where you specify the Java package name, for example
+    option java_package = "org.opensourcecorp.workshops.protobuf_grpc.echo.v1";
+
+    Service that shows a few ways to work with protobufs and gRPC
     """
 
     def Echo(self, request, context):
@@ -48,7 +58,12 @@ def add_EchoServiceServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class EchoService(object):
-    """Service that shows a few ways to work with protobufs and gRPC
+    """TODO: once I figure out how Java works lol
+    // You also need to specify any other appropriate static options for other
+    // languages; here's where you specify the Java package name, for example
+    option java_package = "org.opensourcecorp.workshops.protobuf_grpc.echo.v1";
+
+    Service that shows a few ways to work with protobufs and gRPC
     """
 
     @staticmethod

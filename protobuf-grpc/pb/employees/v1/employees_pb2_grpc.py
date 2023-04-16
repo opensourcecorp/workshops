@@ -6,8 +6,7 @@ from . import employees_pb2 as employees_dot_v1_dot_employees__pb2
 
 
 class EmployeesServiceStub(object):
-    """Service that shows a few ways to work with protobufs and gRPC
-    """
+    """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
         """Constructor.
@@ -28,8 +27,7 @@ class EmployeesServiceStub(object):
 
 
 class EmployeesServiceServicer(object):
-    """Service that shows a few ways to work with protobufs and gRPC
-    """
+    """Missing associated documentation comment in .proto file."""
 
     def GetEmployee(self, request, context):
         """Missing associated documentation comment in .proto file."""
@@ -64,8 +62,7 @@ def add_EmployeesServiceServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class EmployeesService(object):
-    """Service that shows a few ways to work with protobufs and gRPC
-    """
+    """Missing associated documentation comment in .proto file."""
 
     @staticmethod
     def GetEmployee(request,

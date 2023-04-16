@@ -1,21 +1,21 @@
 syntax = "proto3";
 
-// Proto packages should match the directory structure in your tree. The version
-// suffix is considered best-practice
 package employees.v1;
 
-// So the Go output knows its own import path -- this needs to match the output
-// directory structure that your protoc invocation creates!
 option go_package = "github.com/opensourcecorp/workshops/protobuf-grpc/pb/employees/v1";
+// TODO:
+// option java_package = "org.opensourcecorp.workshops.protobuf_grpc.employees.v1";
 
 // Allow for annotations/options to allow for HTTP transcoding of gRPC requests.
-// You can spec & gen these just fine without, but you'll need to use the
-// grpc-gateway plugin to take advantage of these annotations
+// You can spec & generate these protobufs just fine without, but to actually
+// use them, you'll need to use the grpc-gateway plugin to take advantage of
+// these annotations
 import "google/api/annotations.proto";
 
-// Service that shows a few ways to work with protobufs and gRPC
 service EmployeesService {
   rpc GetEmployee(GetEmployeeRequest) returns (GetEmployeeResponse) {
+    // This is where you use those imported annotations above -- this maps GET
+    // requests over HTTP to the path specified, for example
     option (google.api.http) = {
       get: "/employees/v1/get_employee/{short_name}"
     };

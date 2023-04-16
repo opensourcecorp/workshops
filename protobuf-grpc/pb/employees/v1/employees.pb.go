@@ -4,9 +4,6 @@
 // 	protoc        v3.21.12
 // source: employees/v1/employees.proto
 
-// Proto packages should match the directory structure in your tree. The version
-// suffix is considered best-practice
-
 package v1
 
 import (
