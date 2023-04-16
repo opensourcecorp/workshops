@@ -34,3 +34,7 @@ if __name__ == "__main__":
         list_request = employees_pb2.ListEmployeesRequest()
         list_response = employees_stub.ListEmployees(list_request)
         print(list_response)
+
+        get_request = employees_pb2.GetEmployeeRequest(short_name = sys.argv[1])
+        get_response = employees_stub.GetEmployee(get_request)
+        print(get_response)

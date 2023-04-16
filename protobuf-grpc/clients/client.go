@@ -12,7 +12,6 @@ import (
 	employeespb "github.com/ryapric/workshops/protobuf-grpc/pb/employees/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 const grpcAddr = "localhost:8080"
@@ -45,7 +44,7 @@ func callGRPCServer() {
 	employeesClient := employeespb.NewEmployeesServiceClient(conn)
 
 	// ListEmployees returns a list of all employees' short names
-	shortNames, err := employeesClient.ListEmployees(ctx, &emptypb.Empty{})
+	shortNames, err := employeesClient.ListEmployees(ctx, &employeespb.ListEmployeesRequest{})
 	if err != nil {
 		log.Fatalf("error calling gRPC ListEmployees(): %v\n", err)
 	}

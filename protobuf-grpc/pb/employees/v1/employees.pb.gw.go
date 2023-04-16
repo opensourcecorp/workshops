@@ -21,7 +21,6 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // Suppress "imported and not used" errors
@@ -85,7 +84,7 @@ func local_request_EmployeesService_GetEmployee_0(ctx context.Context, marshaler
 }
 
 func request_EmployeesService_ListEmployees_0(ctx context.Context, marshaler runtime.Marshaler, client EmployeesServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq ListEmployeesRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := client.ListEmployees(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -94,7 +93,7 @@ func request_EmployeesService_ListEmployees_0(ctx context.Context, marshaler run
 }
 
 func local_request_EmployeesService_ListEmployees_0(ctx context.Context, marshaler runtime.Marshaler, server EmployeesServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq emptypb.Empty
+	var protoReq ListEmployeesRequest
 	var metadata runtime.ServerMetadata
 
 	msg, err := server.ListEmployees(ctx, &protoReq)

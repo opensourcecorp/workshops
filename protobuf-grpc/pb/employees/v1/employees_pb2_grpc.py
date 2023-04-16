@@ -3,7 +3,6 @@
 import grpc
 
 from . import employees_pb2 as employees_dot_v1_dot_employees__pb2
-from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
 class EmployeesServiceStub(object):
@@ -23,7 +22,7 @@ class EmployeesServiceStub(object):
                 )
         self.ListEmployees = channel.unary_unary(
                 '/employees.v1.EmployeesService/ListEmployees',
-                request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                request_serializer=employees_dot_v1_dot_employees__pb2.ListEmployeesRequest.SerializeToString,
                 response_deserializer=employees_dot_v1_dot_employees__pb2.ListEmployeesResponse.FromString,
                 )
 
@@ -54,7 +53,7 @@ def add_EmployeesServiceServicer_to_server(servicer, server):
             ),
             'ListEmployees': grpc.unary_unary_rpc_method_handler(
                     servicer.ListEmployees,
-                    request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                    request_deserializer=employees_dot_v1_dot_employees__pb2.ListEmployeesRequest.FromString,
                     response_serializer=employees_dot_v1_dot_employees__pb2.ListEmployeesResponse.SerializeToString,
             ),
     }
@@ -97,7 +96,7 @@ class EmployeesService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/employees.v1.EmployeesService/ListEmployees',
-            google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            employees_dot_v1_dot_employees__pb2.ListEmployeesRequest.SerializeToString,
             employees_dot_v1_dot_employees__pb2.ListEmployeesResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

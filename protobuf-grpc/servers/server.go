@@ -15,7 +15,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 const grpcAddr = "localhost:8080"
@@ -83,7 +82,7 @@ func (s *employeesServiceServer) GetEmployee(ctx context.Context, req *employees
 // EmployeesServiceServer interface, as defined in the relevant proto file. It
 // takes no special request information, and returns a list of all employee's
 // short names
-func (s *employeesServiceServer) ListEmployees(ctx context.Context, none *emptypb.Empty) (*employeespb.ListEmployeesResponse, error) {
+func (s *employeesServiceServer) ListEmployees(ctx context.Context, _ *employeespb.ListEmployeesRequest) (*employeespb.ListEmployeesResponse, error) {
 	log.Printf("rcp call to 'ListEmployees' (no request data)\n")
 
 	var shortNames []string

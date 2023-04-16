@@ -13,10 +13,6 @@ option go_package = "github.com/opensourcecorp/workshops/protobuf-grpc/pb/employ
 // grpc-gateway plugin to take advantage of these annotations
 import "google/api/annotations.proto";
 
-// Allows us to specify services that need no parameters, e.g. non-paginated
-// List() calls, by using google.protobuf.Empty as the parameter type
-import "google/protobuf/empty.proto";
-
 // Service that shows a few ways to work with protobufs and gRPC
 service EmployeesService {
   rpc GetEmployee(GetEmployeeRequest) returns (GetEmployeeResponse) {
@@ -25,7 +21,7 @@ service EmployeesService {
     };
   }
 
-  rpc ListEmployees(google.protobuf.Empty) returns (ListEmployeesResponse) {
+  rpc ListEmployees(ListEmployeesRequest) returns (ListEmployeesResponse) {
     option (google.api.http) = {
       get: "/employees/v1/list_employees"
     };
@@ -45,6 +41,11 @@ message GetEmployeeRequest {
 message GetEmployeeResponse {
   Employee employee = 1;
 }
+
+// Even for a Service that you don't have parameters specified for, it's good
+// practice to have the parameters be an empty message like this, for
+// forwards-compatibility in case you ever do add parameter details
+message ListEmployeesRequest {}
 
 message ListEmployeesResponse {
   repeated string short_names = 1;
