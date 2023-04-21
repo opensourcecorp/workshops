@@ -48,6 +48,7 @@ generate: ensure-outdir
 		--openapiv2_opt=logtostderr=true \
     --openapiv2_opt=generate_unbound_methods=true \
 		--python_out=$(outdir) \
+		--pyi_out=$(outdir) \
 		--descriptor_set_out=./protoset \
 		--include_imports \
 		$(proto_files)
