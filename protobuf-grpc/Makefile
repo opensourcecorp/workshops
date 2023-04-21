@@ -17,7 +17,10 @@ setup:
 # This target is just here to make regeneration easier without changing
 # directories
 gen:
-	@make -s -C ./proto generate
+	@make -s -C ./proto gen
+
+gen-custom:
+	@make -s -C ./protoc-gen-list-messages gen
 
 # Wrappers for running clients & servers of each language
 server-go:

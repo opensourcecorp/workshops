@@ -30,27 +30,33 @@ ensure-outdir:
 #
 # Most lang/output code can be generated directly by a single call to protoc
 # with available plugins ...
-generate: ensure-outdir
+gen: ensure-outdir
 	@printf 'Generating protobuf code...\n'
 	@$(pyvenv) && \
 	protoc \
 		$(proto_deps_import_flags) \
 		--go_out=$(outdir) \
 		--go_opt=paths=source_relative \
+		\
 		--go-grpc_out=$(outdir) \
 		--go-grpc_opt=paths=source_relative \
 		--go-grpc_opt=require_unimplemented_servers=false \
+		\
 		--grpc-gateway_out=$(outdir) \
 		--grpc-gateway_opt=logtostderr=true \
     --grpc-gateway_opt=paths=source_relative \
     --grpc-gateway_opt=generate_unbound_methods=true \
+		\
 		--openapiv2_out=$(outdir) \
 		--openapiv2_opt=logtostderr=true \
     --openapiv2_opt=generate_unbound_methods=true \
+		\
 		--python_out=$(outdir) \
 		--pyi_out=$(outdir) \
+		\
 		--descriptor_set_out=./protoset \
 		--include_imports \
+		\
 		$(proto_files)
 # ... but Python gRPC seems to be an angry elf, so we have to use a protoc
 # distro that's in the grpcio_tools Python module
