@@ -51,7 +51,6 @@ apt-get update && apt-get install -y \
   git \
   golang \
   postgresql-client \
-  sqlite3 \
   sudo
 
 # Write out vars to env file(s) for services
@@ -82,3 +81,20 @@ printf 'Successfully reached DB\n'
 cp "${wsroot}"/instructions/step_{0,1}.md /home/appuser/
 
 printf 'All done!\n'
+
+## TODO: ideas for other scorable steps for teams:
+
+# Simulate a git repo's history a la:
+# cd /opt/app
+# git init
+# git remote add origin FAKE
+# <do some thing to change local code>
+# git add .
+# git commit -m "WIP"
+# ...
+
+# mess up the current branch (maybe it was a feature branch that got yeeted)?
+# Have a different branch be the "good" one (`release`, `main` etc)
+
+# BUT ALSO, somehow the good branch is still failing lints (maybe)
+# note to self: need to put anything for a linter on the .bashrc-defined PATH for appuser during init
