@@ -30,8 +30,8 @@ if [[ ! -f /etc/postgresql/"${postgres_major_version}"/main/pg_hba.conf.bak ]]; 
   mv /etc/postgresql/"${postgres_major_version}"/main/pg_hba.conf{,.bak}
 fi
 {
-  printf 'local    all    all    trust\n'
-  printf 'host    all    all    0.0.0.0/0    trust\n'
+  printf 'local    all    all                 trust\n'
+  printf 'host     all    all    0.0.0.0/0    trust\n'
 } > /etc/postgresql/"${postgres_major_version}"/main/pg_hba.conf
 
 # Configure postgres to listen on non-localhost
