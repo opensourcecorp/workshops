@@ -20,7 +20,11 @@ pyvenv = source ../venv/bin/activate
 
 get-proto-deps:
 	@mkdir -p /tmp/proto-deps
-	@for dep in $(proto_deps_sources) ; do git clone --depth=1 https://"$${dep}" $(proto_deps_rootdir)/"$${dep}" || true ; done
+	@for dep in $(proto_deps_sources) ; do \
+		if [[ ! -d $(proto_deps_rootdir)/"$${dep}" ]] ; then \
+			git clone --depth=1 https://"$${dep}" $(proto_deps_rootdir)/"$${dep}" || true ; \
+		fi ; \
+	done
 
 ensure-outdir:
 	@mkdir -p $(outdir)
@@ -30,7 +34,7 @@ ensure-outdir:
 #
 # Most lang/output code can be generated directly by a single call to protoc
 # with available plugins ...
-gen: ensure-outdir
+gen: get-proto-deps ensure-outdir
 	@printf 'Generating protobuf code...\n'
 	@$(pyvenv) && \
 	protoc \
@@ -72,3 +76,17 @@ gen: ensure-outdir
 # our tree set up that way
 	@printf 'Fixing Python import statements...\n'
 	@find $(outdir) -type f -name '*.py' | xargs -I{} sed -E -i 's/^from .*\.v[0-9]+ import (.*)/from . import \1/g' {}
+
+# These targets show that you can use a custom-built protoc plugin to generate
+# code from proto defs however you want!
+build:
+	@make -s -C ../protoc-gen-bash build
+
+gen-custom: get-proto-deps ensure-outdir build
+	@printf 'Generating code using custom protoc plugin...\n'
+	@protoc \
+		--plugin=../protoc-gen-bash/build/protoc-gen-bash \
+		$(proto_deps_import_flags) \
+		--bash_out=$(outdir) \
+		--bash_opt=paths=source_relative \
+		$(proto_files)

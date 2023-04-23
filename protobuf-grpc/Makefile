@@ -20,7 +20,7 @@ gen:
 	@make -s -C ./proto gen
 
 gen-custom:
-	@make -s -C ./protoc-gen-list-messages gen
+	@make -s -C ./proto gen-custom
 
 # Wrappers for running clients & servers of each language
 server-go:

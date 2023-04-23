@@ -33,16 +33,6 @@ service EmployeesService {
   }
 }
 
-// Defines the record structure for each employee
-message Employee {
-  // Employee ID number
-  int64 id = 1;
-  // Employee full name
-  string full_name = 2;
-  // Employee birthday, in RFC 3339 date format
-  string birthday = 3;
-}
-
 // For calling GetEmployee
 message GetEmployeeRequest {
   string short_name = 1;
@@ -50,6 +40,16 @@ message GetEmployeeRequest {
 
 // Response from the GetEmployee call
 message GetEmployeeResponse {
+  // Defines the record structure for each employee
+  message Employee {
+    // Employee ID number
+    int64 id = 1;
+    // Employee full name
+    string full_name = 2;
+    // Employee birthday, in RFC 3339 date format
+    string birthday = 3;
+  }
+
   // Contains Employee record details
   Employee employee = 1;
 }
