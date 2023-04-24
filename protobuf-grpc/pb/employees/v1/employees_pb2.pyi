@@ -6,16 +6,6 @@ from typing import ClassVar as _ClassVar, Iterable as _Iterable, Mapping as _Map
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
-class Employee(_message.Message):
-    __slots__ = ["birthday", "full_name", "id"]
-    BIRTHDAY_FIELD_NUMBER: _ClassVar[int]
-    FULL_NAME_FIELD_NUMBER: _ClassVar[int]
-    ID_FIELD_NUMBER: _ClassVar[int]
-    birthday: str
-    full_name: str
-    id: int
-    def __init__(self, id: _Optional[int] = ..., full_name: _Optional[str] = ..., birthday: _Optional[str] = ...) -> None: ...
-
 class GetEmployeeRequest(_message.Message):
     __slots__ = ["short_name"]
     SHORT_NAME_FIELD_NUMBER: _ClassVar[int]
@@ -24,9 +14,18 @@ class GetEmployeeRequest(_message.Message):
 
 class GetEmployeeResponse(_message.Message):
     __slots__ = ["employee"]
+    class Employee(_message.Message):
+        __slots__ = ["birthday", "full_name", "id"]
+        BIRTHDAY_FIELD_NUMBER: _ClassVar[int]
+        FULL_NAME_FIELD_NUMBER: _ClassVar[int]
+        ID_FIELD_NUMBER: _ClassVar[int]
+        birthday: str
+        full_name: str
+        id: int
+        def __init__(self, id: _Optional[int] = ..., full_name: _Optional[str] = ..., birthday: _Optional[str] = ...) -> None: ...
     EMPLOYEE_FIELD_NUMBER: _ClassVar[int]
-    employee: Employee
-    def __init__(self, employee: _Optional[_Union[Employee, _Mapping]] = ...) -> None: ...
+    employee: GetEmployeeResponse.Employee
+    def __init__(self, employee: _Optional[_Union[GetEmployeeResponse.Employee, _Mapping]] = ...) -> None: ...
 
 class ListEmployeesRequest(_message.Message):
     __slots__ = []

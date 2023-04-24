@@ -3,7 +3,7 @@ SHELL = /usr/bin/env bash -euo pipefail
 outdir := ../pb
 
 # These are the input proto files, i.e. what is going to be compiled
-proto_files := ./*/*/*.proto
+proto_files := $(shell find . -name '*.proto')
 
 # Helper vars for proto dependencies (i.e. what are used in any referenced imports)
 proto_deps_rootdir := /tmp/proto-deps
@@ -51,9 +51,8 @@ gen: get-proto-deps ensure-outdir
     --grpc-gateway_opt=paths=source_relative \
     --grpc-gateway_opt=generate_unbound_methods=true \
 		\
-		--openapiv2_out=$(outdir) \
-		--openapiv2_opt=logtostderr=true \
-    --openapiv2_opt=generate_unbound_methods=true \
+		--openapi_out=$(outdir) \
+		--openapi_opt=output_mode=source_relative \
 		\
 		--python_out=$(outdir) \
 		--pyi_out=$(outdir) \
@@ -79,10 +78,10 @@ gen: get-proto-deps ensure-outdir
 
 # These targets show that you can use a custom-built protoc plugin to generate
 # code from proto defs however you want!
-build:
+build-custom-plugin:
 	@make -s -C ../protoc-gen-bash build
 
-gen-custom: get-proto-deps ensure-outdir build
+gen-custom: get-proto-deps ensure-outdir build-custom-plugin
 	@printf 'Generating code using custom protoc plugin...\n'
 	@protoc \
 		--plugin=../protoc-gen-bash/build/protoc-gen-bash \

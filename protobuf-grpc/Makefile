@@ -17,10 +17,7 @@ setup:
 # This target is just here to make regeneration easier without changing
 # directories
 gen:
-	@make -s -C ./proto gen
-
-gen-custom:
-	@make -s -C ./proto gen-custom
+	@make -s -C ./proto gen gen-custom
 
 # Wrappers for running clients & servers of each language
 server-go:
@@ -43,3 +40,7 @@ client-grpcurl:
 	@grpcurl -plaintext -protoset=./proto/protoset localhost:8080 employees.v1.EmployeesService/ListEmployees
 	@printf 'GetEmployee($(name)):\n'
 	@grpcurl -plaintext -protoset=./proto/protoset -d '{"short_name": "$(name)"}' localhost:8080 employees.v1.EmployeesService/GetEmployee
+
+# Verifies behavior of tooling & other code in the repo
+test-docker:
+	@docker build -t opensourcecorp.org/workshops/protobuf-grpc:latest .

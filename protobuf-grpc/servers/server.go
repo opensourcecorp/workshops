@@ -21,7 +21,7 @@ const grpcAddr = "localhost:8080"
 const httpAddr = "localhost:8081"
 
 // Used to simulate a database of employee records
-var employeeData = map[string]*employeespb.Employee{
+var employeeData = map[string]*employeespb.GetEmployeeResponse_Employee{
 	"Tom": {
 		FullName: "Thomas Anderson",
 		Id:       1,
@@ -121,6 +121,7 @@ func main() {
 	// Now, for the gRPC-HTTP gateway server, we need to create a connection to
 	// the now-running gRPC server, because that's where the gateway will proxy
 	// requests
+	////////////////////////////////////////////////////////////////////////////
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
