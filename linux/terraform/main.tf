@@ -27,6 +27,21 @@ module "vpc" {
   tags = local.tags
 }
 
+module "security_group" {
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "~> 4.0"
+
+  name        = local.name
+  description = "Security group for local IP ssh"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress_cidr_blocks = ["${chomp(data.http.my_ip.body)}/32"]
+  ingress_rules       = ["ssh-tcp", "all-icmp"]
+  egress_rules        = ["all-all"]
+
+  tags = local.tags
+}
+
 module "db" {
   source  = "terraform-aws-modules/ec2-instance/aws"
   version = "~> 3.0"
@@ -40,6 +55,18 @@ module "team_server" {
   version = "~> 3.0"
 
   for_each = toset(["1", "2"])
+  name     = "instance-team${each.key}"
 
-  subnet_id = module.vpc.public_subnets[0].subnet_id
+  ami                    = data.aws_ami.latest.id
+  instance_type          = "t2.micro"
+  key_name               = "user1"
+  vpc_security_group_ids = [module.security_group.security_group_id]
+  subnet_id              = module.vpc.public_subnets[0].subnet_id
+
+  tags = local.tags
+}
+
+resource "aws_key_pair" "main" {
+  key_name   = local.name_tag
+  public_key = file(pathexpand("~/.ssh/id_rsa.pub"))
 }
