@@ -10,7 +10,7 @@ locals {
   name = "${var.event}-osc-workshop-linux"
   tags = {
     event = var.event
-    does_ryan_check_prs = false
+    does_ryan_check_prs = true
   }
 }
 
