@@ -6,6 +6,6 @@ variable "aws_region" {
 
 variable "event" {
   description = "Name of the event that the workshop is being run for"
-  default = "testing"
-  type = string
+  default     = "testing"
+  type        = string
 }

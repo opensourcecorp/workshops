@@ -7,10 +7,9 @@ provider "aws" {
 locals {
   db_ip  = "10.0.1.10"
   region = var.aws_region
-  name = "${var.event}-osc-workshop-linux"
+  name   = "${var.event}-osc-workshop-linux"
   tags = {
-    event = var.event
-    does_ryan_check_prs = true
+    event               = var.event
   }
 }
 
@@ -44,11 +43,11 @@ module "security_group" {
 }
 
 module "db" {
-  count = 0
+  count   = 0
   source  = "terraform-aws-modules/ec2-instance/aws"
   version = "~> 3.0"
 
-  ami                    = data.aws_ami.latest.id
+  ami        = data.aws_ami.latest.id
   subnet_id  = module.vpc.public_subnets[0]
   private_ip = local.db_ip
 }
