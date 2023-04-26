@@ -7,16 +7,17 @@ provider "aws" {
 locals {
   db_ip  = "10.0.1.10"
   region = var.aws_region
-
+  name = "${var.event}-osc-workshop-linux"
   tags = {
-
+    event = var.event
+    does_ryan_check_prs = false
   }
 }
 
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
-  name = "osc-workshop-linux"
+  name = local.name
   cidr = "10.0.0.0/16"
 
   azs            = ["${local.region}a"]
@@ -43,10 +44,12 @@ module "security_group" {
 }
 
 module "db" {
+  count = 0
   source  = "terraform-aws-modules/ec2-instance/aws"
   version = "~> 3.0"
 
-  subnet_id  = module.vpc.public_subnets[0].subnet_id
+  ami                    = data.aws_ami.latest.id
+  subnet_id  = module.vpc.public_subnets[0]
   private_ip = local.db_ip
 }
 
@@ -55,18 +58,18 @@ module "team_server" {
   version = "~> 3.0"
 
   for_each = toset(["1", "2"])
-  name     = "instance-team${each.key}"
+  name     = "${local.name}-team${each.key}"
 
   ami                    = data.aws_ami.latest.id
   instance_type          = "t2.micro"
-  key_name               = "user1"
+  key_name               = aws_key_pair.main.key_name
   vpc_security_group_ids = [module.security_group.security_group_id]
-  subnet_id              = module.vpc.public_subnets[0].subnet_id
+  subnet_id              = module.vpc.public_subnets[0]
 
   tags = local.tags
 }
 
 resource "aws_key_pair" "main" {
-  key_name   = local.name_tag
+  key_name   = local.name
   public_key = file(pathexpand("~/.ssh/id_rsa.pub"))
 }
