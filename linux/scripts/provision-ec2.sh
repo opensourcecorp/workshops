@@ -19,6 +19,6 @@ ssh admin@"${db_ip}" 'sudo bash /tmp/scripts/init-db.sh'
 for server_num in $(seq 1 "${num_teams}") ; do
   server_index=$((server_num - 1))
   server_ip=$(echo ${team_server_ips} | jq -rc ".[${server_index}]")
-  scp -r ../scripts admin@"${server_ip}":/tmp
-  ssh admin@"${server_ip}" "export team_name=Team-${server_num} && export db_add=${db_ip}" && sudo -E bash /tmp/scripts/init.sh
+  scp -r ../scripts ../services ../instructions ../dummy-app-src   admin@"${server_ip}":/tmp
+  ssh admin@"${server_ip}" "export team_name=Team-${server_num} && export db_addr=${db_ip} && sudo -E bash /tmp/scripts/init.sh"
 done

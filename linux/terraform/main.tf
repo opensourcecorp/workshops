@@ -37,7 +37,7 @@ module "security_group" {
   description = "Security group for local IP ssh"
   vpc_id      = module.vpc.vpc_id
 
-  ingress_cidr_blocks = ["${chomp(data.http.my_ip.body)}/32"]
+  ingress_cidr_blocks = [local.my_cidr]
   ingress_rules       = ["ssh-tcp", "all-icmp"]
   egress_rules        = ["all-all"]
 
