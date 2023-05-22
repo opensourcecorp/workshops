@@ -11,7 +11,6 @@ locals {
   my_cidr  = "${chomp(data.http.my_ip.body)}/32"
   tags = {
     event               = var.event
-    does_ryan_check_prs = true
   }
 }
 
