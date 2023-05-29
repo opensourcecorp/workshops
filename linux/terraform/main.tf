@@ -5,12 +5,12 @@ provider "aws" {
 }
 
 locals {
-  db_ip    = "10.0.1.10"
-  region   = var.aws_region
-  name     = "${var.event}-osc-workshop-linux"
-  my_cidr  = "${chomp(data.http.my_ip.response_body)}/32"
+  db_ip   = "10.0.1.10"
+  region  = var.aws_region
+  name    = "${var.event}-osc-workshop-linux"
+  my_cidr = "${chomp(data.http.my_ip.response_body)}/32"
   tags = {
-    event               = var.event
+    event = var.event
   }
 }
 
@@ -25,10 +25,10 @@ module "vpc" {
 
   enable_nat_gateway = false
 
-  manage_default_network_acl = false
-  manage_default_route_table = false
+  manage_default_network_acl    = false
+  manage_default_route_table    = false
   manage_default_security_group = false
-  manage_default_vpc = false
+  manage_default_vpc            = false
 
   tags = local.tags
 }
