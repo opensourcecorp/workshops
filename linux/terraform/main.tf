@@ -7,10 +7,10 @@ provider "aws" {
 locals {
   db_ip   = "10.0.1.10"
   region  = var.aws_region
-  name    = "${var.event}-osc-workshop-linux"
+  name    = "${var.event_name}-osc-workshop-linux"
   my_cidr = "${chomp(data.http.my_ip.response_body)}/32"
   tags = {
-    event = var.event
+    event_name = var.event_name
   }
 }
 
