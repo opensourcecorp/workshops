@@ -6,6 +6,11 @@ if [[ "$(id -u)" -ne 0 ]]; then
   exit 1
 fi
 
+# Disable unattended-upgrades (if it exists) because that shit is ANNOYING
+systemctl stop unattended-upgrades.service || true
+systemctl disable unattended-upgrades.service || true
+apt-get remove --purge -y unattended-upgrades || true
+
 # Enable SSH password access
 sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
 systemctl restart sshd

@@ -22,6 +22,11 @@ if grep -v -q "${team_name}" /etc/hosts ; then
   printf '\n 127.0.0.1    %s\n' "${team_name}" >> /etc/hosts
 fi
 
+# Disable unattended-upgrades (if it exists) because that shit is ANNOYING
+systemctl stop unattended-upgrades.service || true
+systemctl disable unattended-upgrades.service || true
+apt-get remove --purge -y unattended-upgrades || true
+
 # Enable SSH password access
 sed -i -E 's/.*PasswordAuthentication.*no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
 systemctl restart sshd
@@ -85,12 +90,8 @@ printf 'All done!\n'
 ## TODO: ideas for other scorable steps for teams:
 
 # Simulate a git repo's history a la:
-# cd /opt/app
-# git init
-# git remote add origin FAKE
-# <do some thing to change local code>
-# git add .
-# git commit -m "WIP"
+# (at time of writing, this was on the branch 'feature/add-git-scoring-step')
+
 # ...
 
 # mess up the current branch (maybe it was a feature branch that got yeeted)?
