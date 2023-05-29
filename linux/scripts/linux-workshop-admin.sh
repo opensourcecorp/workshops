@@ -74,14 +74,6 @@ check-systemd-service-running() {
 }
 
 ###
-# Naive check for git branch. May be worth using a go test or something instead down the road.
-###
-check-git-branch-correct() {
-  if [[ $(git -C /opt/carrot-cruncher branch --show-current) == "release/bunnies_v1" ]] ; then
-    score-for-step 4
-  fi
-}
-###
 # Main wrapper def & callable for scorables
 ###
 

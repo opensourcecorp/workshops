@@ -90,23 +90,8 @@ printf 'All done!\n'
 ## TODO: ideas for other scorable steps for teams:
 
 # Simulate a git repo's history a la:
-if [[ ! -d /opt/carrot-cruncher ]] ; then
-  mkdir /opt/carrot-cruncher && cp /opt/app/* /opt/carrot-cruncher
-  cd /opt/carrot-cruncher
-  git config --global --add safe.directory /opt/carrot-cruncher
-  git config --global init.defaultBranch main
-  git init
-  git config user.name "Bugs Bunny"
-  git config user.email "bugs@bigbadbunnies.com"
-  git remote add origin git@github.com/bigbadbunnies/carrot-cruncher
-  git add .
-  git commit -m "WIP"
-  git branch release/bunnies_v1 && git checkout release/bunnies_v1
-  sed -i -e 's/printing/picking/g' -e 's/money/carrots/g' -e 's/CHA-CHING/CRUNCH/g' main.go
-  git add .
-  git commit -m "Success"
-  git checkout main
-fi
+# (at time of writing, this was on the branch 'feature/add-git-scoring-step')
+
 # ...
 
 # mess up the current branch (maybe it was a feature branch that got yeeted)?
