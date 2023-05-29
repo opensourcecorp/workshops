@@ -8,7 +8,7 @@ locals {
   db_ip    = "10.0.1.10"
   region   = var.aws_region
   name     = "${var.event}-osc-workshop-linux"
-  my_cidr  = "${chomp(data.http.my_ip.body)}/32"
+  my_cidr  = "${chomp(data.http.my_ip.response_body)}/32"
   tags = {
     event               = var.event
   }
@@ -20,10 +20,15 @@ module "vpc" {
   name = local.name
   cidr = "10.0.0.0/16"
 
-  azs            = ["${local.region}a"]
+  azs            = [data.aws_availability_zones.available.names[0]]
   public_subnets = ["10.0.1.0/24"]
 
   enable_nat_gateway = false
+
+  manage_default_network_acl = false
+  manage_default_route_table = false
+  manage_default_security_group = false
+  manage_default_vpc = false
 
   tags = local.tags
 }
@@ -40,29 +45,32 @@ module "security_group" {
   ingress_rules       = ["ssh-tcp", "all-icmp"]
   egress_rules        = ["all-all"]
 
-  ingress_with_cidr_blocks = [
-    {
-      from_port   = 8080
-      to_port     = 8080
-      protocol    = "tcp"
-      description = "Score server dashboard"
-      cidr_blocks = local.my_cidr
-    },
-    {
-      from_port   = 5432
-      to_port     = 5432
-      protocol    = "tcp"
-      description = "Score DB for team servers"
-      cidr_blocks = module.vpc.vpc_cidr_block
-    },
-    {
-      from_port   = 5432
-      to_port     = 5432
-      protocol    = "tcp"
-      description = "Score DB for deployer"
-      cidr_blocks = local.my_cidr
-    }
-  ]
+  ingress_with_cidr_blocks = concat(
+    [
+      {
+        from_port   = 8080
+        to_port     = 8080
+        protocol    = "tcp"
+        description = "Score server dashboard"
+        cidr_blocks = local.my_cidr
+      },
+      {
+        from_port   = 5432
+        to_port     = 5432
+        protocol    = "tcp"
+        description = "Score DB for team servers"
+        cidr_blocks = module.vpc.vpc_cidr_block
+      },
+      {
+        from_port   = 5432
+        to_port     = 5432
+        protocol    = "tcp"
+        description = "Score DB for deployer"
+        cidr_blocks = local.my_cidr
+      }
+    ],
+    var.custom_security_group_ingress
+  )
 
   tags = local.tags
 }
