@@ -1,0 +1,5 @@
+Package: app
+Version: 1.0.0
+Architecture: amd64
+Maintainer: Ricky Bobby <bigredluvr@talladega.net>
+Description: Literally prints money for our company
