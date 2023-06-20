@@ -27,6 +27,7 @@ score-for-step() {
     if [[ -f "${wsroot}/instructions/step_${next_step}.md" ]] ; then
       printf 'Providing instruction to user for Step %s\n' "${next_step}"
       cp "${wsroot}/instructions/step_${next_step}.md" /home/appuser/
+      wall "Congrats on finishing step ${next_step}" # Broadcast message to user when step is complete
     else
       printf 'No instructions exist for next step -- it looks like Step %s was the last one\n' "${which_step}"
     fi
