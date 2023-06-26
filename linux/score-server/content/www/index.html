@@ -22,20 +22,23 @@
     <caption>Linux Workshop</caption>
     <tr>
       <th>Team</th>
-      <th>Score</th>
       <th>Position</th>
+      <th>Last step completed</th>
+      <th>Score</th>
     </tr>
     <!-- Incoming slice of team data is expected to be pre-sorted in descending order by score -->
     <!-- Also, you could just do `range .` but I need the index value for the hideous JS hack for getting commas in the score -->
     {{ range $i, $e := . }}
     <tr>
       <td>{{ $e.Name }}</td>
+      <td>{{ $e.Position }}</td>
+      <td>{{ $e.LastStepCompleted }}</td>
       <td id="score{{ $i }}">
         <script>
           document.getElementById("score{{ $i }}").innerHTML = Number({{ $e.Score }}).toLocaleString('en');
         </script>
       </td>
-      <td>{{$e.Position}}</td>
+
     </tr>
     {{ end }}
   </table>

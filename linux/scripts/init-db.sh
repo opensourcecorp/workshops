@@ -24,7 +24,9 @@ chsh --shell "$(command -v bash)" appuser
 
 # Install postgres (w/e just get it all)
 apt-get update && apt-get install -y \
-  postgresql-all
+  golang \
+  postgresql-all \
+  tree
 
 # Grab some vars to avoid hardcoding versions etc
 postgres_service="$(systemctl list-units | grep 'postgres.*@' | awk '{ print $1 }')"
@@ -51,8 +53,33 @@ psql -U postgres -c '
 CREATE TABLE IF NOT EXISTS scoring (
   timestamp TIMESTAMP,
   team_name TEXT,
+  last_step_completed INTEGER,
   score INTEGER
 );
 '
+
+# Set up score server dashboard service
+(cd /root/score-server && go build -o score-server ./cmd/...)
+
+printf '[Unit]
+Description=Score dashboard service for the Linux Workshop
+
+[Service]
+ExecStart=/root/score-server/score-server
+Restart=always
+RestartSec=3s
+
+[Install]
+WantedBy=multi-user.target
+' > /etc/systemd/system/score-server.service
+
+systemctl daemon-reload
+systemctl stop score-server.service || true
+systemctl enable score-server.service
+systemctl start score-server.service
+
+timeout 30 systemctl is-active score-server.service || {
+  printf 'ERROR: Could not start score-server.service!\n' && exit 1
+}
 
 printf 'All done!\n'

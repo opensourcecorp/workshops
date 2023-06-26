@@ -47,12 +47,16 @@ teardown() {
 
 teardown_file() {
   teardown
-  rm -f /home/appuser/step_{2..20}.md # just to be sure to catch any non-0 or 1 steps
+  rm -f /home/appuser/step_{2..200}.md # just to be sure to catch any non-0 or 1 steps
+  rm -f /home/appuser/congratulations.md
   systemctl start linux-workshop-admin.timer
 }
 
 reset-score() {
-  psql -U postgres -h "${db_addr:-NOT_SET}" -c 'UPDATE scoring SET score = 0;'
+  psql -U postgres -h "${db_addr:-NOT_SET}" -c "
+    DELETE FROM scoring WHERE team_name = '$(hostname)';
+    INSERT INTO scoring (timestamp, team_name, last_step_completed, score) VALUES (NOW(), '$(hostname)', 0, 0);
+  "
 }
 
 get-score() {
@@ -82,7 +86,7 @@ Description=Prints money!
 User=appuser
 ExecStart=/usr/local/bin/run-app
 Restart=always
-RestartSec=2s
+RestartSec=3s
 
 [Install]
 WantedBy=multi-user.target
