@@ -1,9 +1,0 @@
-Congratulations!!!
-==================
-
-You get the app working again, and your company is once again printing money
-hand over fist. There's nothing else for you to do here except celebrate your
-accomplishments!
-
-Now you can kick back, relax... and if you're feeling adventurous, try to break
-the workshop scoring system in your favor `;)`

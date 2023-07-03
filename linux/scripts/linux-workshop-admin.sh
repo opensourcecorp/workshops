@@ -31,10 +31,10 @@ score-for-step() {
       wall "Congrats on finishing step ${which_step}! Be sure to check your home directory for any new instruction files! (hit any key to dismiss this message)"
     else
       printf 'Team is done with the workshop!\n'
-      cp "${wsroot}/instructions/congratulations.md" /home/appuser/
+      cp "${wsroot}/instructions/congrats.md" /home/appuser/
       # This check suppresses an infinite loop of congratulations, lol
       if [[ ! -f "${wsroot}"/team_has_been_congratulated ]] ; then
-        wall "Congratulations -- you have completed ALL STEPS! Be sure to read congratulations.md in your home directory!"
+        wall "Congratulations -- you have completed ALL STEPS! Be sure to read congrats.md in your home directory!"
         touch "${wsroot}"/team_has_been_congratulated
       fi
     fi
@@ -48,7 +48,7 @@ get-last-step-completed() {
   max_possible_step_completed="$(find "${wsroot}"/instructions -type f -name '*.md' | grep -E -o '[0-9]+' | sort -h | tail -n1)"
   if [[ "${last_step_completed}" -eq 0 ]] ; then
     last_step_completed=0
-  elif [[ -f /home/appuser/congratulations.md ]] ; then
+  elif [[ -f /home/appuser/congrats.md ]] ; then
     last_step_completed="${max_possible_step_completed}"
   else
     last_step_completed="$((last_step_completed - 1))"

@@ -48,7 +48,7 @@ teardown() {
 teardown_file() {
   teardown
   rm -f /home/appuser/step_{2..200}.md # just to be sure to catch any non-0 or 1 steps
-  rm -f /home/appuser/congratulations.md
+  rm -f /home/appuser/congrats.md
   systemctl start linux-workshop-admin.timer
 }
 
