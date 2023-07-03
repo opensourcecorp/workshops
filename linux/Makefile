@@ -7,6 +7,9 @@ up-local:
 up-aws:
 	@(cd ./terraform && terraform apply)
 
+yeet-aws:
+	@(cd ./terraform && terraform apply -auto-approve)
+
 provision-local:
 # Don't re-provision DB at the same time, since it throws off team server tests
 	@vagrant provision db
@@ -20,3 +23,6 @@ down-local:
 
 down-aws:
 	@(cd ./terraform && terraform destroy)
+
+nuke-aws:
+	@(cd ./terraform && terraform destroy -auto-approve)
