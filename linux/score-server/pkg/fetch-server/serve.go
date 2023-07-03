@@ -7,26 +7,27 @@ import (
 	"database/sql"
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"sort"
 	"time"
 
-	"github.com/opensourcecorp/workshops/linux/score-fetcher/content"
-
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/opensourcecorp/workshops/linux/score-fetcher/content"
 )
 
 const dbDriver = "pgx"
-const dbConn = "postgresql://postgres@10.0.1.10:5432/postgres"
+const dbConn = "postgresql://postgres@localhost:5432/postgres" // app is expected to be running on the DB server
 
 type teamData struct {
-	Name     string
-	Score    int
-	Position int
+	Name              string
+	Score             int
+	Position          int
+	LastStepCompleted int
 }
 
 func Root(w http.ResponseWriter, req *http.Request) {
-	fmt.Printf("%s: got request on %s from %s\n", time.Now(), req.URL, req.Host)
+	log.Printf("%s: got request on %s from %s\n", time.Now(), req.URL, req.Host)
 
 	tplBytes, err := content.Content.ReadFile("www/index.html")
 	if err != nil {
@@ -78,7 +79,7 @@ func getScoreData(dbConn string) ([]teamData, error) {
 	}
 	defer db.Close()
 
-	rows, err := db.Query("SELECT team_name, SUM(score) FROM scoring GROUP BY team_name")
+	rows, err := db.Query("SELECT team_name, SUM(score), MAX(last_step_completed) FROM scoring GROUP BY team_name")
 	if err != nil {
 		return nil, fmt.Errorf("unhandled DB query error: %v", err)
 	}
@@ -86,13 +87,21 @@ func getScoreData(dbConn string) ([]teamData, error) {
 
 	var data []teamData
 	for rows.Next() {
-		var teamName string
-		var score int
-		if err = rows.Scan(&teamName, &score); err != nil {
+		var (
+			teamName          string
+			score             int
+			lastStepCompleted int
+		)
+
+		if err = rows.Scan(&teamName, &score, &lastStepCompleted); err != nil {
 			return nil, fmt.Errorf("error scanning row for team score data: %v", err)
 		}
 
-		data = append(data, teamData{Name: teamName, Score: score})
+		data = append(data, teamData{
+			Name:              teamName,
+			Score:             score,
+			LastStepCompleted: lastStepCompleted,
+		})
 	}
 
 	if err := rows.Err(); err != nil {

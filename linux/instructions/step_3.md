@@ -12,4 +12,4 @@ Furthermore, you know that your app's service definition is supposed to be
 (aptly) named `app.service`.
 
 See if that service exists on the machine. If not, create it, and get it
-running.
+running. You need to make sure it runs *even if the system reboots*.
