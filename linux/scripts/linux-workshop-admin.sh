@@ -34,7 +34,7 @@ score-for-step() {
       cp "${wsroot}/instructions/congrats.md" /home/appuser/
       # This check suppresses an infinite loop of congratulations, lol
       if [[ ! -f "${wsroot}"/team_has_been_congratulated ]] ; then
-        wall "Congratulations -- you have completed ALL STEPS! Be sure to read congrats.md in your home directory!"
+        wall "Congratulations -- you have completed ALL STEPS! Be sure to read congrats.md in your home directory! (hit any key to dismiss this message)"
         touch "${wsroot}"/team_has_been_congratulated
       fi
     fi
@@ -103,6 +103,14 @@ check-systemd-service-running() {
   fi
 }
 
+check-debfile-service-running() {
+  if systemctl is-active app-deb.service > /dev/null && systemctl is-enabled app-deb.service > /dev/null ; then
+    score-for-step 4
+  else
+    printf '* app-deb.service is either not running, not enabled, or both\n'
+  fi
+}
+
 ###
 # Main wrapper def & callable for scorables
 ###
@@ -112,6 +120,7 @@ main() {
   check-binary-built
   check-symlink
   check-systemd-service-running
+  check-debfile-service-running
 }
 
 main
