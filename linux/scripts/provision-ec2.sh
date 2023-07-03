@@ -19,7 +19,8 @@ team_server_ips="$(jq -c '[.instance_ips.value[]]' ${outputs_file})"
 printf '>>> %s teams, with IPs of: %s\n' "${num_teams}" "${team_server_ips}"
 
 printf '>>> Adding DB server init script...\n'
-scp -o StrictHostKeyChecking=accept-new -r ../scripts admin@"${db_pub_ip}":/tmp
+scp -o StrictHostKeyChecking=accept-new -r ../scripts ../score-server admin@"${db_pub_ip}":/tmp
+ssh admin@"${db_pub_ip}" -- 'sudo cp -r /tmp/score-server /root/'
 printf '>>> Running DB server init script...\n'
 ssh admin@"${db_pub_ip}" 'sudo bash /tmp/scripts/init-db.sh'
 

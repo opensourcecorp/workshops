@@ -92,7 +92,8 @@ solve-step-2() {
 
 solve-step-3() {
   solve-step-2
-  printf '[Unit]
+  cat <<EOF > /etc/systemd/system/app.service
+[Unit]
 Description=Prints money!
 
 [Service]
@@ -103,7 +104,7 @@ RestartSec=3s
 
 [Install]
 WantedBy=multi-user.target
-' > /etc/systemd/system/app.service
+EOF
   systemctl daemon-reload
   systemctl enable app.service
   systemctl start app.service
@@ -113,7 +114,8 @@ solve-step-4() {
   solve-step-3
   dpkg-deb --build /opt/app/dist/debian/app
   apt-get install -y /opt/app/dist/debian/app.deb
-  printf '[Unit]
+  cat <<EOF > /etc/systemd/system/app-deb.service
+[Unit]
 Description=Prints money!
 
 [Service]
@@ -124,7 +126,7 @@ RestartSec=3s
 
 [Install]
 WantedBy=multi-user.target
-' > /etc/systemd/system/app-deb.service
+EOF
   systemctl daemon-reload
   systemctl stop app.service
   systemctl disable app.service

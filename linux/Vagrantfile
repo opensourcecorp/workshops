@@ -42,7 +42,7 @@ Vagrant.configure("2") do |config|
       SCRIPT
   end
 
-  (1..1).each do |i|
+  (1..2).each do |i|
     config.vm.define "team#{i}" do |team|
       team.vm.box = box
 

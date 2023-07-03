@@ -36,10 +36,11 @@ postgres_major_version="$(echo "${postgres_service}" | sed -E 's/.*@([0-9]+).*/\
 if [[ ! -f /etc/postgresql/"${postgres_major_version}"/main/pg_hba.conf.bak ]]; then
   mv /etc/postgresql/"${postgres_major_version}"/main/pg_hba.conf{,.bak}
 fi
-{
-  printf 'local    all    all                 trust\n'
-  printf 'host     all    all    0.0.0.0/0    trust\n'
-} > /etc/postgresql/"${postgres_major_version}"/main/pg_hba.conf
+cat <<EOF > /etc/postgresql/"${postgres_major_version}"/main/pg_hba.conf
+local    all    all                 trust
+host     all    all    0.0.0.0/0    trust
+host     all    all         ::/0    trust
+EOF
 
 # Configure postgres to listen on non-localhost
 printf "listen_addresses = '*'\n" >> /etc/postgresql/"${postgres_major_version}"/main/postgresql.conf
@@ -61,7 +62,8 @@ CREATE TABLE IF NOT EXISTS scoring (
 # Set up score server dashboard service
 (cd /root/score-server && go build -o score-server ./cmd/...)
 
-printf '[Unit]
+cat <<EOF > /etc/systemd/system/score-server.service
+[Unit]
 Description=Score dashboard service for the Linux Workshop
 
 [Service]
@@ -71,7 +73,7 @@ RestartSec=3s
 
 [Install]
 WantedBy=multi-user.target
-' > /etc/systemd/system/score-server.service
+EOF
 
 systemctl daemon-reload
 systemctl stop score-server.service || true
