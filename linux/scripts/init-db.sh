@@ -60,7 +60,11 @@ CREATE TABLE IF NOT EXISTS scoring (
 '
 
 # Set up score server dashboard service
-(cd /root/score-server && go build -o score-server ./cmd/...)
+(
+  cd /root/score-server && \
+  go test ./... && \
+  go build -o score-server ./cmd/...
+)
 
 cat <<EOF > /etc/systemd/system/score-server.service
 [Unit]

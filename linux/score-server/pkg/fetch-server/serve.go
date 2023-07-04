@@ -7,13 +7,13 @@ import (
 	"database/sql"
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"sort"
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/opensourcecorp/workshops/linux/score-fetcher/content"
+	"github.com/sirupsen/logrus"
 )
 
 const dbDriver = "pgx"
@@ -27,7 +27,7 @@ type teamData struct {
 }
 
 func Root(w http.ResponseWriter, req *http.Request) {
-	log.Printf("%s: got request on %s from %s\n", time.Now(), req.URL, req.Host)
+	logrus.Infof("%s: got request on %s from %s\n", time.Now(), req.URL, req.Host)
 
 	tplBytes, err := content.Content.ReadFile("www/index.html")
 	if err != nil {
