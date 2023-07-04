@@ -1,7 +1,7 @@
 Congratulations!
 ================
 
-You get the app working again, and your company is once again printing money
+You got the app working again, and your company is once again printing money
 hand over fist. Your boss is going to be thrilled! Remember to ask for a raise
 during your next performance review `;-)`
 
