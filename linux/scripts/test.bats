@@ -51,6 +51,7 @@ teardown() {
   }
   rm -f /etc/systemd/system/app-deb.service
   systemctl daemon-reload
+  rm -f /opt/app/dist/debian/app/usr/bin/app
   rm -f /opt/app/dist/debian/app.deb
   apt-get remove -y app
 
@@ -112,6 +113,7 @@ EOF
 
 solve-step-4() {
   solve-step-3
+  cp /opt/app/app /opt/app/dist/debian/app/usr/bin/app
   dpkg-deb --build /opt/app/dist/debian/app
   apt-get install -y /opt/app/dist/debian/app.deb
   cat <<EOF > /etc/systemd/system/app-deb.service
@@ -161,12 +163,14 @@ EOF
 
 @test "step 3 scoring" {
   solve-step-3
-  systemctl is-active app.service
+  systemctl is-active app.service || { printf 'NOT ACTIVE\n' && return 1 ;}
+  systemctl is-enabled app.service || { printf 'NOT ENABLED\n' && return 1 ;}
 }
 
 @test "step 4 scoring" {
   solve-step-4
-  systemctl is-active app-deb.service
+  systemctl is-active app-deb.service || { printf 'NOT ACTIVE\n' && return 1 ;}
+  systemctl is-enabled app-deb.service || { printf 'NOT ENABLED\n' && return 1 ;}
 }
 
 @test "simulate score accumulation" {
