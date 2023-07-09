@@ -88,6 +88,11 @@ module "db" {
   subnet_id                   = module.vpc.public_subnets[0]
   associate_public_ip_address = true
 
+  user_data = <<-EOF
+    #!/usr/bin/env bash
+    printf 'admin\nadmin\n' | passwd admin
+  EOF
+
   tags = local.tags
 }
 
@@ -105,6 +110,11 @@ module "team_servers" {
   vpc_security_group_ids      = [module.security_group.security_group_id]
   subnet_id                   = module.vpc.public_subnets[0]
   associate_public_ip_address = true
+
+  user_data = <<-EOF
+    #!/usr/bin/env bash
+    printf 'appuser\nappuser\n' | passwd appuser
+  EOF
 
   tags = local.tags
 }
