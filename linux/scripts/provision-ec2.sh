@@ -19,10 +19,10 @@ team_server_ips="$(jq -c '[.instance_ips.value[]]' ${outputs_file})"
 printf '>>> %s teams, with IPs of: %s\n' "${num_teams}" "${team_server_ips}"
 
 printf '>>> Adding DB server init script...\n'
-scp -o StrictHostKeyChecking=accept-new -r ../scripts ../score-server admin@"${db_pub_ip}":/tmp
-ssh admin@"${db_pub_ip}" -- 'sudo cp -r /tmp/score-server /root/'
+scp -P 2332 -o StrictHostKeyChecking=accept-new -r ../scripts ../score-server admin@"${db_pub_ip}":/tmp
+ssh -p 2332 admin@"${db_pub_ip}" -- 'sudo cp -r /tmp/score-server /root/'
 printf '>>> Running DB server init script...\n'
-ssh admin@"${db_pub_ip}" 'sudo bash /tmp/scripts/init-db.sh'
+ssh -p 2332 admin@"${db_pub_ip}" 'sudo bash /tmp/scripts/init-db.sh'
 
 for server_num in $(seq 1 "${num_teams}") ; do
   server_index=$((server_num - 1))
@@ -30,13 +30,13 @@ for server_num in $(seq 1 "${num_teams}") ; do
   printf '>>> Team %s IP is %s\n' "${server_num}" "${server_ip}"
 
   printf '>>> Adding files to Team server %s at %s...\n' "${server_num}" "${server_ip}"
-  scp -r -o StrictHostKeyChecking=accept-new ../scripts ../services ../instructions ../dummy-app-src admin@"${server_ip}":/tmp
+  scp -P 2332 -r -o StrictHostKeyChecking=accept-new ../scripts ../services ../instructions ../dummy-app-src admin@"${server_ip}":/tmp
 
   printf '>>> Running init on Team server %s at %s...\n' "${server_num}" "${server_ip}"
-  ssh admin@"${server_ip}" "export team_name=Team-${server_num} && export db_addr=${db_priv_ip} && sudo -E bash /tmp/scripts/init.sh"
+  ssh -p 2332 admin@"${server_ip}" "export team_name=Team-${server_num} && export db_addr=${db_priv_ip} && sudo -E bash /tmp/scripts/init.sh"
 
   printf '>>> Running tests on Team server %s at %s...\n' "${server_num}" "${server_ip}"
-  ssh admin@"${server_ip}" "sudo -E bats /.ws/scripts/test.bats"
+  ssh -p 2332 admin@"${server_ip}" "sudo -E bats /.ws/scripts/test.bats"
 
   printf '>>> Done with Team server %s at %s\n' "${server_num}" "${server_ip}"
 done

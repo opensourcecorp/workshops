@@ -29,7 +29,7 @@ apt-get remove --purge -y unattended-upgrades || true
 
 # Enable SSH password access
 sed -i -E 's/.*PasswordAuthentication.*no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
-systemctl restart sshd
+systemctl restart ssh
 
 # Set up appuser
 useradd -m appuser || true

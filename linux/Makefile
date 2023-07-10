@@ -9,6 +9,7 @@ up-aws:
 
 yeet-aws:
 	@(cd ./terraform && terraform apply -auto-approve)
+	@make -s provision-aws
 
 provision-local:
 # Don't re-provision DB at the same time, since it throws off team server tests
