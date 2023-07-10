@@ -113,7 +113,7 @@ module "team_servers" {
 
   user_data = <<-EOF
     #!/usr/bin/env bash
-    printf 'appuser\nappuser\n' | passwd appuser
+    printf 'admin\nadmin\n' | passwd admin
   EOF
 
   tags = local.tags
