@@ -1,25 +1,59 @@
 <!doctype html>
 <html>
-  <head>
-    <title>Linux Workshop</title>
-    <meta charset="utf-8">
-    <meta http-equiv="refresh" content="10"> <!-- refresh page every N seconds -->
-    <style>
-     table {
-          width: 30%;
-          margin-left: auto;
-          margin-right: auto;
-      }
-      table, caption, th, td {
-        text-align: center;
-        border: 1px solid black;
-        border-collapse: collapse;
-        padding: 10px;
-      }
-    </style>
-  </head>
+
+<head>
+  <title>Linux Workshop</title>
+  <meta charset="utf-8">
+  <meta http-equiv="refresh" content="10"> <!-- refresh page every N seconds -->
+  <style>
+    body {
+      font-family: 'Courier New', Courier, monospace;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      width: 50px;
+      height: auto;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      background-color: #ffffff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    th,
+    td {
+      padding: 10px;
+      text-align: center;
+      border: 1px solid #dddddd;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <h1>Linux Workshop</h1>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/a/af/Tux.png" alt="Logo" class="logo">
+  </div>
   <table>
-    <caption>Linux Workshop</caption>
     <tr>
       <th>Team</th>
       <th>Position</th>
@@ -42,4 +76,6 @@
     </tr>
     {{ end }}
   </table>
+</body>
+
 </html>
