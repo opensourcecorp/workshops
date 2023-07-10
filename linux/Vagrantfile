@@ -36,7 +36,7 @@ Vagrant.configure("2") do |config|
 
     db.vm.provision "shell",
       inline: <<-SCRIPT
-        sudo sh -c 'grep 2332 /etc/ssh/sshd_config || printf "Port 2332\n" >> /etc/ssh/sshd_config' # assumes default port line is commented out
+        sudo sh -c 'grep 2332 /etc/ssh/sshd_config || printf "Port 2332\n" >> /etc/ssh/sshd_config'
         sudo systemctl restart ssh
 
         rm -rf /root/score-server
