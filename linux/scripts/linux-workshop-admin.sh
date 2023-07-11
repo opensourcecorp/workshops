@@ -5,11 +5,14 @@ set -euo pipefail
 # This is the core admin service that will be run on each workshop machine. It
 # determines & accrues the team's score, provides the next set of instructions
 # to the team when appropriate, etc. It is to be placed at
-# '/.ws/linux-workshop-admin'
+# '/.ws/scripts/linux-workshop-admin.sh'
 ################################################################################
 
 wsroot='/.ws'
 
+# score-for-step takes an argument as a step number to score for, and then wraps
+# accrue-points to actually modify the team's score. The provided step number is
+# used for determining which instruction file to provide to the team.
 score-for-step() {
   which_step="${1:-}"
 
@@ -41,14 +44,14 @@ score-for-step() {
   fi
 }
 
-# xyz
+# get-last-step-completed uses some heuristics to determine the last step
+# completed by the team. It should never return a negative value, nor should it
+# return a step number higher than the maximum possible number of steps.
 get-last-step-completed() {
   local last_step_completed
   last_step_completed="$(find /home/appuser -type f -name '*.md' | grep -E -o '[0-9]+' | sort -h | tail -n1)"
   max_possible_step_completed="$(find "${wsroot}"/instructions -type f -name '*.md' | grep -E -o '[0-9]+' | sort -h | tail -n1)"
-  if [[ "${last_step_completed}" -eq 0 ]] ; then
-    last_step_completed=0
-  elif [[ -f /home/appuser/congrats.md ]] ; then
+  if [[ -f /home/appuser/congrats.md ]] ; then
     last_step_completed="${max_possible_step_completed}"
   else
     last_step_completed="$((last_step_completed - 1))"
@@ -56,8 +59,8 @@ get-last-step-completed() {
   printf '%d' "${last_step_completed}"
 }
 
-# accrue-points adds monotonically-increasing point values based on how many
-# steps have been completed
+# accrue-points adds monotonically-increasing point values, the rate of which
+# will increase over time at aggregate since this is called per-step.
 accrue-points() {
   psql -U postgres -h "${db_addr:-NOT_SET}" -c "
     INSERT INTO scoring (
