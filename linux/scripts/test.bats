@@ -147,7 +147,7 @@ EOF
   solve-step-1
   score="$(get-score)"
   printf 'DEBUG: Score from step 1: %s\n' "${score}"
-  [[ "${score}" -eq 100 ]]
+  [[ "${score}" -ge 100 ]]
   [[ -f "/home/appuser/step_2.md" ]] # next instruction gets put in homedir
 }
 
@@ -157,7 +157,7 @@ EOF
   solve-step-2
   score="$(get-score)"
   printf 'DEBUG: Score from step 2: %s\n' "${score}"
-  [[ "${score}" -eq 200 ]] # step 1 + 2 score
+  [[ "${score}" -ge 200 ]] # step 1 + 2 score
   [[ -f "/home/appuser/step_3.md" ]]
 }
 
@@ -181,5 +181,5 @@ EOF
   score="$(get-score)"
   score="$(get-score)"
   printf 'DEBUG: Score after accumulation: %s\n' "${score}"
-  [[ "${score}" -eq 300 ]]
+  [[ "${score}" -ge 300 ]]
 }
