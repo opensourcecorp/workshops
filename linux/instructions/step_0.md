@@ -3,7 +3,7 @@ Oh no! Our app isn't running!
 
 Your company runs a handful of web applications on their Linux servers.
 Unfortunately, it seems that at least one of them has stopped responding to
-healthcheck pings. This is *bad* -- ever second that service isn't running, the
+healthcheck pings. This is *bad* -- every second that service isn't running, the
 company isn't making any money! Well, at least that's how your boss feels. You
 just work here.
 

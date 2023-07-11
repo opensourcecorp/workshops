@@ -29,7 +29,7 @@ apt-get remove --purge -y unattended-upgrades || true
 
 # Enable SSH password access
 sed -i -E 's/.*PasswordAuthentication.*no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
-systemctl restart sshd
+systemctl restart ssh
 
 # Set up appuser
 useradd -m appuser || true
@@ -56,7 +56,8 @@ apt-get update && apt-get install -y \
   git \
   golang \
   postgresql-client \
-  sudo
+  sudo \
+  tree
 
 # Write out vars to env file(s) for services
 rm -f "${wsroot}"/env && touch "${wsroot}"/env
@@ -72,7 +73,7 @@ systemctl disable linux-workshop-admin.service
 systemctl enable linux-workshop-admin.timer
 systemctl start linux-workshop-admin.timer
 
-# Confirm DB connectivity
+# Confirm DB connectivity and set enough data for it to appear on the dashboard
 printf 'Waiting for DB to be reachable...\n'
 timeout 180 sh -c "
   until timeout 2 psql -U postgres -h ${db_addr} -c 'SELECT NOW();' > /dev/null ; do
@@ -80,7 +81,8 @@ timeout 180 sh -c "
      sleep 5
   done
 "
-printf 'Successfully reached DB\n'
+printf 'Successfully reached DB, initializing with base values...\n'
+psql -U postgres -h "${db_addr}" -c "INSERT INTO scoring (timestamp, team_name, last_step_completed, score) VALUES (NOW(), '$(hostname)', 0, 0);" > /dev/null
 
 # Dump the first instruction(s) to the team's homedir
 cp "${wsroot}"/instructions/step_{0,1}.md /home/appuser/

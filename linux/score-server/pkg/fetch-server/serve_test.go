@@ -7,15 +7,15 @@ import (
 
 func TestRankTeams(t *testing.T) {
 	data := []teamData{
-		{"Team 1", 100, 3},
-		{"Team 3", 300, 1},
-		{"Team 2", 200, 2},
+		{Name: "Team 1", Score: 100, Position: 3},
+		{Name: "Team 3", Score: 300, Position: 1},
+		{Name: "Team 2", Score: 200, Position: 2},
 	}
 
 	want := []teamData{
-		{"Team 3", 300, 1},
-		{"Team 2", 200, 2},
-		{"Team 1", 100, 3},
+		{Name: "Team 3", Score: 300, Position: 1},
+		{Name: "Team 2", Score: 200, Position: 2},
+		{Name: "Team 1", Score: 100, Position: 3},
 	}
 
 	got := rankTeams(data)

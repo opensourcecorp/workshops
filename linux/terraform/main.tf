@@ -48,6 +48,13 @@ module "security_group" {
   ingress_with_cidr_blocks = concat(
     [
       {
+        from_port   = 2332
+        to_port     = 2332
+        protocol    = "tcp"
+        description = "Custom SSH"
+        cidr_blocks = local.my_cidr
+      },
+      {
         from_port   = 8080
         to_port     = 8080
         protocol    = "tcp"
@@ -82,11 +89,18 @@ module "db" {
   name = "${local.name}-db"
 
   ami                         = data.aws_ami.latest.id
-  instance_type               = "t2.micro"
+  instance_type               = "t3a.micro"
   key_name                    = aws_key_pair.main.key_name
   vpc_security_group_ids      = [module.security_group.security_group_id]
   subnet_id                   = module.vpc.public_subnets[0]
   associate_public_ip_address = true
+
+  user_data = <<-EOF
+    #!/usr/bin/env bash
+    printf 'admin\nadmin\n' | passwd admin
+    grep 2332 /etc/ssh/sshd_config || printf 'Port 2332\n' >> /etc/ssh/sshd_config
+    systemctl restart ssh
+  EOF
 
   tags = local.tags
 }
@@ -100,11 +114,18 @@ module "team_servers" {
   name = "${local.name}-team-${count.index + 1}"
 
   ami                         = data.aws_ami.latest.id
-  instance_type               = "t2.micro"
+  instance_type               = "t3a.micro"
   key_name                    = aws_key_pair.main.key_name
   vpc_security_group_ids      = [module.security_group.security_group_id]
   subnet_id                   = module.vpc.public_subnets[0]
   associate_public_ip_address = true
+
+  user_data = <<-EOF
+    #!/usr/bin/env bash
+    printf 'admin\nadmin\n' | passwd admin
+    grep 2332 /etc/ssh/sshd_config || printf 'Port 2332\n' >> /etc/ssh/sshd_config
+    systemctl restart ssh
+  EOF
 
   tags = local.tags
 }
