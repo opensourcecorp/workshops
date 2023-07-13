@@ -21,5 +21,6 @@ following:
   `/opt/app`* as well
 
 - To prevent possible issues with hotfix rebuilds of the app (like we're doing
-  now) causing the rebuild to fall out-of-sync, the app must *not be copied to
-  the correct directory* -- it must instead be *linked*
+  now) causing the rebuild to fall out-of-sync with the right location, the app
+  must *not be copied to the correct directory* -- you must find another way to
+  have the same file appear in multiple places at once.
