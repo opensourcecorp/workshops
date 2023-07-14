@@ -91,7 +91,11 @@ check-binary-built() {
 }
 
 check-symlink() {
-  if [[ -L /usr/local/bin/run-app ]] && file /usr/local/bin/run-app | grep -q -v 'broken' ; then
+  if \
+    [[ -L /usr/local/bin/run-app ]] && \
+    [[ -f /usr/local/bin/run-app ]] && \
+    file /usr/local/bin/run-app | grep -q -v 'broken' \
+  ; then
     score-for-step 2
   else
     printf '* Symlink from Go binary to desired location does not yet exist\n'
