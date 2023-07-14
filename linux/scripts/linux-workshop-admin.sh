@@ -103,7 +103,10 @@ check-symlink() {
 }
 
 check-systemd-service-running() {
-  if systemctl is-active app.service > /dev/null && systemctl is-enabled app.service > /dev/null ; then
+  if \
+    systemctl is-active app.service > /dev/null && \
+    systemctl is-enabled app.service > /dev/null \
+  ; then
     score-for-step 3
   else
     printf '* app.service is either not running, not enabled, or both\n'
@@ -111,7 +114,10 @@ check-systemd-service-running() {
 }
 
 check-debfile-service-running() {
-  if systemctl is-active app-deb.service > /dev/null && systemctl is-enabled app-deb.service > /dev/null ; then
+  if \
+    systemctl is-active app-deb.service > /dev/null && \
+    systemctl is-enabled app-deb.service > /dev/null \
+  ; then
     score-for-step 4
   else
     printf '* app-deb.service is either not running, not enabled, or both\n'
