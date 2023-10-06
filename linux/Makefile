@@ -9,6 +9,8 @@ up-aws:
 
 yeet-aws:
 	@(cd ./terraform && terraform apply -auto-approve)
+# Give time for userdata to run
+	@(sleep 30)
 	@make -s provision-aws
 
 provision-local:
