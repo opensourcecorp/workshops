@@ -17,10 +17,7 @@ following:
 
 - Once there, the app there needs to be named `run-app`, not `app`
 
-- The app source code (including the built binary) need to *remain under
-  `/opt/app`* as well
-
-- To prevent possible issues with hotfix rebuilds of the app (like we're doing
-  now) causing the rebuild to fall out-of-sync with the right location, the app
-  must *not be copied to the correct directory* -- you must find another way to
-  have the same file appear in multiple places at once.
+- To ensure both locations always have the same version (e.g. during hotfixes),
+  make a reference from the binary location to the target location without
+  copying the actual file. This way, any update or change will reflect in both
+  places at once without needing to manually sync them.
