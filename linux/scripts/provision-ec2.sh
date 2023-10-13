@@ -21,6 +21,7 @@ fi
 outputs_file='/tmp/outputs.json'
 
 printf '>>> Getting Terraform outputs...\n'
+# TODO: use -chdir here but needs testing if you change the Makefile target as well
 (cd ../terraform && terraform output -json) > "${outputs_file}"
 
 printf '>>> Determining IP addresses of DB server...\n'

@@ -5,12 +5,11 @@ up-local:
 	@vagrant up $(local_team_servers)
 
 up-aws:
-	@(cd ./terraform && terraform apply)
+	@terraform -chdir=./terraform apply
 
 yeet-aws:
-	@(cd ./terraform && terraform apply -auto-approve)
-# Give time for userdata to run
-	@(sleep 30)
+	@terraform -chdir=./terraform apply -auto-approve
+	@printf 'Waiting 30s for EC2 instances to hopefully process userdata...\n' && sleep 30
 	@make -s provision-aws
 
 provision-local:
@@ -19,13 +18,14 @@ provision-local:
 	@vagrant provision $(local_team_servers)
 
 provision-aws:
+# TODO: just run this script without cd-ing but need to test later
 	@(cd ./terraform && bash ../scripts/provision-ec2.sh)
 
 down-local:
 	@vagrant destroy -f
 
 down-aws:
-	@(cd ./terraform && terraform destroy)
+	@terraform -chdir=./terraform destroy
 
 nuke-aws:
-	@(cd ./terraform && terraform destroy -auto-approve)
+	@terraform -chdir=./terraform destroy -auto-approve
