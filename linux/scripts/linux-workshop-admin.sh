@@ -91,7 +91,11 @@ check-binary-built() {
 }
 
 check-symlink() {
-  if [[ -L /usr/local/bin/run-app ]] && file /usr/local/bin/run-app | grep -q -v 'broken' ; then
+  if \
+    [[ -L /usr/local/bin/run-app ]] && \
+    [[ -f /usr/local/bin/run-app ]] && \
+    file /usr/local/bin/run-app | grep -q -v 'broken' \
+  ; then
     score-for-step 2
   else
     printf '* Symlink from Go binary to desired location does not yet exist\n'
@@ -99,7 +103,10 @@ check-symlink() {
 }
 
 check-systemd-service-running() {
-  if systemctl is-active app.service > /dev/null && systemctl is-enabled app.service > /dev/null ; then
+  if \
+    systemctl is-active app.service > /dev/null && \
+    systemctl is-enabled app.service > /dev/null \
+  ; then
     score-for-step 3
   else
     printf '* app.service is either not running, not enabled, or both\n'
@@ -107,7 +114,10 @@ check-systemd-service-running() {
 }
 
 check-debfile-service-running() {
-  if systemctl is-active app-deb.service > /dev/null && systemctl is-enabled app-deb.service > /dev/null ; then
+  if \
+    systemctl is-active app-deb.service > /dev/null && \
+    systemctl is-enabled app-deb.service > /dev/null \
+  ; then
     score-for-step 4
   else
     printf '* app-deb.service is either not running, not enabled, or both\n'

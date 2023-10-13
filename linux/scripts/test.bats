@@ -18,6 +18,7 @@ if [[ "$(id -u)" -ne 0 ]] ; then
 fi
 
 # This file should have been populated on init
+# shellcheck disable=SC1091
 source "${wsroot}"/env || exit 1
 
 # setup* and teardown* are bats-specifically-named pre-/post-test hook
