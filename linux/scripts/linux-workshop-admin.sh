@@ -124,24 +124,25 @@ check-debfile-service-running() {
   fi
 }
 
-###
-# Naive check for git branch. May be worth using a go test or something instead down the road.
-###
-check-git-branch-correct() {
-  if [[ $(git -C /opt/carrot-cruncher branch --show-current) == "release/bunnies_v1" ]] ; then
-    score-for-step 4
-  fi
-}
+# ###
+# # Naive check for git branch. May be worth using a go test or something instead down the road.
+# ###
+# check-git-branch-correct() {
+#   if [[ $(git -C /opt/carrot-cruncher branch --show-current) == "release/bunnies_v1" ]] ; then
+#     score-for-step 4
+#   fi
+# }
+
 ###
 # Main wrapper def & callable for scorables
 ###
-
 main() {
   printf 'Starting score check...\n'
   check-binary-built
   check-symlink
   check-systemd-service-running
   check-debfile-service-running
+  # check-git-branch-correct
 }
 
 main
