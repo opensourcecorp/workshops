@@ -1,1 +1,6 @@
+# the possible locations of the app binary itself, and its debfile
 app
+*.deb
+dist/debian/app/usr/bin/app
+# but NOT its Debian packaging root directory, which must have the same name
+!dist/debian/app/

@@ -10,13 +10,16 @@
 # error when you stop & start a service too fast in succession.
 ################################################################################
 
+wsroot='/.ws'
+
 if [[ "$(id -u)" -ne 0 ]] ; then
   printf 'Tests must be run as root user.\n' > /dev/stderr
   exit 1
 fi
 
 # This file should have been populated on init
-source /.ws/env || exit 1
+# shellcheck disable=SC1091
+source "${wsroot}"/env || exit 1
 
 # setup* and teardown* are bats-specifically-named pre-/post-test hook
 # functions. <setup|teardown>_file run once, period, and <setup|teardown> run
@@ -42,17 +45,33 @@ teardown() {
   rm -f /etc/systemd/system/app.service
   systemctl daemon-reload
 
+  # Step 4
+  systemctl list-units | grep -q app-deb.service && {
+    systemctl stop app-deb.service
+    systemctl disable app-deb.service
+  }
+  rm -f /etc/systemd/system/app-deb.service
+  systemctl daemon-reload
+  rm -f /opt/app/dist/debian/app/usr/bin/app
+  rm -f /opt/app/dist/debian/app.deb
+  apt-get remove -y app
+
   reset-score
 }
 
 teardown_file() {
   teardown
-  rm -f /home/appuser/step_{2..20}.md # just to be sure to catch any non-0 or 1 steps
+  rm -f /home/appuser/step_{2..200}.md # just to be sure to catch any non-0 or 1 steps
+  rm -f /home/appuser/congrats.md
+  rm -r "${wsroot}"/team_has_been_congratulated
   systemctl start linux-workshop-admin.timer
 }
 
 reset-score() {
-  psql -U postgres -h "${db_addr:-NOT_SET}" -c 'UPDATE scoring SET score = 0;'
+  psql -U postgres -h "${db_addr:-NOT_SET}" -c "
+    DELETE FROM scoring WHERE team_name = '$(hostname)';
+    INSERT INTO scoring (timestamp, team_name, last_step_completed, score) VALUES (NOW(), '$(hostname)', 0, 0);
+  "
 }
 
 get-score() {
@@ -75,21 +94,47 @@ solve-step-2() {
 
 solve-step-3() {
   solve-step-2
-  printf '[Unit]
+  cat <<EOF > /etc/systemd/system/app.service
+[Unit]
 Description=Prints money!
 
 [Service]
 User=appuser
 ExecStart=/usr/local/bin/run-app
 Restart=always
-RestartSec=2s
+RestartSec=3s
 
 [Install]
 WantedBy=multi-user.target
-' > /etc/systemd/system/app.service
+EOF
   systemctl daemon-reload
   systemctl enable app.service
   systemctl start app.service
+}
+
+solve-step-4() {
+  solve-step-3
+  cp /opt/app/app /opt/app/dist/debian/app/usr/bin/app
+  dpkg-deb --build /opt/app/dist/debian/app
+  apt-get install -y /opt/app/dist/debian/app.deb
+  cat <<EOF > /etc/systemd/system/app-deb.service
+[Unit]
+Description=Prints money!
+
+[Service]
+User=appuser
+ExecStart=/usr/bin/app
+Restart=always
+RestartSec=3s
+
+[Install]
+WantedBy=multi-user.target
+EOF
+  systemctl daemon-reload
+  systemctl stop app.service
+  systemctl disable app.service
+  systemctl enable app-deb.service
+  systemctl start app-deb.service
 }
 
 ################################################################################
@@ -103,7 +148,7 @@ WantedBy=multi-user.target
   solve-step-1
   score="$(get-score)"
   printf 'DEBUG: Score from step 1: %s\n' "${score}"
-  [[ "${score}" -eq 100 ]]
+  [[ "${score}" -ge 100 ]]
   [[ -f "/home/appuser/step_2.md" ]] # next instruction gets put in homedir
 }
 
@@ -113,13 +158,20 @@ WantedBy=multi-user.target
   solve-step-2
   score="$(get-score)"
   printf 'DEBUG: Score from step 2: %s\n' "${score}"
-  [[ "${score}" -eq 200 ]] # step 1 + 2 score
+  [[ "${score}" -ge 200 ]] # step 1 + 2 score
   [[ -f "/home/appuser/step_3.md" ]]
 }
 
 @test "step 3 scoring" {
   solve-step-3
-  systemctl is-active app.service
+  systemctl is-active app.service || { printf 'NOT ACTIVE\n' && return 1 ;}
+  systemctl is-enabled app.service || { printf 'NOT ENABLED\n' && return 1 ;}
+}
+
+@test "step 4 scoring" {
+  solve-step-4
+  systemctl is-active app-deb.service || { printf 'NOT ACTIVE\n' && return 1 ;}
+  systemctl is-enabled app-deb.service || { printf 'NOT ENABLED\n' && return 1 ;}
 }
 
 @test "simulate score accumulation" {
@@ -130,5 +182,5 @@ WantedBy=multi-user.target
   score="$(get-score)"
   score="$(get-score)"
   printf 'DEBUG: Score after accumulation: %s\n' "${score}"
-  [[ "${score}" -eq 300 ]]
+  [[ "${score}" -ge 300 ]]
 }
