@@ -98,7 +98,7 @@ module "db" {
   user_data = <<-EOF
     #!/usr/bin/env bash
     printf 'admin\nadmin\n' | passwd admin
-    grep 2332 /etc/ssh/sshd_config || printf 'Port 2332\n' >> /etc/ssh/sshd_config
+    grep -q 2332 /etc/ssh/sshd_config || printf 'Port 2332\n' >> /etc/ssh/sshd_config
     systemctl restart ssh
   EOF
 
@@ -123,7 +123,7 @@ module "team_servers" {
   user_data = <<-EOF
     #!/usr/bin/env bash
     printf 'admin\nadmin\n' | passwd admin
-    grep 2332 /etc/ssh/sshd_config || printf 'Port 2332\n' >> /etc/ssh/sshd_config
+    grep -q 2332 /etc/ssh/sshd_config || printf 'Port 2332\n' >> /etc/ssh/sshd_config
     systemctl restart ssh
   EOF
 
