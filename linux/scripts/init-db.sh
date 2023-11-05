@@ -2,9 +2,8 @@
 set -euo pipefail
 
 # Install ezlog
-apt-get update && apt-get install -y git
-rm -rf /usr/local/share/ezlog
-git clone 'https://github.com/opensourcecorp/ezlog.git' /usr/local/share/ezlog
+command -v git > /dev/null || { apt-get update && apt-get install -y git ;}
+[[ -d /usr/local/share/ezlog ]] || git clone 'https://github.com/opensourcecorp/ezlog.git' /usr/local/share/ezlog
 # shellcheck disable=SC1091
 source /usr/local/share/ezlog/src/main.sh
 
