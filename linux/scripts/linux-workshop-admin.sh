@@ -8,7 +8,11 @@ set -euo pipefail
 # '/.ws/scripts/linux-workshop-admin.sh'
 ################################################################################
 
+# shellcheck disable=SC1091
+source /usr/local/share/ezlog/src/main.sh
+
 wsroot='/.ws'
+log-info "wsroot set as '${wsroot}'"
 
 # score-for-step takes an argument as a step number to score for, and then wraps
 # accrue-points to actually modify the team's score. The provided step number is
@@ -17,23 +21,22 @@ score-for-step() {
   which_step="${1:-}"
 
   if [[ -z "${which_step}" ]] ; then
-    printf 'ERROR: current step number not provided to score-for-step\n'
-    return 1
+    log-fatal 'Current step number not provided to score-for-step'
   fi
 
-  printf 'Successful completion of Step %d!\n' "${which_step}"
+  log-info "Successful completion of Step ${which_step}!"
   accrue-points "${which_step}"
 
   next_step="$((which_step + 1))"
 
   if [[ ! -f "/home/appuser/step_${next_step}.md" ]]; then
     if [[ -f "${wsroot}/instructions/step_${next_step}.md" ]] ; then
-      printf 'Providing instruction to user for Step %s\n' "${next_step}"
+      log-info "Providing instruction to user for Step ${next_step}"
       cp "${wsroot}/instructions/step_${next_step}.md" /home/appuser/
       # Also broadcast message to user when step is complete
       wall "Congrats on finishing step ${which_step}! Be sure to check your home directory for any new instruction files! (hit any key to dismiss this message)"
     else
-      printf 'Team is done with the workshop!\n'
+      log-info 'Team is done with the workshop!'
       cp "${wsroot}/instructions/congrats.md" /home/appuser/
       # This check suppresses an infinite loop of congratulations, lol
       if [[ ! -f "${wsroot}"/team_has_been_congratulated ]] ; then
@@ -86,7 +89,7 @@ check-binary-built() {
   if [[ -x /opt/app/app ]] ; then
     score-for-step 1
   else
-    printf '* Go binary is not yet built\n'
+    log-info 'Go binary is not yet built'
   fi
 }
 
@@ -98,7 +101,7 @@ check-symlink() {
   ; then
     score-for-step 2
   else
-    printf '* Symlink from Go binary to desired location does not yet exist\n'
+    log-info 'Symlink from Go binary to desired location does not yet exist'
   fi
 }
 
@@ -109,7 +112,7 @@ check-systemd-service-running() {
   ; then
     score-for-step 3
   else
-    printf '* app.service is either not running, not enabled, or both\n'
+    log-info 'app.service is either not running, not enabled, or both'
   fi
 }
 
@@ -120,7 +123,7 @@ check-debfile-service-running() {
   ; then
     score-for-step 4
   else
-    printf '* app-deb.service is either not running, not enabled, or both\n'
+    log-info 'app-deb.service is either not running, not enabled, or both'
   fi
 }
 
@@ -129,7 +132,7 @@ check-debfile-service-running() {
 ###
 
 main() {
-  printf 'Starting score check...\n'
+  log-info 'Starting score check...'
   check-binary-built
   check-symlink
   check-systemd-service-running
