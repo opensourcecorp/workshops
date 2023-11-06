@@ -1,8 +1,4 @@
-num_team_servers = Integer(ENV["num_team_servers"])
-
-if not num_team_servers
-  num_team_servers = 2
-end
+num_team_servers = Integer(ENV["num_team_servers"].nil? ? 2 : ENV["num_team_servers"])
 
 Vagrant.configure("2") do |config|
   box = "debian/bookworm64" # Debian 12

@@ -7,5 +7,7 @@ COPY go.mod /root/go.mod
 COPY main.go /root/main.go
 RUN go build -o /root/app ./...
 
-HEALTHCHECK --start-period=1s --interval=5s CMD curl -fsSL http://127.0.0.1:8080/health || exit 1
+EXPOSE 8080
+
+HEALTHCHECK --start-period=1s --interval=5s --timeout=1s CMD curl -fsSL http://127.0.0.1:8080/health || exit 1
 CMD ["/root/app"]

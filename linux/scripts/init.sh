@@ -74,7 +74,13 @@ apt-get update && apt-get install -y \
   nmap \
   postgresql-client \
   sudo \
-  tree
+  tree \
+  ufw
+
+###
+log-info 'Opening all firewall rules for ufw (we will edit them later)'
+ufw default allow incoming
+ufw default allow outgoing
 
 ###
 log-info 'Installing Docker'
@@ -110,7 +116,7 @@ log-info 'Starting up dummy web app for networking steps'
   docker build -f ./Containerfile -t web-app:latest .
   docker stop web-app > /dev/null || true
   docker rm web-app > /dev/null || true
-  docker run -dit --restart=always --name web-app web-app:latest
+  docker run -dit --restart=always -p 8080:8080 --name web-app web-app:latest
 )
 
 ###
