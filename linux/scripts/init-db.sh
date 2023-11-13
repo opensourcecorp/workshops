@@ -33,9 +33,24 @@ chsh --shell "$(command -v bash)" appuser
 ###
 log-info 'Installing postgres'
 apt-get update && apt-get install -y \
+  apt-transport-https \
+  ca-certificates \
+  curl \
+  gnupg2 \
   golang \
   postgresql-all \
   tree
+
+###
+log-info 'Installing Docker'
+curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor > /etc/apt/trusted.gpg.d/docker.gpg
+printf "deb https://download.docker.com/linux/debian %s stable\n" "$(lsb_release -cs)" > /etc/apt/sources.list.d/docker.list
+apt-get update
+apt-get install -y \
+  docker-ce \
+  docker-ce-cli \
+  containerd.io \
+  docker-compose-plugin
 
 ###
 log-debug 'Grabbing some vars to avoid hardcoding versions, etc'
@@ -101,5 +116,15 @@ systemctl start score-server.service
 timeout 30 systemctl is-active score-server.service || {
   printf 'ERROR: Could not start score-server.service!\n' && exit 1
 }
+
+###
+log-info 'Starting up dummy web app for networking challenges'
+(
+  cd /root/dummy-web-app-src || exit 1
+  docker build -f ./Containerfile -t web-app:latest .
+  docker stop web-app > /dev/null 2>&1 || true
+  docker rm web-app > /dev/null 2>&1 || true
+  docker run -dit --restart=always -p 8000:8000 --name web-app web-app:latest
+)
 
 log-info 'All done!'

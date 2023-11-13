@@ -20,6 +20,7 @@ fi
 # This file should have been populated on init
 # shellcheck disable=SC1091
 source "${wsroot}"/env || exit 1
+[[ -n "${db_addr:-}" ]] || exit 1
 
 # setup* and teardown* are bats-specifically-named pre-/post-test hook
 # functions. <setup|teardown>_file run once, period, and <setup|teardown> run
@@ -56,6 +57,9 @@ teardown() {
   rm -f /opt/app/dist/debian/app.deb
   apt-get remove -y app
 
+  # Step 5
+  ufw deny out 8000
+
   reset-score
 }
 
@@ -68,7 +72,7 @@ teardown_file() {
 }
 
 reset-score() {
-  psql -U postgres -h "${db_addr:-NOT_SET}" -c "
+  psql -U postgres -h "${db_addr}" -c "
     DELETE FROM scoring WHERE team_name = '$(hostname)';
     INSERT INTO scoring (timestamp, team_name, last_step_completed, score) VALUES (NOW(), '$(hostname)', 0, 0);
   "
@@ -77,7 +81,7 @@ reset-score() {
 get-score() {
   systemctl reset-failed # to reset systemd restart rate-limiter, if other means fail to do so
   systemctl start linux-workshop-admin.service --wait
-  score="$(psql -U postgres -h "${db_addr:-NOT_SET}" -tAc 'SELECT SUM(score) FROM scoring;')"
+  local score="$(psql -U postgres -h "${db_addr}" -tAc 'SELECT SUM(score) FROM scoring;')"
   printf '%s' "${score}"
 }
 
@@ -137,6 +141,10 @@ EOF
   systemctl start app-deb.service
 }
 
+solve-step-5() {
+  ufw allow out 8000
+}
+
 ################################################################################
 
 @test "init steps succeeded" {
@@ -144,9 +152,14 @@ EOF
   [[ -f "/home/appuser/step_1.md" ]]
 }
 
-@test "step 1 scoring" {
+@test "step 1" {
+  # Fails before solution
+  [[ ! -f /opt/app/app ]]
+  [[ ! -x /opt/app/app ]]
+
+  # Passes after solution
   solve-step-1
-  score="$(get-score)"
+  local score="$(get-score)"
   printf 'DEBUG: Score from step 1: %s\n' "${score}"
   [[ "${score}" -ge 100 ]]
   [[ -f "/home/appuser/step_2.md" ]] # next instruction gets put in homedir
@@ -154,24 +167,59 @@ EOF
 
 # This test also end ups implicitly tests two steps' scores at once, which is
 # good
-@test "step 2 scoring" {
+@test "step 2" {
+  # Fails before solution
+  [[ ! -f "/home/appuser/step_3.md" ]]
+  [[ ! -L /usr/local/bin/run-app ]]
+
+  # Passes after solution
   solve-step-2
-  score="$(get-score)"
+  local score="$(get-score)"
   printf 'DEBUG: Score from step 2: %s\n' "${score}"
   [[ "${score}" -ge 200 ]] # step 1 + 2 score
   [[ -f "/home/appuser/step_3.md" ]]
 }
 
-@test "step 3 scoring" {
+@test "step 3" {
+  # Fails before solution
+  systemctl is-active app.service && return 1
+  systemctl is-enabled app.service && return 1
+
+  # Passes after solution
   solve-step-3
-  systemctl is-active app.service || { printf 'NOT ACTIVE\n' && return 1 ;}
-  systemctl is-enabled app.service || { printf 'NOT ENABLED\n' && return 1 ;}
+  local score="$(get-score)"
+  printf 'DEBUG: Score from step 3: %s\n' "${score}"
+  systemctl is-active app.service || return 1
+  systemctl is-enabled app.service || return 1
+  [[ -f "/home/appuser/step_4.md" ]]
 }
 
-@test "step 4 scoring" {
+@test "step 4" {
+  # Fails before solution
+  [[ ! -f "/home/appuser/step_5.md" ]]
+  systemctl is-active app-deb.service && return 1
+  systemctl is-enabled app-deb.service && return 1
+
+  # Passes after solution
   solve-step-4
-  systemctl is-active app-deb.service || { printf 'NOT ACTIVE\n' && return 1 ;}
-  systemctl is-enabled app-deb.service || { printf 'NOT ENABLED\n' && return 1 ;}
+  local score="$(get-score)"
+  printf 'DEBUG: Score from step 4: %s\n' "${score}"
+  systemctl is-active app-deb.service || return 1
+  systemctl is-enabled app-deb.service || return 1
+  [[ -f "/home/appuser/step_5.md" ]]
+}
+
+@test "step 5" {
+  # Fails before solution
+  # [[ ! -f "/home/appuser/step_6.md" ]]
+  timeout 1 curl -fsSL "${db_addr}:8000" && return 1
+
+  # Passes after solution
+  solve-step-5
+  local score="$(get-score)"
+  printf 'DEBUG: Score from step 5: %s\n' "${score}"
+  timeout 1 curl -fsSL "${db_addr}:8000" || return 1
+  # [[ -f "/home/appuser/step_6.md" ]]
 }
 
 @test "simulate score accumulation" {

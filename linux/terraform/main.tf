@@ -62,6 +62,13 @@ module "security_group" {
         cidr_blocks = local.my_cidr
       },
       {
+        from_port   = 8000
+        to_port     = 8000
+        protocol    = "tcp"
+        description = "Dummy web app"
+        cidr_blocks = module.vpc.vpc_cidr_block
+      },
+      {
         from_port   = 5432
         to_port     = 5432
         protocol    = "tcp"

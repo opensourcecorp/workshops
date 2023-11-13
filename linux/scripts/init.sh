@@ -54,7 +54,7 @@ mkdir -p "${wsroot}"
 
 ###
 log-info 'Moving & setting permissions on source directories (all of which are expected to have landed in /tmp)'
-cp -r /tmp/{scripts,services,instructions,dummy-web-app-src} "${wsroot}"/
+cp -r /tmp/{scripts,services,instructions} "${wsroot}"/
 mkdir -p /opt/app
 cp -r /tmp/dummy-app-src/* /opt/app
 chown -R appuser:appuser /opt/app
@@ -78,20 +78,13 @@ apt-get update && apt-get install -y \
   ufw
 
 ###
-log-info 'Opening all firewall rules for ufw (we will edit them later)'
+log-info 'Opening all firewall rules for ufw, then blocking outbound 8000 for the dummy web app'
+printf 'y\n' | ufw enable
 ufw default allow incoming
 ufw default allow outgoing
-
-###
-log-info 'Installing Docker'
-curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor > /etc/apt/trusted.gpg.d/docker.gpg
-printf "deb https://download.docker.com/linux/debian %s stable\n" "$(lsb_release -cs)" > /etc/apt/sources.list.d/docker.list
-apt-get update
-apt-get install -y \
-  docker-ce \
-  docker-ce-cli \
-  containerd.io \
-  docker-compose-plugin
+ufw deny out 8000
+log-info 'Adding file for teams to know which IP to use for one of the networking steps'
+printf '%s\n' "${db_addr}" > /home/appuser/.remote-ip.txt
 
 ###
 log-info 'Writing out vars to env file(s) for systemd services'
@@ -108,16 +101,6 @@ systemctl daemon-reload
 systemctl disable linux-workshop-admin.service
 systemctl enable linux-workshop-admin.timer
 systemctl start linux-workshop-admin.timer
-
-###
-log-info 'Starting up dummy web app for networking steps'
-(
-  cd "${wsroot}"/dummy-web-app-src || exit 1
-  docker build -f ./Containerfile -t web-app:latest .
-  docker stop web-app > /dev/null || true
-  docker rm web-app > /dev/null || true
-  docker run -dit --restart=always -p 8080:8080 --name web-app web-app:latest
-)
 
 ###
 log-info 'Waiting for DB to be reachable...'
