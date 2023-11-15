@@ -113,7 +113,7 @@ systemctl stop score-server.service || true
 systemctl enable score-server.service
 systemctl start score-server.service
 
-timeout 30 systemctl is-active score-server.service || {
+timeout 30s systemctl is-active score-server.service || {
   printf 'ERROR: Could not start score-server.service!\n' && exit 1
 }
 

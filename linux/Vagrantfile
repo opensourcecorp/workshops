@@ -28,8 +28,9 @@ Vagrant.configure("2") do |config|
     db.vm.box = box
 
     db.vm.network "private_network", ip: db_addr
-    db.vm.network "forwarded_port", guest: 5432, host: 5432, protocol: "tcp"
-    db.vm.network "forwarded_port", guest: 8080, host: 8080, protocol: "tcp"
+    db.vm.network "forwarded_port", guest: 5432, host: 5432, protocol: "tcp" # DB
+    db.vm.network "forwarded_port", guest: 8000, host: 8000, protocol: "tcp" # Dummy web app
+    db.vm.network "forwarded_port", guest: 8080, host: 8080, protocol: "tcp" # Score dashboard
 
     db.vm.synced_folder ".", "/vagrant", disabled: true
 

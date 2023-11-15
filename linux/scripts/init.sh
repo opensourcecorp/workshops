@@ -103,15 +103,24 @@ systemctl enable linux-workshop-admin.timer
 systemctl start linux-workshop-admin.timer
 
 ###
-log-info 'Waiting for DB to be reachable...'
-timeout 180 sh -c "
-  until timeout 2 psql -U postgres -h ${db_addr} -c 'SELECT NOW();' > /dev/null ; do
-     printf 'Still waiting for DB to be reachable...\n'
-     sleep 5
+_db_init() {
+  # shellcheck disable=SC1091
+  source /usr/local/share/ezlog/src/main.sh
+  log-info 'Waiting for DB to be reachable...'
+  until timeout 2s psql -U postgres -h "${db_addr}" -c 'SELECT NOW();' > /dev/null ; do
+    log-info 'Still waiting for DB to be reachable...'
+    sleep 5
   done
-"
-log-info 'Successfully reached DB, initializing with base values so team appears on dashboard'
-psql -U postgres -h "${db_addr}" -c "INSERT INTO scoring (timestamp, team_name, last_step_completed, score) VALUES (NOW(), '$(hostname)', 0, 0);" > /dev/null
+  log-info 'Successfully reached DB, trying to initialize with base values so team appears on dashboard...'
+  # until-loop because DB can be reachable before schema is made
+  until psql -U postgres -h "${db_addr}" -c "INSERT INTO scoring (timestamp, team_name, last_step_completed, score) VALUES (NOW(), '$(hostname)', 0, 0);" > /dev/null ; do
+    log-info 'Issue with setting base values; trying again...'
+    sleep 1
+  done
+  log-info 'Successfully initialized with base values'
+}
+export -f _db_init
+timeout 180s bash -c _db_init
 
 ###
 log-info 'Dumping the first instruction(s) to the appuser homedir'

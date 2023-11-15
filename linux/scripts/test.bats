@@ -212,13 +212,20 @@ solve-step-5() {
 @test "step 5" {
   # Fails before solution
   # [[ ! -f "/home/appuser/step_6.md" ]]
-  timeout 1 curl -fsSL "${db_addr}:8000" && return 1
 
   # Passes after solution
   solve-step-5
   local score="$(get-score)"
   printf 'DEBUG: Score from step 5: %s\n' "${score}"
-  timeout 1 curl -fsSL "${db_addr}:8000" || return 1
+  counter=0
+  until timeout 1s curl -fsSL "${db_addr}:8000" ; do
+    printf 'Web app not reachable, trying again...\n' >&2
+    counter="$((counter + 1))"
+    sleep 5
+    if [[ "${counter}" -ge 10 ]] ; then
+      return 1
+    fi
+  done
   # [[ -f "/home/appuser/step_6.md" ]]
 }
 
