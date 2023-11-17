@@ -96,10 +96,10 @@ if [[ ! -d /home/git ]] ; then
       echo "Git server setup completed successfully."
   else
       echo "Git server setup failed. Check /tmp/git_setup.log for details."
-      exit 1 # or handle the error as appropriate
   fi
 fi
 
+# Ideas
 # mess up the current branch (maybe it was a feature branch that got yeeted)?
 # Have a different branch be the "good" one (`release`, `main` etc)
 

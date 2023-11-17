@@ -36,8 +36,6 @@ function setup_ssh_keys_for_git_user() {
 function add_to_known_hosts() {
   local ssh_dir="${GIT_HOME}/.ssh"
   local known_hosts_file="${ssh_dir}/known_hosts"
-  # Assumes localhost is the host for the Git server
-  # You'll need to replace 'localhost' with the actual hostname if different
   su - "${GIT_USER}" -c "ssh-keyscan -p ${SSH_PORT} -H localhost >> ${known_hosts_file}"
   chmod 644 "${known_hosts_file}"
 }
