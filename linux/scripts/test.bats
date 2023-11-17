@@ -160,6 +160,7 @@ solve-step-5() {
   # Passes after solution
   solve-step-1
   local score="$(get-score)"
+  sleep 1
   printf 'DEBUG: Score from step 1: %s\n' "${score}"
   [[ "${score}" -ge 100 ]]
   [[ -f "/home/appuser/step_2.md" ]] # next instruction gets put in homedir
@@ -175,6 +176,7 @@ solve-step-5() {
   # Passes after solution
   solve-step-2
   local score="$(get-score)"
+  sleep 1
   printf 'DEBUG: Score from step 2: %s\n' "${score}"
   [[ "${score}" -ge 200 ]] # step 1 + 2 score
   [[ -f "/home/appuser/step_3.md" ]]
@@ -188,6 +190,7 @@ solve-step-5() {
   # Passes after solution
   solve-step-3
   local score="$(get-score)"
+  sleep 1
   printf 'DEBUG: Score from step 3: %s\n' "${score}"
   systemctl is-active app.service || return 1
   systemctl is-enabled app.service || return 1
@@ -203,6 +206,7 @@ solve-step-5() {
   # Passes after solution
   solve-step-4
   local score="$(get-score)"
+  sleep 1
   printf 'DEBUG: Score from step 4: %s\n' "${score}"
   systemctl is-active app-deb.service || return 1
   systemctl is-enabled app-deb.service || return 1
@@ -216,13 +220,14 @@ solve-step-5() {
   # Passes after solution
   solve-step-5
   local score="$(get-score)"
+  sleep 1
   printf 'DEBUG: Score from step 5: %s\n' "${score}"
   counter=0
   until timeout 1s curl -fsSL "${db_addr}:8000" ; do
     printf 'Web app not reachable, trying again...\n' >&2
     counter="$((counter + 1))"
     sleep 5
-    if [[ "${counter}" -ge 10 ]] ; then
+    if [[ "${counter}" -ge 30 ]] ; then
       return 1
     fi
   done
