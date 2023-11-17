@@ -92,36 +92,13 @@ printf 'All done!\n'
 ## TODO: ideas for other scorable steps for teams:
 ### Setup a local git server and clone to repo
 if [[ ! -d /home/git ]] ; then
-  useradd -m git || true
-  printf 'git\ngit\n' | passwd git
-  chsh --shell "$(command -v bash)" git
-  sudo mkdir -p /home/git/repositories/carrot-cruncher.git
-  cd /home/git/repositories/carrot-cruncher.git
-  git config --global init.defaultBranch main
-  sudo git init --bare
-  cd ..
-  sudo chown -R git:git carrot-cruncher.git
-
-  git config user.name "Bugs Bunny"
-  git config user.email "bugs@bigbadbunnies.com"
-  ssh-keyscan localhost >> ~/.ssh/known_hosts
-  git clone ssh://git@localhost:2332/home/git/repositories/carrot-cruncher.git
-  cp -r /opt/app/* .
-  git add .
-  git commit -m "WIP"
-  git branch release/bunnies_v1 && git checkout release/bunnies_v1
-  sed -i -e 's/printing/picking/g' -e 's/money/carrots/g' -e 's/CHA-CHING/CRUNCH/g' main.go
-  git add .
-  git commit -m "Success"
-  git checkout main
-
-# # Simulate a git repo's history a la:
-  cd /opt && git clone git@localhost:/home/git/repositories/carrot-cruncher.git
-  cd /opt/carrot-cruncher
-  git config --global --add safe.directory /opt/carrot-cruncher
+  if ./git_server_setup.sh > /tmp/git_setup.log 2>&1; then
+      echo "Git server setup completed successfully."
+  else
+      echo "Git server setup failed. Check /tmp/git_setup.log for details."
+      exit 1 # or handle the error as appropriate
+  fi
 fi
-
-# ...
 
 # mess up the current branch (maybe it was a feature branch that got yeeted)?
 # Have a different branch be the "good" one (`release`, `main` etc)
