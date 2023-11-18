@@ -129,7 +129,7 @@ _check-debfile-service-running() {
 }
 
 _check-webapp-reachable() {
-  if timeout 1s curl -fsSL "${db_addr:-NOT_SET}:8000" ; then
+  if timeout 1s curl -fsSL "${db_addr:-NOT_SET}:8000" > /dev/null ; then
     _score-for-step 5
   else
     log-error "web app is not reachable"
