@@ -12,7 +12,7 @@ import (
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/opensourcecorp/workshops/linux/score-fetcher/content"
+	"github.com/opensourcecorp/workshops/linux/score-server/content"
 	"github.com/sirupsen/logrus"
 )
 

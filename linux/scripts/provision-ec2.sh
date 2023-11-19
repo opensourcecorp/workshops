@@ -43,8 +43,8 @@ log-info "${num_teams} teams, with IPs of: ${team_server_ips}"
 # Provision the DB server first, so that if it fails we know we're about to have
 # a bad time overall
 log-info 'Adding DB server init script...'
-scp -P 2332 -o StrictHostKeyChecking=accept-new -r ../scripts ../score-server admin@"${db_pub_ip}":/tmp
-ssh -p 2332 admin@"${db_pub_ip}" -- 'sudo cp -r /tmp/score-server /root/'
+scp -P 2332 -o StrictHostKeyChecking=accept-new -r ../scripts ../services ../score-server "admin@${db_pub_ip}":/tmp
+ssh -p 2332 admin@"${db_pub_ip}" -- 'sudo cp -r /tmp/{score-server,services,dummy-web-app} /root/'
 log-info 'Running DB server init script...'
 ssh -p 2332 admin@"${db_pub_ip}" 'sudo bash /tmp/scripts/init-db.sh'
 

@@ -226,10 +226,10 @@ solve-challenge-5() {
   until timeout 1s curl -fsSL "${db_addr}:8000" ; do
     printf 'Web app not reachable, trying again...\n' >&2
     counter="$((counter + 1))"
-    sleep 5
     if [[ "${counter}" -ge 30 ]] ; then
       return 1
     fi
+    sleep 5
   done
   # [[ -f "/home/appuser/challenge_6.md" ]]
 }

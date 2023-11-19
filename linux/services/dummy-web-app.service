@@ -1,0 +1,10 @@
+[Unit]
+Description=Dummy web app that one of the Linux Workshop Challenges uses
+
+[Service]
+ExecStart=/root/dummy-web-app/dummy-web-app
+Restart=always
+RestartSec=3s
+
+[Install]
+WantedBy=multi-user.target
