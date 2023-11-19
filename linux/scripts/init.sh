@@ -83,7 +83,7 @@ printf 'y\n' | ufw enable
 ufw default allow incoming
 ufw default allow outgoing
 ufw deny out 8000
-log-info 'Adding file for teams to know which IP to use for one of the networking steps'
+log-info 'Adding file for teams to know which IP to use for one of the networking challenges'
 printf '%s\n' "${db_addr}" > /home/appuser/.remote-ip.txt
 
 ###
@@ -113,7 +113,7 @@ _db_init() {
   done
   log-info 'Successfully reached DB, trying to initialize with base values so team appears on dashboard...'
   # until-loop because DB can be reachable before schema is made
-  until psql -U postgres -h "${db_addr}" -c "INSERT INTO scoring (timestamp, team_name, last_step_completed, score) VALUES (NOW(), '$(hostname)', 0, 0);" > /dev/null ; do
+  until psql -U postgres -h "${db_addr}" -c "INSERT INTO scoring (timestamp, team_name, last_challenge_completed, score) VALUES (NOW(), '$(hostname)', 0, 0);" > /dev/null ; do
     log-info 'Issue with setting base values; trying again...'
     sleep 1
   done
@@ -124,9 +124,9 @@ timeout 180s bash -c _db_init
 
 ###
 log-info 'Dumping the first instruction(s) to the appuser homedir'
-cp "${wsroot}"/instructions/step_{0,1}.md /home/appuser/
+cp "${wsroot}"/instructions/challenge_{0,1}.md /home/appuser/
 
-## TODO: ideas for other scorable steps for teams:
+## TODO: ideas for other scorable challenges for teams:
 
 # Simulate a git repo's history a la:
 # (at time of writing, this was on the branch 'feature/add-git-scoring-step')

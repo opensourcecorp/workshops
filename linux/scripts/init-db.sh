@@ -82,7 +82,7 @@ psql -U postgres -c '
 CREATE TABLE IF NOT EXISTS scoring (
   timestamp TIMESTAMP,
   team_name TEXT,
-  last_step_completed INTEGER,
+  last_challenge_completed INTEGER,
   score INTEGER
 );
 '

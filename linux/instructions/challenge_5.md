@@ -1,5 +1,5 @@
-Step 5: Fix Networking
-======================
+Challenge 5: Fix Networking
+===========================
 
 You just got a call from your boss -- turns out there's a different application
 running on your server that needs to make a network call to *another* server,

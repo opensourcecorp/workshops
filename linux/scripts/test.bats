@@ -31,14 +31,14 @@ setup_file() {
 }
 
 teardown() {
-  # Step 1
+  # Challenge 1
   rm -f /opt/app/app
   sed -i 's/Println/PrintLine/g' /opt/app/main.go
 
-  # Step 2
+  # Challenge 2
   rm -f /usr/local/bin/run-app
 
-  # Step 3
+  # Challenge 3
   systemctl list-units | grep -q app.service && {
     systemctl stop app.service
     systemctl disable app.service
@@ -46,7 +46,7 @@ teardown() {
   rm -f /etc/systemd/system/app.service
   systemctl daemon-reload
 
-  # Step 4
+  # Challenge 4
   systemctl list-units | grep -q app-deb.service && {
     systemctl stop app-deb.service
     systemctl disable app-deb.service
@@ -57,7 +57,7 @@ teardown() {
   rm -f /opt/app/dist/debian/app.deb
   apt-get remove -y app
 
-  # Step 5
+  # Challenge 5
   ufw deny out 8000
 
   reset-score
@@ -65,7 +65,7 @@ teardown() {
 
 teardown_file() {
   teardown
-  rm -f /home/appuser/step_{2..200}.md # just to be sure to catch any non-0 or 1 steps
+  rm -f /home/appuser/challenge_{2..200}.md # just to be sure to catch any non-0 or 1 challenges
   rm -f /home/appuser/congrats.md
   rm -r "${wsroot}"/team_has_been_congratulated
   systemctl start linux-workshop-admin.timer
@@ -74,7 +74,7 @@ teardown_file() {
 reset-score() {
   psql -U postgres -h "${db_addr}" -c "
     DELETE FROM scoring WHERE team_name = '$(hostname)';
-    INSERT INTO scoring (timestamp, team_name, last_step_completed, score) VALUES (NOW(), '$(hostname)', 0, 0);
+    INSERT INTO scoring (timestamp, team_name, last_challenge_completed, score) VALUES (NOW(), '$(hostname)', 0, 0);
   "
 }
 
@@ -85,19 +85,19 @@ get-score() {
   printf '%s' "${score}"
 }
 
-# Helpers for redundant stuff in tests, like solving steps, etc.
-solve-step-1() {
+# Helpers for redundant stuff in tests, like solving challenges, etc.
+solve-challenge-1() {
   sed -i 's/PrintLine/Println/g' /opt/app/main.go
   go build -o /opt/app/app /opt/app/main.go
 }
 
-solve-step-2() {
-  solve-step-1
+solve-challenge-2() {
+  solve-challenge-1
   ln -fs /opt/app/app /usr/local/bin/run-app
 }
 
-solve-step-3() {
-  solve-step-2
+solve-challenge-3() {
+  solve-challenge-2
   cat <<EOF > /etc/systemd/system/app.service
 [Unit]
 Description=Prints money!
@@ -116,8 +116,8 @@ EOF
   systemctl start app.service
 }
 
-solve-step-4() {
-  solve-step-3
+solve-challenge-4() {
+  solve-challenge-3
   cp /opt/app/app /opt/app/dist/debian/app/usr/bin/app
   dpkg-deb --build /opt/app/dist/debian/app
   apt-get install -y /opt/app/dist/debian/app.deb
@@ -141,87 +141,87 @@ EOF
   systemctl start app-deb.service
 }
 
-solve-step-5() {
+solve-challenge-5() {
   ufw allow out 8000
 }
 
 ################################################################################
 
 @test "init steps succeeded" {
-  [[ -f "/home/appuser/step_0.md" ]]
-  [[ -f "/home/appuser/step_1.md" ]]
+  [[ -f "/home/appuser/challenge_0.md" ]]
+  [[ -f "/home/appuser/challenge_1.md" ]]
 }
 
-@test "step 1" {
+@test "challenge 1" {
   # Fails before solution
   [[ ! -f /opt/app/app ]]
   [[ ! -x /opt/app/app ]]
 
   # Passes after solution
-  solve-step-1
+  solve-challenge-1
   local score="$(get-score)"
   sleep 1
-  printf 'DEBUG: Score from step 1: %s\n' "${score}"
+  printf 'DEBUG: Score from challenge 1: %s\n' "${score}"
   [[ "${score}" -ge 100 ]]
-  [[ -f "/home/appuser/step_2.md" ]] # next instruction gets put in homedir
+  [[ -f "/home/appuser/challenge_2.md" ]] # next instruction gets put in homedir
 }
 
-# This test also end ups implicitly tests two steps' scores at once, which is
+# This test also end ups implicitly tests two challenges' scores at once, which is
 # good
-@test "step 2" {
+@test "challenge 2" {
   # Fails before solution
-  [[ ! -f "/home/appuser/step_3.md" ]]
+  [[ ! -f "/home/appuser/challenge_3.md" ]]
   [[ ! -L /usr/local/bin/run-app ]]
 
   # Passes after solution
-  solve-step-2
+  solve-challenge-2
   local score="$(get-score)"
   sleep 1
-  printf 'DEBUG: Score from step 2: %s\n' "${score}"
-  [[ "${score}" -ge 200 ]] # step 1 + 2 score
-  [[ -f "/home/appuser/step_3.md" ]]
+  printf 'DEBUG: Score from challenge 2: %s\n' "${score}"
+  [[ "${score}" -ge 200 ]] # challenge 1 + 2 score
+  [[ -f "/home/appuser/challenge_3.md" ]]
 }
 
-@test "step 3" {
+@test "challenge 3" {
   # Fails before solution
   systemctl is-active app.service && return 1
   systemctl is-enabled app.service && return 1
 
   # Passes after solution
-  solve-step-3
+  solve-challenge-3
   local score="$(get-score)"
   sleep 1
-  printf 'DEBUG: Score from step 3: %s\n' "${score}"
+  printf 'DEBUG: Score from challenge 3: %s\n' "${score}"
   systemctl is-active app.service || return 1
   systemctl is-enabled app.service || return 1
-  [[ -f "/home/appuser/step_4.md" ]]
+  [[ -f "/home/appuser/challenge_4.md" ]]
 }
 
-@test "step 4" {
+@test "challenge 4" {
   # Fails before solution
-  [[ ! -f "/home/appuser/step_5.md" ]]
+  [[ ! -f "/home/appuser/challenge_5.md" ]]
   systemctl is-active app-deb.service && return 1
   systemctl is-enabled app-deb.service && return 1
 
   # Passes after solution
-  solve-step-4
+  solve-challenge-4
   local score="$(get-score)"
   sleep 1
-  printf 'DEBUG: Score from step 4: %s\n' "${score}"
+  printf 'DEBUG: Score from challenge 4: %s\n' "${score}"
   systemctl is-active app-deb.service || return 1
   systemctl is-enabled app-deb.service || return 1
-  [[ -f "/home/appuser/step_5.md" ]]
+  [[ -f "/home/appuser/challenge_5.md" ]]
 }
 
-@test "step 5" {
+@test "challenge 5" {
   # Fails before solution
-  # [[ ! -f "/home/appuser/step_6.md" ]]
+  # [[ ! -f "/home/appuser/challenge_6.md" ]]
 
   # Passes after solution
-  solve-step-5
+  solve-challenge-5
   local score="$(get-score)"
   sleep 1
-  printf 'DEBUG: Score from step 5: %s\n' "${score}"
+  printf 'DEBUG: Score from challenge 5: %s\n' "${score}"
   counter=0
   until timeout 1s curl -fsSL "${db_addr}:8000" ; do
     printf 'Web app not reachable, trying again...\n' >&2
@@ -231,11 +231,11 @@ solve-step-5() {
       return 1
     fi
   done
-  # [[ -f "/home/appuser/step_6.md" ]]
+  # [[ -f "/home/appuser/challenge_6.md" ]]
 }
 
 @test "simulate score accumulation" {
-  solve-step-1
+  solve-challenge-1
   # each of these assignments does NOT increment the score var, but assigning it
   # suppresses the useless output from the first call anyway
   score="$(get-score)"

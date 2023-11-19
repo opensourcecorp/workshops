@@ -20,10 +20,10 @@ const dbDriver = "pgx"
 const dbConn = "postgresql://postgres@localhost:5432/postgres" // app is expected to be running on the DB server
 
 type teamData struct {
-	Name              string
-	Score             int
-	Position          int
-	LastStepCompleted int
+	Name                   string
+	Score                  int
+	Position               int
+	LastChallengeCompleted int
 }
 
 func Root(w http.ResponseWriter, req *http.Request) {
@@ -79,7 +79,7 @@ func getScoreData(dbConn string) ([]teamData, error) {
 	}
 	defer db.Close()
 
-	rows, err := db.Query("SELECT team_name, SUM(score), MAX(last_step_completed) FROM scoring GROUP BY team_name")
+	rows, err := db.Query("SELECT team_name, SUM(score), MAX(last_challenge_completed) FROM scoring GROUP BY team_name")
 	if err != nil {
 		return nil, fmt.Errorf("unhandled DB query error: %v", err)
 	}
@@ -88,19 +88,19 @@ func getScoreData(dbConn string) ([]teamData, error) {
 	var data []teamData
 	for rows.Next() {
 		var (
-			teamName          string
-			score             int
-			lastStepCompleted int
+			teamName               string
+			score                  int
+			lastChallengeCompleted int
 		)
 
-		if err = rows.Scan(&teamName, &score, &lastStepCompleted); err != nil {
+		if err = rows.Scan(&teamName, &score, &lastChallengeCompleted); err != nil {
 			return nil, fmt.Errorf("error scanning row for team score data: %v", err)
 		}
 
 		data = append(data, teamData{
-			Name:              teamName,
-			Score:             score,
-			LastStepCompleted: lastStepCompleted,
+			Name:                   teamName,
+			Score:                  score,
+			LastChallengeCompleted: lastChallengeCompleted,
 		})
 	}
 
