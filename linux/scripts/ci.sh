@@ -38,7 +38,7 @@ while read -r module ; do
   (
     cd "${mod_dir}"
     printf '>> Running go vet...\n'
-    go vet ./... > /dev/null 2>&1
+    go vet ./...
     printf '>> Running linter...\n'
     staticcheck ./...
     printf '>> Running error checker...\n'
