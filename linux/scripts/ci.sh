@@ -33,4 +33,4 @@ while read -r module ; do
   )
 done < /tmp/go-modules
 
-printf 'Success!\n'
+printf '>>> Success!\n'
