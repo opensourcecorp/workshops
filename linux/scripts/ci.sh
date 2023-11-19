@@ -46,5 +46,9 @@ while read -r module ; do
   )
 done < /tmp/go-modules
 
+# TODO: enable in a separate PR
+# printf '> Running IaC linter...\n'
+# go run github.com/terraform-linters/tflint@latest --chdir=./terraform
+
 ###
 printf '> Success!\n'

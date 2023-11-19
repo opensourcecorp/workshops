@@ -1,5 +1,8 @@
 local_team_servers := $(shell vagrant status | grep -E -o 'team[0-9]+')
 
+ci:
+	@bash ./scripts/ci.sh
+
 up-local:
 # NOTE: --parallel might not work for all providers, but does for libvirt
 	@vagrant up --parallel
