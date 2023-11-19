@@ -7,6 +7,7 @@ if [[ -n "${GITHUB_ACTION:-}" ]] ; then
     shellcheck
 fi
 
+###
 printf '>>> Running shellcheck...\n'
 find . \
   -type f \
@@ -15,6 +16,7 @@ find . \
   -print0 \
 | xargs -0 -I{} shellcheck {}
 
+###
 printf '>>> Finding Go modules...\n'
 find . -type f -name 'go.mod' > /tmp/go-modules
 while read -r module ; do
@@ -33,4 +35,5 @@ while read -r module ; do
   )
 done < /tmp/go-modules
 
+###
 printf '>>> Success!\n'
