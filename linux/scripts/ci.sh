@@ -1,16 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# NOTE: GHA 'ubuntu-latest' seems to actually already have what's needed -- but
-# some reason, explicitly installing *downgrades* Go?? So, leaving this out for
-# now.
-#
-# # Only try to install if running in GHA
-# if [[ -n "${GITHUB_ACTION:-}" ]] ; then sudo apt-get update && sudo apt-get
-#   install -y \
-#     golang \
-##     shellcheck
-# fi
+# Only try to install if running in GHA
+if [[ -n "${GITHUB_ACTION:-}" ]] ; then
+  sudo apt-get update && sudo apt-get install -y \
+    shellcheck
+fi
 
 printf '>>> Running shellcheck...\n'
 find . \
