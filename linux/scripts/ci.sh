@@ -8,7 +8,7 @@ if [[ -n "${GITHUB_ACTION:-}" ]] ; then
 fi
 
 ###
-printf '>>> Running shellcheck...\n'
+printf '> Running shellcheck...\n'
 find . \
   -type f \
   -name '*.sh' \
@@ -17,23 +17,34 @@ find . \
 | xargs -0 -I{} shellcheck {}
 
 ###
-printf '>>> Finding Go modules...\n'
+printf '> Finding Go modules...\n'
 find . -type f -name 'go.mod' > /tmp/go-modules
+
+if [[ "$(</tmp/go-modules wc -l)" -gt 0 ]] ; then
+  printf '> Installing CI checks for Go...\n'
+  for pkg in \
+    honnef.co/go/tools/cmd/staticcheck@latest \
+    github.com/kisielk/errcheck@latest \
+  ; do
+    go install "${pkg}"
+  done
+fi
+
 while read -r module ; do
   # Don't check the intentionally-broken dummy-app-src directory
   if [[ "${module}" =~ 'dummy-app-src' ]] ; then continue ; fi
-  printf '>>> Running CI checks for Go module defined at %s...\n' "${module}"
+  printf '> Running CI checks for Go module defined at %s...\n' "${module}"
   mod_dir="$(dirname "${module}")"
   (
     cd "${mod_dir}"
-    printf '>>> Running go vet...\n'
-    go vet ./...
-    printf '>>> Running linter...\n'
-    go run honnef.co/go/tools/cmd/staticcheck@latest ./...
-    printf '>>> Running error checker...\n'
-    go run github.com/kisielk/errcheck@latest ./...
+    printf '>> Running go vet...\n'
+    go vet ./... > /dev/null 2>&1
+    printf '>> Running linter...\n'
+    staticcheck ./...
+    printf '>> Running error checker...\n'
+    errcheck ./...
   )
 done < /tmp/go-modules
 
 ###
-printf '>>> Success!\n'
+printf '> Success!\n'
