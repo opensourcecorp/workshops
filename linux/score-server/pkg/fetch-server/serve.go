@@ -32,21 +32,30 @@ func Root(w http.ResponseWriter, req *http.Request) {
 	tplBytes, err := content.Content.ReadFile("www/index.html")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "Dashboard:os.ReadFile: %v\n", err)
+		_, err := fmt.Fprintf(w, "Dashboard:os.ReadFile: %v\n", err)
+		if err != nil {
+			logrus.Fatalf("writing to RepsonseWriter: %v", err)
+		}
 		return
 	}
 
 	tpl, err := template.New("index").Parse(string(tplBytes))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "Dashboard:template.Parse: %v\n", err)
+		_, err := fmt.Fprintf(w, "Dashboard:template.Parse: %v\n", err)
+		if err != nil {
+			logrus.Fatalf("writing to RepsonseWriter: %v", err)
+		}
 		return
 	}
 
 	data, err := getScoreData(dbConn)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "Dashboard:%v\n", err)
+		_, err := fmt.Fprintf(w, "Dashboard:%v\n", err)
+		if err != nil {
+			logrus.Fatalf("writing to RepsonseWriter: %v", err)
+		}
 		return
 	}
 
@@ -55,11 +64,17 @@ func Root(w http.ResponseWriter, req *http.Request) {
 	resp, err := renderHTMLTemplate(tpl, data)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(w, "Dashboard:%v\n", err)
+		_, err := fmt.Fprintf(w, "Dashboard:%v\n", err)
+		if err != nil {
+			logrus.Fatalf("writing to RepsonseWriter: %v", err)
+		}
 		return
 	}
 
-	fmt.Fprint(w, resp)
+	_, err = fmt.Fprint(w, resp)
+	if err != nil {
+		logrus.Fatalf("writing to RepsonseWriter: %v", err)
+	}
 }
 
 func renderHTMLTemplate(t *template.Template, data []teamData) (string, error) {
@@ -77,13 +92,23 @@ func getScoreData(dbConn string) ([]teamData, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error opening DB connection: %v", err)
 	}
-	defer db.Close()
+	defer func() {
+		if closeErr := db.Close(); closeErr != nil {
+			// TODO: change to errors.Join when Go 1.20 is available
+			logrus.Fatalf("closing DB connection: %v", closeErr)
+		}
+	}()
 
 	rows, err := db.Query("SELECT team_name, SUM(score), MAX(last_challenge_completed) FROM scoring GROUP BY team_name")
 	if err != nil {
 		return nil, fmt.Errorf("unhandled DB query error: %v", err)
 	}
-	defer rows.Close()
+	defer func() {
+		if closeErr := rows.Close(); closeErr != nil {
+			// TODO: change to errors.Join when Go 1.20 is available
+			logrus.Fatalf("closing DB rows: %v", closeErr)
+		}
+	}()
 
 	var data []teamData
 	for rows.Next() {

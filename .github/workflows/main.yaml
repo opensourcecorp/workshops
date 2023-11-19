@@ -1,0 +1,17 @@
+name: main
+
+on:
+  push:
+    branches: ['**']
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # Linux workshop
+    - name: CI
+      run: 'cd ./linux && bash ./scripts/ci.sh'
