@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Only try to install if running in GHA
 if [[ -n "${GITHUB_ACTION:-}" ]] ; then
-  apt-get update && apt-get install -y \
+  sudo apt-get update && sudo apt-get install -y \
     golang \
     shellcheck
 fi
