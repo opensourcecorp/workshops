@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-GIT_USER=${GIT_USER:-git}
-GIT_HOME=${GIT_HOME:-/home/git}
+GIT_USER=${GIT_USER:-appuser}
+GIT_HOME=${GIT_HOME:-/home/appuser}
 REPO_NAME=${REPO_NAME:-carrot-cruncher}
 REPO_DIR="${GIT_HOME}/repositories/${REPO_NAME}.git"
+WORK_DIR="/opt/git"
 APP_DIR=${APP_DIR:-/opt/app}
 DEFAULT_BRANCH=${DEFAULT_BRANCH:-main}
 SSH_PORT=${SSH_PORT:-2332}
@@ -57,15 +58,17 @@ function init_git_repo() {
   pushd "${REPO_DIR}" > /dev/null
   git init --bare
   git config --global init.defaultBranch "${DEFAULT_BRANCH}"
+  git config --global user.email "bugs@bigbadbunnies.com"
+  git config --global user.name "Bugs Bunny"
   popd > /dev/null
   chown -R "${GIT_USER}:${GIT_USER}" "${REPO_DIR}"
 }
 
 function setup_local_clone() {
-  local clone_dir="${GIT_HOME}/${REPO_NAME}"
+  local clone_dir="${WORK_DIR}/${REPO_NAME}"
   mkdir -p "${clone_dir}"
   pushd "${clone_dir}" > /dev/null
-  git clone "file://${REPO_DIR}" .
+  git clone "appuser://${REPO_DIR}" .
   cp -r "${APP_DIR}"/* .
   git add .
   git commit -m "Initial commit"
@@ -73,7 +76,7 @@ function setup_local_clone() {
 }
 
 function create_release_branch() {
-  pushd "${GIT_HOME}/${REPO_NAME}" > /dev/null
+  pushd "${WORK_DIR}/${REPO_NAME}" > /dev/null
   git checkout -b release/bunnies_v1
   sed -i -e 's/printing/picking/g' -e 's/money/carrots/g' -e 's/CHA-CHING/CRUNCH/g' main.go
   echo -e "Name: Bugs Bunny\nSecurity Question Answer: 'Crunchy King'\nSSN: 1234-BUNNY" > banking.txt

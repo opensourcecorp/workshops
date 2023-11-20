@@ -12,8 +12,8 @@
 
 wsroot='/.ws'
 
-if [[ "$(id -u)" -ne 0 ]] ; then
-  printf 'Tests must be run as root user.\n' > /dev/stderr
+if [[ "$(id -u)" -ne 0 ]]; then
+  printf 'Tests must be run as root user.\n' >/dev/stderr
   exit 1
 fi
 
@@ -94,7 +94,7 @@ solve-step-2() {
 
 solve-step-3() {
   solve-step-2
-  cat <<EOF > /etc/systemd/system/app.service
+  cat <<EOF >/etc/systemd/system/app.service
 [Unit]
 Description=Prints money!
 
@@ -117,7 +117,7 @@ solve-step-4() {
   cp /opt/app/app /opt/app/dist/debian/app/usr/bin/app
   dpkg-deb --build /opt/app/dist/debian/app
   apt-get install -y /opt/app/dist/debian/app.deb
-  cat <<EOF > /etc/systemd/system/app-deb.service
+  cat <<EOF >/etc/systemd/system/app-deb.service
 [Unit]
 Description=Prints money!
 
@@ -137,6 +137,13 @@ EOF
   systemctl start app-deb.service
 }
 
+solve_challenge_3.1() {
+  local RELEASE_BRANCH=release/bunnies_v1
+  pushd "/opt/git/carrot-cruncher" >/dev/null
+  git merge "${RELEASE_BRANCH}"
+  git push origin main
+  popd >/dev/null
+}
 ################################################################################
 
 @test "init steps succeeded" {
@@ -164,14 +171,14 @@ EOF
 
 @test "step 3 scoring" {
   solve-step-3
-  systemctl is-active app.service || { printf 'NOT ACTIVE\n' && return 1 ;}
-  systemctl is-enabled app.service || { printf 'NOT ENABLED\n' && return 1 ;}
+  systemctl is-active app.service || { printf 'NOT ACTIVE\n' && return 1; }
+  systemctl is-enabled app.service || { printf 'NOT ENABLED\n' && return 1; }
 }
 
 @test "step 4 scoring" {
   solve-step-4
-  systemctl is-active app-deb.service || { printf 'NOT ACTIVE\n' && return 1 ;}
-  systemctl is-enabled app-deb.service || { printf 'NOT ENABLED\n' && return 1 ;}
+  systemctl is-active app-deb.service || { printf 'NOT ACTIVE\n' && return 1; }
+  systemctl is-enabled app-deb.service || { printf 'NOT ENABLED\n' && return 1; }
 }
 
 @test "simulate score accumulation" {

@@ -124,15 +124,24 @@ check-debfile-service-running() {
   fi
 }
 
-# ###
-# # Naive check for git branch. May be worth using a go test or something instead down the road.
-# ###
-check-git-branch-correct() {
-  if [[ $(git -C /opt/carrot-cruncher branch --show-current) == "release/bunnies_v1" ]] ; then
-    score-for-step 5
-  fi
+check-git-branch-merged-correct() {
+  local TEST_DIR=${wsroot}/git-check
+    mkdir -p "${TEST_DIR}"
+    pushd "${TEST_DIR}" > /dev/null
+    # Clone if the directory is empty
+    if [ ! "$(ls -A ${TEST_DIR})" ]; then
+        git clone "ssh://appuser@localhost:2332/home/git/repositories/carrot-cruncher.git" .
+    fi
+    git fetch
+    git checkout main
+    git pull origin main
+    if grep -q carrot main.go; then
+    score-for-step 3.1
+    else
+        printf "feature branch not merged into main.\n"
+    fi
+    popd > /dev/null
 }
-
 
 ###
 # Main wrapper def & callable for scorables
@@ -143,7 +152,7 @@ main() {
   check-symlink
   check-systemd-service-running
   check-debfile-service-running
-  check-git-branch-correct
+  check-git-branch-merged-correct
 
 }
 

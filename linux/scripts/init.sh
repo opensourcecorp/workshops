@@ -47,7 +47,6 @@ cp -r /tmp/{scripts,services,instructions} "${wsroot}"/
 mkdir -p /opt/app
 cp -r /tmp/dummy-app-src/* /opt/app
 chown -R appuser:appuser /opt/app
-rm -rf /tmp/{scripts,services,instructions,dummy-app-src}
 
 # Install any system packages we might need
 apt-get update && apt-get install -y \
@@ -87,15 +86,15 @@ psql -U postgres -h "${db_addr}" -c "INSERT INTO scoring (timestamp, team_name, 
 # Dump the first instruction(s) to the team's homedir
 cp "${wsroot}"/instructions/step_{0,1}.md /home/appuser/
 
-printf 'All done!\n'
 
 ## TODO: ideas for other scorable steps for teams:
 ### Setup a local git server and clone to repo
 if [[ ! -d /home/git ]] ; then
-  if ./git_server_setup.sh > /tmp/git_setup.log 2>&1; then
+  sudo chmod +x /tmp/scripts/setup-git.sh
+  if /tmp/scripts/setup-git.sh > /tmp/setup-git.log 2>&1; then
       echo "Git server setup completed successfully."
   else
-      echo "Git server setup failed. Check /tmp/git_setup.log for details."
+      echo "Git server setup failed. Check /tmp/setup-git.log for details."
   fi
 fi
 
@@ -105,3 +104,6 @@ fi
 
 # BUT ALSO, somehow the good branch is still failing lints (maybe)
 # note to self: need to put anything for a linter on the .bashrc-defined PATH for appuser during init
+
+rm -rf /tmp/{scripts,services,instructions,dummy-app-src}
+printf 'All done!\n'
