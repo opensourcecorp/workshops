@@ -1,5 +1,5 @@
-Step 4: Bundling the app as a Debian package
-============================================
+Challenge 4: Bundling the app as a Debian package
+=================================================
 
 You got the `systemd` service running! Awesome job!
 

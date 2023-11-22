@@ -59,7 +59,7 @@
     <tr>
       <th>Team</th>
       <th>Position</th>
-      <th>Last step completed</th>
+      <th>Last challenge completed</th>
       <th>Score</th>
     </tr>
     <!-- Incoming slice of team data is expected to be pre-sorted in descending order by score -->
@@ -68,7 +68,7 @@
     <tr>
       <td>{{ $e.Name }}</td>
       <td>{{ $e.Position }}</td>
-      <td>{{ $e.LastStepCompleted }}</td>
+      <td>{{ $e.LastChallengeCompleted }}</td>
       <td id="score{{ $i }}">
         <script>
           document.getElementById("score{{ $i }}").innerHTML = Number({{ $e.Score }}).toLocaleString('en');

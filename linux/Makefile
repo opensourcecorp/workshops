@@ -1,8 +1,11 @@
 local_team_servers := $(shell vagrant status | grep -E -o 'team[0-9]+')
 
+ci:
+	@bash ./scripts/ci.sh
+
 up-local:
-	@vagrant up db
-	@vagrant up $(local_team_servers)
+# NOTE: --parallel might not work for all providers, but does for libvirt
+	@vagrant up --parallel
 
 up-aws:
 	@terraform -chdir=./terraform apply

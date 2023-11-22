@@ -5,7 +5,7 @@ import (
 	"net"
 	"net/http"
 
-	fetchserver "github.com/opensourcecorp/workshops/linux/score-fetcher/pkg/fetch-server"
+	fetchserver "github.com/opensourcecorp/workshops/linux/score-server/pkg/fetch-server"
 	"github.com/sirupsen/logrus"
 )
 

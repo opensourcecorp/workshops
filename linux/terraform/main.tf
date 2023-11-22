@@ -62,6 +62,13 @@ module "security_group" {
         cidr_blocks = local.my_cidr
       },
       {
+        from_port   = 8000
+        to_port     = 8000
+        protocol    = "tcp"
+        description = "Dummy web app"
+        cidr_blocks = module.vpc.vpc_cidr_block
+      },
+      {
         from_port   = 5432
         to_port     = 5432
         protocol    = "tcp"
@@ -98,7 +105,7 @@ module "db" {
   user_data = <<-EOF
     #!/usr/bin/env bash
     printf 'admin\nadmin\n' | passwd admin
-    grep 2332 /etc/ssh/sshd_config || printf 'Port 2332\n' >> /etc/ssh/sshd_config
+    grep -q 2332 /etc/ssh/sshd_config || printf 'Port 2332\n' >> /etc/ssh/sshd_config
     systemctl restart ssh
   EOF
 
@@ -123,7 +130,7 @@ module "team_servers" {
   user_data = <<-EOF
     #!/usr/bin/env bash
     printf 'admin\nadmin\n' | passwd admin
-    grep 2332 /etc/ssh/sshd_config || printf 'Port 2332\n' >> /etc/ssh/sshd_config
+    grep -q 2332 /etc/ssh/sshd_config || printf 'Port 2332\n' >> /etc/ssh/sshd_config
     systemctl restart ssh
   EOF
 

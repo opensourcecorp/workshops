@@ -1,90 +1,129 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Install ezlog
+command -v git > /dev/null || { apt-get update && apt-get install -y git ;}
+[[ -d /usr/local/share/ezlog ]] || git clone 'https://github.com/opensourcecorp/ezlog.git' /usr/local/share/ezlog
+# shellcheck disable=SC1091
+source /usr/local/share/ezlog/src/main.sh
+
+log-debug 'Logging enabled'
+
 if [[ "$(id -u)" -ne 0 ]]; then
-  printf 'ERROR: script must be run as root.\n' > /dev/stderr
-  exit 1
+  log-fatal 'Script must be run as root'
 fi
 
 if [[ -z "${team_name}" ]]; then
-  printf 'ERROR: env var "team_name" not set at runtime.\n' > /dev/stderr
-  exit 1
+  log-fatal 'Env var "team_name" not set at runtime'
 fi
 
 if [[ -z "${db_addr}" ]]; then
-  printf 'ERROR: env var "db_addr" not set at runtime.\n' > /dev/stderr
-  exit 1
+  log-fatal 'Env var "db_addr" not set at runtime'
 fi
 
-# Set hostname to be equal to team name
+###
+log-info 'Setting hostname to be equal to team name'
 hostnamectl set-hostname "${team_name}"
 if grep -v -q "${team_name}" /etc/hosts ; then
   printf '\n 127.0.0.1    %s\n' "${team_name}" >> /etc/hosts
 fi
 
-# Disable unattended-upgrades (if it exists) because that shit is ANNOYING
+###
+log-info 'Disabling unattended-upgrades (if it exists)'
 systemctl stop unattended-upgrades.service || true
 systemctl disable unattended-upgrades.service || true
 apt-get remove --purge -y unattended-upgrades || true
 
-# Enable SSH password access
+###
+log-info 'Enabling SSH password access'
 sed -i -E 's/.*PasswordAuthentication.*no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
 systemctl restart ssh
 
-# Set up appuser
+###
+log-info 'Setting up appuser'
 useradd -m appuser || true
 usermod -aG sudo appuser
 printf 'appuser ALL=(ALL) NOPASSWD:ALL\n' > /etc/sudoers.d/appuser
 printf 'appuser\nappuser\n' | passwd appuser
 chsh --shell "$(command -v bash)" appuser
 
-# Create the workshop root directory, which will contain workshop admin files
+###
 wsroot='/.ws'
+log-info "Creating the workshop root directory '${wsroot}', which will contain workshop admin files"
 mkdir -p "${wsroot}"
 
-# All source directories are expected to have landed in /tmp
+###
+log-info 'Moving & setting permissions on source directories (all of which are expected to have landed in /tmp)'
 cp -r /tmp/{scripts,services,instructions} "${wsroot}"/
 mkdir -p /opt/app
 cp -r /tmp/dummy-app-src/* /opt/app
 chown -R appuser:appuser /opt/app
 
-# Install any system packages we might need
+###
+log-info 'Installing any needed system packages'
 apt-get update && apt-get install -y \
+  apt-transport-https \
   bats \
+  ca-certificates \
   curl \
   git \
   golang \
+  gnupg2 \
+  net-tools \
+  nmap \
   postgresql-client \
   sudo \
-  tree
+  tree \
+  ufw
 
-# Write out vars to env file(s) for services
+###
+log-info 'Opening all firewall rules for ufw, then blocking outbound 8000 for the dummy web app'
+printf 'y\n' | ufw enable
+ufw default allow incoming
+ufw default allow outgoing
+ufw deny out 8000
+log-info 'Adding file for teams to know which IP to use for one of the networking challenges'
+printf '%s\n' "${db_addr}" > /home/appuser/.remote-ip.txt
+
+###
+log-info 'Writing out vars to env file(s) for systemd services'
 rm -f "${wsroot}"/env && touch "${wsroot}"/env
 {
   printf 'db_addr=%s\n' "${db_addr}"
   printf 'team_name=%s\n' "$(hostname)"
 } >> "${wsroot}"/env
 
-# Set up systemd timer(s) & service(s)
+###
+log-info 'Set up systemd timer(s) & service(s)'
 cp "${wsroot}"/services/* /etc/systemd/system/
 systemctl daemon-reload
 systemctl disable linux-workshop-admin.service
 systemctl enable linux-workshop-admin.timer
 systemctl start linux-workshop-admin.timer
 
-# Confirm DB connectivity and set enough data for it to appear on the dashboard
-printf 'Waiting for DB to be reachable...\n'
-timeout 180 sh -c "
-  until timeout 2 psql -U postgres -h ${db_addr} -c 'SELECT NOW();' > /dev/null ; do
-     printf 'Still waiting for DB to be reachable...\n'
-     sleep 5
+###
+_db_init() {
+  # shellcheck disable=SC1091
+  source /usr/local/share/ezlog/src/main.sh
+  log-info 'Waiting for DB to be reachable...'
+  until timeout 2s psql -U postgres -h "${db_addr}" -c 'SELECT NOW();' > /dev/null ; do
+    log-info 'Still waiting for DB to be reachable...'
+    sleep 5
   done
-"
-printf 'Successfully reached DB, initializing with base values...\n'
-psql -U postgres -h "${db_addr}" -c "INSERT INTO scoring (timestamp, team_name, last_step_completed, score) VALUES (NOW(), '$(hostname)', 0, 0);" > /dev/null
+  log-info 'Successfully reached DB, trying to initialize with base values so team appears on dashboard...'
+  # until-loop because DB can be reachable before schema is made
+  until psql -U postgres -h "${db_addr}" -c "INSERT INTO scoring (timestamp, team_name, last_challenge_completed, score) VALUES (NOW(), '$(hostname)', 0, 0);" > /dev/null ; do
+    log-info 'Issue with setting base values; trying again...'
+    sleep 1
+  done
+  log-info 'Successfully initialized with base values'
+}
+export -f _db_init
+timeout 180s bash -c _db_init
 
-# Dump the first instruction(s) to the team's homedir
-cp "${wsroot}"/instructions/step_{0,1}.md /home/appuser/
+###
+log-info 'Dumping the first instruction(s) to the appuser homedir'
+cp "${wsroot}"/instructions/challenge_{0,1}.md /home/appuser/
 
 
 ## TODO: ideas for other scorable steps for teams:
