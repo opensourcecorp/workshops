@@ -27,7 +27,7 @@ source "${wsroot}"/env || exit 1
 # once *per test*
 setup_file() {
   systemctl stop linux-workshop-admin.timer
-  reset-score
+  _reset-score
 }
 
 teardown() {
@@ -60,7 +60,7 @@ teardown() {
   # Challenge 5
   ufw deny out 8000
 
-  reset-score
+  _reset-score
 }
 
 teardown_file() {
@@ -71,14 +71,14 @@ teardown_file() {
   systemctl start linux-workshop-admin.timer
 }
 
-reset-score() {
+_reset-score() {
   psql -U postgres -h "${db_addr}" -c "
     DELETE FROM scoring WHERE team_name = '$(hostname)';
     INSERT INTO scoring (timestamp, team_name, last_challenge_completed, score) VALUES (NOW(), '$(hostname)', 0, 0);
   "
 }
 
-get-score() {
+_get-score() {
   systemctl reset-failed # to reset systemd restart rate-limiter, if other means fail to do so
   systemctl start linux-workshop-admin.service --wait
   local score="$(psql -U postgres -h "${db_addr}" -tAc 'SELECT SUM(score) FROM scoring;')"
@@ -86,18 +86,18 @@ get-score() {
 }
 
 # Helpers for redundant stuff in tests, like solving challenges, etc.
-solve-challenge-1() {
+_solve-challenge-1() {
   sed -i 's/PrintLine/Println/g' /opt/app/main.go
   go build -o /opt/app/app /opt/app/main.go
 }
 
-solve-challenge-2() {
-  solve-challenge-1
+_solve-challenge-2() {
+  _solve-challenge-1
   ln -fs /opt/app/app /usr/local/bin/run-app
 }
 
-solve-challenge-3() {
-  solve-challenge-2
+_solve-challenge-3() {
+  _solve-challenge-2
   cat <<EOF > /etc/systemd/system/app.service
 [Unit]
 Description=Prints money!
@@ -116,8 +116,8 @@ EOF
   systemctl start app.service
 }
 
-solve-challenge-4() {
-  solve-challenge-3
+_solve-challenge-4() {
+  _solve-challenge-3
   cp /opt/app/app /opt/app/dist/debian/app/usr/bin/app
   dpkg-deb --build /opt/app/dist/debian/app
   apt-get install -y /opt/app/dist/debian/app.deb
@@ -183,8 +183,8 @@ solve_challenge_3.2() {
   [[ ! -x /opt/app/app ]]
 
   # Passes after solution
-  solve-challenge-1
-  local score="$(get-score)"
+  _solve-challenge-1
+  local score="$(_get-score)"
   sleep 1
   printf 'DEBUG: Score from challenge 1: %s\n' "${score}"
   [[ "${score}" -ge 100 ]]
@@ -199,8 +199,8 @@ solve_challenge_3.2() {
   [[ ! -L /usr/local/bin/run-app ]]
 
   # Passes after solution
-  solve-challenge-2
-  local score="$(get-score)"
+  _solve-challenge-2
+  local score="$(_get-score)"
   sleep 1
   printf 'DEBUG: Score from challenge 2: %s\n' "${score}"
   [[ "${score}" -ge 200 ]] # challenge 1 + 2 score
@@ -213,8 +213,8 @@ solve_challenge_3.2() {
   systemctl is-enabled app.service && return 1
 
   # Passes after solution
-  solve-challenge-3
-  local score="$(get-score)"
+  _solve-challenge-3
+  local score="$(_get-score)"
   sleep 1
   printf 'DEBUG: Score from challenge 3: %s\n' "${score}"
   systemctl is-active app.service || return 1
@@ -229,8 +229,8 @@ solve_challenge_3.2() {
   systemctl is-enabled app-deb.service && return 1
 
   # Passes after solution
-  solve-challenge-4
-  local score="$(get-score)"
+  _solve-challenge-4
+  local score="$(_get-score)"
   sleep 1
   printf 'DEBUG: Score from challenge 4: %s\n' "${score}"
   systemctl is-active app-deb.service || return 1
@@ -243,8 +243,8 @@ solve_challenge_3.2() {
   # [[ ! -f "/home/appuser/challenge_6.md" ]]
 
   # Passes after solution
-  solve-challenge-5
-  local score="$(get-score)"
+  _solve-challenge-5
+  local score="$(_get-score)"
   sleep 1
   printf 'DEBUG: Score from challenge 5: %s\n' "${score}"
   counter=0
@@ -259,19 +259,13 @@ solve_challenge_3.2() {
   # [[ -f "/home/appuser/challenge_6.md" ]]
 }
 
-@test "challenge 3.1" {
-  solve_challenge_3.1
-  chmod 777 /opt/git/carrot-cruncher
-  su - "appuser" -c "pushd /opt/git/carrot-cruncher >/dev/null; git config --global --add safe.directory /opt/git/carrot-cruncher; git fetch"
-}
-
 @test "simulate score accumulation" {
-  solve-challenge-1
+  _solve-challenge-1
   # each of these assignments does NOT increment the score var, but assigning it
   # suppresses the useless output from the first call anyway
-  score="$(get-score)"
-  score="$(get-score)"
-  score="$(get-score)"
+  score="$(_get-score)"
+  score="$(_get-score)"
+  score="$(_get-score)"
   printf 'DEBUG: Score after accumulation: %s\n' "${score}"
   [[ "${score}" -ge 300 ]]
 }

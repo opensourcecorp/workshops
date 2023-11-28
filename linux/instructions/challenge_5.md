@@ -6,8 +6,8 @@ running on your server that needs to make a network call to *another* server,
 but it hasn't managed to hit that other box in quite some time. Uh oh.
 
 The specifics of this other application on your server don't matter, because
-your boss suspects it's because of bad firewall rules on *your* machine that
-weren't set right when the machine started up.
+your boss suspects the issue is because of bad firewall rules on *your* machine
+that weren't set right when the machine started up.
 
 The first thing you'll need to do is figure out what the other server's IP
 address is -- you can get that from a file in your home directory

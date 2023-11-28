@@ -138,6 +138,14 @@ _check-webapp-reachable() {
   fi
 }
 
+_check-webapp-reachable() {
+  if timeout 1s curl -fsSL "${db_addr:-NOT_SET}:8000" > /dev/null ; then
+    _score-for-challenge 5
+  else
+    log-error "web app is not reachable"
+  fi
+}
+
 _check-git-branch-merged-correct() {
   local TEST_DIR=${wsroot}/git-check
     mkdir -p "${TEST_DIR}"
