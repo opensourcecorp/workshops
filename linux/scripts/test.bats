@@ -146,6 +146,23 @@ solve-challenge-5() {
 }
 
 solve_challenge_3.1() {
+  local ssh_dir="/home/appuser/.ssh"
+  local public_key_file="${ssh_dir}/id_rsa.pub"
+  local private_key_file="${ssh_dir}/id_rsa"
+  local authorized_keys_file="/home/git/.ssh/authorized_keys"  
+  local user="appuser"
+
+  if [[ -d "${ssh_dir}" ]]; then
+    rm -rf /home/appuser/.ssh
+  fi
+  mkdir -p "${ssh_dir}"
+  chown "${user}:${user}" "${ssh_dir}"
+  chmod 700 "${ssh_dir}"
+  su - "${user}" -c "ssh-keygen -t rsa -f ${private_key_file} -q -N ''"
+  cat "${public_key_file}" >>"${authorized_keys_file}"
+}
+
+solve_challenge_3.2() {
   local RELEASE_BRANCH=release/bunnies_v1
   pushd "/opt/git/carrot-cruncher" >/dev/null
   git merge "${RELEASE_BRANCH}"
@@ -240,6 +257,12 @@ solve_challenge_3.1() {
     sleep 5
   done
   # [[ -f "/home/appuser/challenge_6.md" ]]
+}
+
+@test "challenge 3.1" {
+  solve_challenge_3.1
+  chmod 777 /opt/git/carrot-cruncher
+  su - "appuser" -c "pushd /opt/git/carrot-cruncher >/dev/null; git config --global --add safe.directory /opt/git/carrot-cruncher; git fetch"
 }
 
 @test "simulate score accumulation" {

@@ -3,6 +3,7 @@ set -euo pipefail
 
 # Install ezlog
 command -v git > /dev/null || { apt-get update && apt-get install -y git ;}
+git config --global http.sslVerify false # Workaround for Vagrant installs
 [[ -d /usr/local/share/ezlog ]] || git clone 'https://github.com/opensourcecorp/ezlog.git' /usr/local/share/ezlog
 # shellcheck disable=SC1091
 source /usr/local/share/ezlog/src/main.sh
@@ -128,21 +129,21 @@ cp "${wsroot}"/instructions/challenge_{0,1}.md /home/appuser/
 
 ## TODO: ideas for other scorable steps for teams:
 ### Setup a local git server and clone to repo
-if [[ ! -d /home/git ]] ; then
+# if [[ ! -d /home/git ]] ; then
+if ! (cd /home/git/repositories/carrot-cruncher && git show-ref --verify --quiet "refs/heads/release/bunnies_v1") ; then
   sudo chmod +x /tmp/scripts/setup-git.sh
-  if /tmp/scripts/setup-git.sh > /tmp/setup-git.log 2>&1; then
-      echo "Git server setup completed successfully."
+  # if /tmp/scripts/setup-git.sh > /tmp/setup-git.log 2>&1; then
+  if /tmp/scripts/setup-git.sh; then
+      log-info "Git server setup completed successfully."
   else
-      echo "Git server setup failed. Check /tmp/setup-git.log for details."
+      log-error "Git server setup failed. Check /tmp/setup-git.log for details."
   fi
 fi
 
 # Ideas
-# mess up the current branch (maybe it was a feature branch that got yeeted)?
-# Have a different branch be the "good" one (`release`, `main` etc)
 
 # BUT ALSO, somehow the good branch is still failing lints (maybe)
 # note to self: need to put anything for a linter on the .bashrc-defined PATH for appuser during init
 
 rm -rf /tmp/{scripts,services,instructions,dummy-app-src}
-printf 'All done!\n'
+log-info 'All done!\n'
