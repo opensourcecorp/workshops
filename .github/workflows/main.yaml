@@ -1,0 +1,22 @@
+name: main
+
+on:
+  push:
+    branches: ['**']
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Go 1.19+
+      uses: actions/setup-go@v4
+      with:
+        go-version: '>=1.19'
+
+    # Linux workshop
+    - name: CI
+      run: 'cd ./linux && bash ./scripts/ci.sh'

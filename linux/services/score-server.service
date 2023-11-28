@@ -1,0 +1,10 @@
+[Unit]
+Description=Score dashboard service for the Linux Workshop
+
+[Service]
+ExecStart=/root/score-server/score-server
+Restart=always
+RestartSec=3s
+
+[Install]
+WantedBy=multi-user.target

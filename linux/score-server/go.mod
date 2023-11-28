@@ -1,4 +1,4 @@
-module github.com/opensourcecorp/workshops/linux/score-fetcher
+module github.com/opensourcecorp/workshops/linux/score-server
 
 go 1.19
 

@@ -1,5 +1,5 @@
-Step 2: Make binary more accessible
-===================================
+Challenge 2: Make binary more accessible
+========================================
 
 You got the binary rebuilt, great work! However, the app is in kind of a weird
 place on the filesystem -- there's nothing *wrong* with apps being under the

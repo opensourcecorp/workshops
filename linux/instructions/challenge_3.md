@@ -1,5 +1,5 @@
-Step 3: App runtime management
-==============================
+Challenge 3: App runtime management
+===================================
 
 Ok great, the app is now available in the right directory! Now that we've got
 that sorted out, we need to see why the app wasn't actually running on the
