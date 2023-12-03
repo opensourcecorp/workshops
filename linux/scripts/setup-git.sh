@@ -61,17 +61,17 @@ function _setup_git_user() {
   # _add_to_known_hosts
   echo $(which git-shell) >>/etc/shells
   chsh --shell "$(command -v /bin/bash)" "${GIT_USER}"
-  # chsh --shell "$(command -v git-shell)" "${GIT_USER}"
 }
 
 function _init_git_repo() {
   log-info "Initializing remote carrot cruncher"
+  rm -rf "${REPO_DIR}
   mkdir -p "${REPO_DIR}"
   pushd "${REPO_DIR}" >/dev/null
-  git config --global init.defaultBranch "${DEFAULT_BRANCH}"
-  git init --bare
+  su - ${GIT_USER} -c "git config --global init.defaultBranch ${DEFAULT_BRANCH}"
   su - ${GIT_USER} -c "git config --global user.email 'bugs@bigbadbunnies.com'"
   su - ${GIT_USER} -c "git config --global user.name 'Bugs Bunny'"
+  su - ${GIT_USER} -c "pushd "${REPO_DIR}" >/dev/null; git init --bare"
   popd >/dev/null
   chown -R "${GIT_USER}:${GIT_USER}" "${REPO_DIR}"
 }
@@ -89,12 +89,14 @@ function _setup_local_clone() {
   git config --global --add safe.directory /opt/git/carrot-cruncher
   pushd "${clone_dir}"
   cp -r "${APP_DIR}"/* .
+  sed -i 's/PrintLine/Println/g' main.go
   su - ${GIT_USER} -c "pushd ${clone_dir}; git add .; git commit -m 'Initial commit'; git push origin"
   popd >/dev/null
 }
 
 function _create_release_branch() {
   local clone_dir="${WORK_DIR}/${REPO_NAME}"
+  local branch_2="v1.0.2-rc-tmp-bugfix-2.0.1"
   pushd "${clone_dir}" >/dev/null
   log-info "setting up release branch"
   su - ${GIT_USER} -c "pushd ${clone_dir}; git checkout -b '${BRANCH_NAME}'"
@@ -104,8 +106,19 @@ function _create_release_branch() {
   rm banking.txt
   su - ${GIT_USER} -c "pushd ${clone_dir}; git add .; git commit -m 'oops did not mean to add that...'"
   su - ${GIT_USER} -c "pushd ${clone_dir}; git push --set-upstream origin '${BRANCH_NAME}'"
-  su - ${GIT_USER} -c "pushd ${clone_dir}; git checkout -b '${DEFAULT_BRANCH}'"
+  su - ${GIT_USER} -c "pushd ${clone_dir}; git checkout '${DEFAULT_BRANCH}'"
+  su - ${GIT_USER} -c "pushd ${clone_dir}; git checkout -b '${branch_2}'"
+  sed -i -e 's/printing/uh/g' -e 's/money/oh/g' -e 's/CHA-CHING/NO-NO-NOOOOO/g' main.go
+  su - ${GIT_USER} -c "pushd ${clone_dir}; git add .; git commit -m 'I think we might be on to something...'"
+  su - ${GIT_USER} -c "pushd ${clone_dir}; git push --set-upstream origin '${branch_2}'"
+  su - ${GIT_USER} -c "pushd ${clone_dir}; git checkout '${DEFAULT_BRANCH}'"
+  su - ${GIT_USER} -c "pushd ${clone_dir}; git branch -D ${BRANCH_NAME} ${branch_2}"
   popd >/dev/null
+}
+
+function _polish_off() {
+  chown -R ${APP_USER}:${APP_USER} /opt/git # git appuser ownership of git directory
+  chsh --shell "$(command -v git-shell)" "${GIT_USER}" # switch Git User to git-shell
 }
 
 function main() {
@@ -113,6 +126,7 @@ function main() {
   _init_git_repo
   _setup_local_clone
   _create_release_branch
+  _polish_off
   log-info "Git server setup is complete."
 }
 

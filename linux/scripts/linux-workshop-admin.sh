@@ -147,22 +147,25 @@ _check-webapp-reachable() {
 }
 
 _check-git-branch-merged-correct() {
-  local TEST_DIR=${wsroot}/git-check
-    mkdir -p "${TEST_DIR}"
-    pushd "${TEST_DIR}" > /dev/null
-    # Clone if the directory is empty
-    if [ ! "$(ls -A ${TEST_DIR})" ]; then
-        git clone "ssh://appuser@localhost:2332/home/git/repositories/carrot-cruncher.git" .
-    fi
-    git fetch
-    git checkout main
-    git pull origin main
-    if grep -q carrot main.go; then
-    score-for-step 3.1
-    else
-        log-error "feature branch not merged into main.\n"
-    fi
-    popd > /dev/null
+  local test_dir=${wsroot}/git-check
+  local repo_dir="/srv/git/repositories/carrot-cruncher.git"
+  if [ "$(git rev-parse master)" = "$(git rev-parse release/bunnies_v1)" ] then
+    log-info "commits match"
+  else
+    log-error "commits don't match"
+  fi
+  pushd "${test_dir}" > /dev/null
+  # Clone if the directory is empty
+  if [ ! "$(ls -A ${test_dir})" ]; then
+      su - git -c "GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=accept-new' git clone 'git@localhost:${repo_dir}' ${test_dir}"
+  fi
+  su - git -c "git fetch; git checkout main; git pull origin main"
+  if grep -q carrot main.go; then
+    _score-for-challenge 7
+  else
+      log-error "feature branch not merged correctly into main.\n"
+  fi
+  popd > /dev/null
 }
 
 ###
