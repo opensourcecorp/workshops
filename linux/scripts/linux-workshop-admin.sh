@@ -138,11 +138,12 @@ _check-webapp-reachable() {
   fi
 }
 
-_check-webapp-reachable() {
-  if timeout 1s curl -fsSL "${db_addr:-NOT_SET}:8000" > /dev/null ; then
-    _score-for-challenge 5
+_check-ssh-setup() {
+  if su - appuser -c "cd /tmp/ && git clone git@localhost:/srv/git/repositories/carrot-cruncher.git"; then
+    rm -rf /tmp/carrot-cruncher
+    _score-for-challenge 7
   else
-    log-error "web app is not reachable"
+    log-error "SSH Keys not setup successfully"
   fi
 }
 
@@ -161,7 +162,7 @@ _check-git-branch-merged-correct() {
   fi
   su - git -c "git fetch; git checkout main; git pull origin main"
   if grep -q carrot main.go; then
-    _score-for-challenge 7
+    _score-for-challenge 8
   else
       log-error "feature branch not merged correctly into main.\n"
   fi

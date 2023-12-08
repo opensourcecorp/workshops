@@ -168,13 +168,12 @@ _solve-challenge-7() {
 
 _solve-challenge-8() {
   _solve-challenge-7
-  set -eux pipefail
   local user="appuser"
   local RELEASE_BRANCH=release/bunnies_v1
   pushd "/opt/git/carrot-cruncher" >/dev/null
-  su - "${user}" -c "git pull ${RELEASE_BRANCH}"
-  su - "${user}" -c "git merge ${RELEASE_BRANCH}"
-  su - "${user}" -c "git push origin main"
+  su - "${user}" -c "pushd "/opt/git/carrot-cruncher" >/dev/null; git checkout ${RELEASE_BRANCH} && git pull"
+  su - "${user}" -c "pushd "/opt/git/carrot-cruncher" >/dev/null; git checkout main && git merge ${RELEASE_BRANCH}"
+  su - "${user}" -c "pushd "/opt/git/carrot-cruncher" >/dev/null; git push origin main"
   popd >/dev/null
 }
 
@@ -271,7 +270,7 @@ _solve-challenge-8() {
   _solve-challenge-7
   chmod 777 /opt/git/carrot-cruncher
   su - "appuser" -c "pushd /opt/git/carrot-cruncher >/dev/null; git config --global --add safe.directory /opt/git/carrot-cruncher; git fetch"
-  # [[ -f "/home/appuser/challenge_8.md" ]]
+  [[ -f "/home/appuser/challenge_8.md" ]]
 }
 
 @test "challenge 8" {

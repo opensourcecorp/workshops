@@ -65,15 +65,15 @@ function _setup_git_user() {
 
 function _init_git_repo() {
   log-info "Initializing remote carrot cruncher"
-  rm -rf "${REPO_DIR}
+  rm -rf "${REPO_DIR}"
   mkdir -p "${REPO_DIR}"
+  chown -R "${GIT_USER}:${GIT_USER}" "${REPO_DIR}"
   pushd "${REPO_DIR}" >/dev/null
   su - ${GIT_USER} -c "git config --global init.defaultBranch ${DEFAULT_BRANCH}"
   su - ${GIT_USER} -c "git config --global user.email 'bugs@bigbadbunnies.com'"
   su - ${GIT_USER} -c "git config --global user.name 'Bugs Bunny'"
   su - ${GIT_USER} -c "pushd "${REPO_DIR}" >/dev/null; git init --bare"
   popd >/dev/null
-  chown -R "${GIT_USER}:${GIT_USER}" "${REPO_DIR}"
 }
 
 function _setup_local_clone() {
@@ -117,8 +117,16 @@ function _create_release_branch() {
 }
 
 function _polish_off() {
-  chown -R ${APP_USER}:${APP_USER} /opt/git # git appuser ownership of git directory
   chsh --shell "$(command -v git-shell)" "${GIT_USER}" # switch Git User to git-shell
+  [[ ! -d /home/git/git-shell-commands ]] || mkdir -m 777 /home/git/git-shell-commands
+  cat >/home/git/git-shell-commands/no-interactive-login <<\EOF
+#!/bin/sh
+printf '%s\n' "Hi! You've successfully authenticated, but we do not"
+printf '%s\n' "provide interactive shell access."
+exit 128
+EOF
+  chmod 777 /home/git/git-shell-commands/no-interactive-login
+  chown -R ${APP_USER}:${APP_USER} /opt/git # git appuser ownership of git directory
 }
 
 function main() {

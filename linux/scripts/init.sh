@@ -127,16 +127,14 @@ log-info 'Dumping the first instruction(s) to the appuser homedir'
 cp "${wsroot}"/instructions/challenge_{0,1}.md /home/appuser/
 
 
-## TODO: ideas for other scorable steps for teams:
 ### Setup a local git server and clone to repo
-# if [[ ! -d /home/git ]] ; then
-if ! (cd /home/git/repositories/carrot-cruncher && git show-ref --verify --quiet "refs/heads/release/bunnies_v1") ; then
+if ! (cd /srv/git/repositories/carrot-cruncher && git show-ref --verify --quiet "refs/heads/release/bunnies_v1") ; then
   sudo chmod +x /tmp/scripts/setup-git.sh
   # if /tmp/scripts/setup-git.sh > /tmp/setup-git.log 2>&1; then
   if /tmp/scripts/setup-git.sh; then
       log-info "Git server setup completed successfully."
   else
-      log-error "Git server setup failed. Check /tmp/setup-git.log for details."
+      log-error "Git server setup failed."
   fi
 fi
 
@@ -146,4 +144,4 @@ fi
 # note to self: need to put anything for a linter on the .bashrc-defined PATH for appuser during init
 
 rm -rf /tmp/{scripts,services,instructions,dummy-app-src}
-log-info 'All done!\n'
+log-info 'All done!'
