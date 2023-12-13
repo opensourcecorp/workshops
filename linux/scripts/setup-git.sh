@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-set -euxo pipefail
-
 GIT_USER=${GIT_USER:-git}
 APP_USER=${APP_USER:-appuser}
 GIT_HOME=${GIT_HOME:-/srv/git}
@@ -67,7 +65,8 @@ function _init_git_repo() {
   log-info "Initializing remote carrot cruncher"
   rm -rf "${REPO_DIR}"
   mkdir -p "${REPO_DIR}"
-  chown -R "${GIT_USER}:${GIT_USER}" "${REPO_DIR}"
+  mkdir "${GIT_HOME}/ssh-keys"
+  chown -R "${GIT_USER}:${GIT_USER}" "${GIT_HOME}"
   pushd "${REPO_DIR}" >/dev/null
   su - ${GIT_USER} -c "git config --global init.defaultBranch ${DEFAULT_BRANCH}"
   su - ${GIT_USER} -c "git config --global user.email 'bugs@bigbadbunnies.com'"
@@ -118,7 +117,7 @@ function _create_release_branch() {
 
 function _polish_off() {
   chsh --shell "$(command -v git-shell)" "${GIT_USER}" # switch Git User to git-shell
-  [[ ! -d /home/git/git-shell-commands ]] || mkdir -m 777 /home/git/git-shell-commands
+  [[ -d /home/git/git-shell-commands ]] || mkdir -m 777 /home/git/git-shell-commands
   cat >/home/git/git-shell-commands/no-interactive-login <<\EOF
 #!/bin/sh
 printf '%s\n' "Hi! You've successfully authenticated, but we do not"

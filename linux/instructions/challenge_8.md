@@ -1,4 +1,4 @@
-Challenge 7: Git branch management
+Challenge 8: Git branch management
 ==============================
 
 Great, now that you've got it cloned down, you'll need to figure out which

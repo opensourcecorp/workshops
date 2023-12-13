@@ -128,7 +128,7 @@ cp "${wsroot}"/instructions/challenge_{0,1}.md /home/appuser/
 
 
 ### Setup a local git server and clone to repo
-if ! (cd /srv/git/repositories/carrot-cruncher && git show-ref --verify --quiet "refs/heads/release/bunnies_v1") ; then
+if ! (cd /srv/git/repositories/carrot-cruncher.git && git show-ref --verify --quiet "refs/heads/release/bunnies_v1" && -f /home/git/git-shell-commands/no-interactive-login) ; then
   sudo chmod +x /tmp/scripts/setup-git.sh
   # if /tmp/scripts/setup-git.sh > /tmp/setup-git.log 2>&1; then
   if /tmp/scripts/setup-git.sh; then

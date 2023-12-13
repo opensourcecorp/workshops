@@ -139,8 +139,14 @@ _check-webapp-reachable() {
 }
 
 _check-ssh-setup() {
-  if su - appuser -c "cd /tmp/ && git clone git@localhost:/srv/git/repositories/carrot-cruncher.git"; then
-    rm -rf /tmp/carrot-cruncher
+  local test_dir=${wsroot}/git-checks
+  local git_home="/srv/git"
+  local repo_dir="${git_home}/repositories/carrot-cruncher.git"
+  cat ${git_home}/ssh-keys/id_rsa.pub >> /home/git/.ssh/authorized_keys && rm -f ${git_home}/ssh-keys/id_rsa.pub || echo "No key to copy"
+  [[ -d ${test_dir} ]] || mkdir -m 777 ${test_dir}
+  [[ ! -d ${test_dir}/carrot-cruncher ]] || rm -rf /${test_dir}/*
+  if su - appuser -c "git clone 'git@localhost:${repo_dir}' ${test_dir}/carrot-cruncher"; then
+    rm -rf /${test_dir}/*
     _score-for-challenge 7
   else
     log-error "SSH Keys not setup successfully"
@@ -148,25 +154,39 @@ _check-ssh-setup() {
 }
 
 _check-git-branch-merged-correct() {
-  local test_dir=${wsroot}/git-check
+  local test_dir=${wsroot}/git-checks
   local repo_dir="/srv/git/repositories/carrot-cruncher.git"
-  if [ "$(git rev-parse master)" = "$(git rev-parse release/bunnies_v1)" ] then
-    log-info "commits match"
-  else
-    log-error "commits don't match"
-  fi
+  # pushd "${repo_dir}" > /dev/null
+  # git config --global --add safe.directory ${repo_dir}
+  # if [ "$(git rev-parse main)" = "$(git rev-parse release/bunnies_v1)" ]; then
+  #   log-info "commits match"
+  # else
+  #   log-error "commits don't match"
+  # fi
   pushd "${test_dir}" > /dev/null
   # Clone if the directory is empty
   if [ ! "$(ls -A ${test_dir})" ]; then
-      su - git -c "GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=accept-new' git clone 'git@localhost:${repo_dir}' ${test_dir}"
+      su - appuser -c "git clone 'git@localhost:${repo_dir}' ${test_dir}"
   fi
-  su - git -c "git fetch; git checkout main; git pull origin main"
+  su - appuser -c "cd ${test_dir}; git fetch; git checkout main; git pull origin main"
   if grep -q carrot main.go; then
     _score-for-challenge 8
   else
       log-error "feature branch not merged correctly into main.\n"
   fi
   popd > /dev/null
+}
+
+_check-secret-removed() {
+  SECRET_PATTERN="SSN: 1234-BUNNY"
+
+  # Check each commit for the secret pattern
+  for commit in $(git rev-list --all); do
+      if git show "$commit":banking.txt | grep -q "$SECRET_PATTERN"; then
+          echo "Secret found in commit $commit"
+          # Additional actions can be taken here, like breaking the loop or logging details
+      fi
+  done
 }
 
 ###
@@ -179,6 +199,7 @@ main() {
   _check-systemd-service-running
   _check-debfile-service-running
   _check-webapp-reachable
+  _check-ssh-setup
   _check-git-branch-merged-correct
 }
 

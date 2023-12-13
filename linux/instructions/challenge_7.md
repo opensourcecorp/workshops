@@ -10,6 +10,10 @@ main. See if you can figure out how to get it up and running.
 
 The name of the app is carrot-cruncher. The last dev got the repo cloned somewhere, 
 but they never said where... hopefully you'll able to find it. When you do, supposedly
-there was a new branch pushed to the remote repo, so you'll need to figure out how to
-authenticate to that repo, clone the remote branches down, then you'll be off to 
-the races... Goodluck!
+there was a new working branch pushed to the remote repo, so you'll need to figure out how to
+authenticate to that repo.
+
+There was a note in confluence about a process that picks up keys in the local git server.
+Supposedly all you had to do was copy some file to the 'ssh-keys/' directory near all the
+repos and git takes it from there? So I gues try that? Then clone the remote branches down, 
+then you'll be off to the races... Goodluck!

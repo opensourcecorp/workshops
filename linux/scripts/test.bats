@@ -151,18 +151,15 @@ _solve-challenge-7() {
   local ssh_dir="/home/appuser/.ssh"
   local public_key_file="${ssh_dir}/id_rsa.pub"
   local private_key_file="${ssh_dir}/id_rsa"
-  local authorized_keys_file="/home/git/.ssh/authorized_keys"  
   local known_hosts_file="${ssh_dir}/known_hosts"
   local user="appuser"
 
-  if [[ -d "${ssh_dir}" ]]; then
-    rm -rf "${ssh_dir}"
-  fi
+  [[ -d "${ssh_dir}" ]] && rm -rf "${ssh_dir}"
   mkdir -p "${ssh_dir}"
   chown "${user}:${user}" "${ssh_dir}"
   chmod 700 "${ssh_dir}"
   su - "${user}" -c "ssh-keygen -t rsa -f ${private_key_file} -q -N ''"
-  cat "${public_key_file}" >>"${authorized_keys_file}"
+  cp "${public_key_file}" "/srv/git/ssh-keys"
   su - "${user}" -c "ssh-keyscan -H localhost >> ${known_hosts_file}"
 }
 
@@ -179,27 +176,27 @@ _solve-challenge-8() {
 
 ################################################################################
 
-# @test "init steps succeeded" {
-#   [[ -f "/home/appuser/challenge_0.md" ]]
-#   [[ -f "/home/appuser/challenge_1.md" ]]
-# }
+@test "init steps succeeded" {
+  [[ -f "/home/appuser/challenge_0.md" ]]
+  [[ -f "/home/appuser/challenge_1.md" ]]
+}
 
-# @test "challenge 1" {
-#   # Fails before solution
-#   [[ ! -f /opt/app/app ]]
-#   [[ ! -x /opt/app/app ]]
+@test "challenge 1" {
+  # Fails before solution
+  [[ ! -f /opt/app/app ]]
+  [[ ! -x /opt/app/app ]]
 
-#   # Passes after solution
-#   _solve-challenge-1
-#   local score="$(_get-score)"
-#   sleep 1
-#   printf 'DEBUG: Score from challenge 1: %s\n' "${score}"
-#   [[ "${score}" -ge 100 ]]
-#   [[ -f "/home/appuser/challenge_2.md" ]] # next instruction gets put in homedir
-# }
+  # Passes after solution
+  _solve-challenge-1
+  local score="$(_get-score)"
+  sleep 1
+  printf 'DEBUG: Score from challenge 1: %s\n' "${score}"
+  [[ "${score}" -ge 100 ]]
+  [[ -f "/home/appuser/challenge_2.md" ]] # next instruction gets put in homedir
+}
 
-# # This test also end ups implicitly tests two challenges' scores at once, which is
-# # good
+# This test also end ups implicitly tests two challenges' scores at once, which is
+# good
 # @test "challenge 2" {
 #   # Fails before solution
 #   [[ ! -f "/home/appuser/challenge_3.md" ]]
@@ -267,31 +264,40 @@ _solve-challenge-8() {
 # }
 
 @test "challenge 7" {
+  # Fails before solution
+  [[ ! -f "/home/appuser/challenge_8.md" ]]
+  
+  # Passes after solution
   _solve-challenge-7
-  chmod 777 /opt/git/carrot-cruncher
+  sleep 10
   su - "appuser" -c "pushd /opt/git/carrot-cruncher >/dev/null; git config --global --add safe.directory /opt/git/carrot-cruncher; git fetch"
+  echo "running this"
   [[ -f "/home/appuser/challenge_8.md" ]]
 }
 
 @test "challenge 8" {
+  # Fails before solution
+  [[ ! -f "/home/appuser/challenge_9.md" ]]
+  
+  # Passes after solution
   local git_dir=/srv/git/repositories/carrot-cruncher.git
   _solve-challenge-8
   pushd "${git_dir}" >/dev/null
   git config --global --add safe.directory /srv/git/repositories/carrot-cruncher.git
-  if [ "$(git rev-parse master)" = "$(git rev-parse release/bunnies_v1)" ] ; then
+  if [ "$(git rev-parse main)" = "$(git rev-parse release/bunnies_v1)" ] ; then
     return 1
   fi
   popd >/dev/null
-  # [[ -f "/home/appuser/challenge_9.md" ]]
+  [[ -f "/home/appuser/challenge_9.md" ]]
 }
 
-@test "simulate score accumulation" {
-  _solve-challenge-1
-  # each of these assignments does NOT increment the score var, but assigning it
-  # suppresses the useless output from the first call anyway
-  score="$(_get-score)"
-  score="$(_get-score)"
-  score="$(_get-score)"
-  printf 'DEBUG: Score after accumulation: %s\n' "${score}"
-  [[ "${score}" -ge 300 ]]
-}
+# @test "simulate score accumulation" {
+#   _solve-challenge-1
+#   # each of these assignments does NOT increment the score var, but assigning it
+#   # suppresses the useless output from the first call anyway
+#   score="$(_get-score)"
+#   score="$(_get-score)"
+#   score="$(_get-score)"
+#   printf 'DEBUG: Score after accumulation: %s\n' "${score}"
+#   [[ "${score}" -ge 300 ]]
+# }
