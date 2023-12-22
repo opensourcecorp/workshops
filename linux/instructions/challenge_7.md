@@ -1,19 +1,7 @@
-Challenge 7: Git SSH Setup
+Challenge 7: Git branch management
 ==============================
 
-We just got hired by a very famous movie star (who's name may not be disclosed)
-to create a new version of our app for their specific use case. Our lead
-engineers were working on putting together the new app, but they mysteriously
-dissappeared while on a golfing trip a few weeks past. We were told that the
-code was about ready to deploy, just hadn't gotten the chance to merge it into
-main. See if you can figure out how to get it up and running.
-
-The name of the app is carrot-cruncher. The last dev got the repo cloned somewhere, 
-but they never said where... hopefully you'll able to find it. When you do, supposedly
-there was a new working branch pushed to the remote repo, so you'll need to figure out how to
-authenticate to that repo.
-
-There was a note in confluence about a process that picks up keys in the local git server.
-Supposedly all you had to do was copy some file to the 'ssh-keys/' directory near all the
-repos and git takes it from there? So I gues try that? Then clone the remote branches down, 
-then you'll be off to the races... Goodluck!
+Great, now that you've got it cloned down, you'll need to figure out which
+of those remote branches have the correct changes it get it merged in ASAP.
+The working version should be obvious... or so we were told... So we recommend
+you just try running the the different branches and see which one fits. 

@@ -159,7 +159,7 @@ _solve-challenge-7() {
   chown "${user}:${user}" "${ssh_dir}"
   chmod 700 "${ssh_dir}"
   su - "${user}" -c "ssh-keygen -t rsa -f ${private_key_file} -q -N ''"
-  cp "${public_key_file}" "/srv/git/ssh-keys"
+  cp "${public_key_file}" "/srv/git/ssh-keys/"
   su - "${user}" -c "ssh-keyscan -H localhost >> ${known_hosts_file}"
 }
 
@@ -271,7 +271,6 @@ _solve-challenge-8() {
   _solve-challenge-7
   sleep 10
   su - "appuser" -c "pushd /opt/git/carrot-cruncher >/dev/null; git config --global --add safe.directory /opt/git/carrot-cruncher; git fetch"
-  echo "running this"
   [[ -f "/home/appuser/challenge_8.md" ]]
 }
 

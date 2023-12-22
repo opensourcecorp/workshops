@@ -142,12 +142,12 @@ _check-ssh-setup() {
   local test_dir=${wsroot}/git-checks
   local git_home="/srv/git"
   local repo_dir="${git_home}/repositories/carrot-cruncher.git"
-  cat ${git_home}/ssh-keys/id_rsa.pub >> /home/git/.ssh/authorized_keys && rm -f ${git_home}/ssh-keys/id_rsa.pub || echo "No key to copy"
+  cat ${git_home}/ssh-keys/id_rsa.pub >> /home/git/.ssh/authorized_keys && rm -f ${git_home}/ssh-keys/id_rsa.pub || log-error "No key to copy"
   [[ -d ${test_dir} ]] || mkdir -m 777 ${test_dir}
   [[ ! -d ${test_dir}/carrot-cruncher ]] || rm -rf /${test_dir}/*
   if su - appuser -c "git clone 'git@localhost:${repo_dir}' ${test_dir}/carrot-cruncher"; then
     rm -rf /${test_dir}/*
-    _score-for-challenge 7
+    _score-for-challenge 6
   else
     log-error "SSH Keys not setup successfully"
   fi
@@ -170,7 +170,7 @@ _check-git-branch-merged-correct() {
   fi
   su - appuser -c "cd ${test_dir}; git fetch; git checkout main; git pull origin main"
   if grep -q carrot main.go; then
-    _score-for-challenge 8
+    _score-for-challenge 7
   else
       log-error "feature branch not merged correctly into main.\n"
   fi

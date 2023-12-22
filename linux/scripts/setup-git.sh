@@ -38,6 +38,12 @@ function _setup_ssh_keys_for_git_user() {
   fi
   chmod 600 "${authorized_keys_file}"
   chown "${GIT_USER}:${GIT_USER}" "${authorized_keys_file}"
+  [[ -d /home/${APP_USER}/.ssh ]] || mkdir /home/${APP_USER}/.ssh
+  cat <<EOF >/home/${APP_USER}/.ssh/config
+HOST localhost
+      USER ${GIT_USER}
+      PORT ${SSH_PORT}
+EOF
 }
 
 function _add_to_known_hosts() {
@@ -65,7 +71,7 @@ function _init_git_repo() {
   log-info "Initializing remote carrot cruncher"
   rm -rf "${REPO_DIR}"
   mkdir -p "${REPO_DIR}"
-  mkdir "${GIT_HOME}/ssh-keys"
+  [[ -d "${GIT_HOME}/ssh-keys" ]] || mkdir "${GIT_HOME}/ssh-keys"
   chown -R "${GIT_USER}:${GIT_USER}" "${GIT_HOME}"
   pushd "${REPO_DIR}" >/dev/null
   su - ${GIT_USER} -c "git config --global init.defaultBranch ${DEFAULT_BRANCH}"
