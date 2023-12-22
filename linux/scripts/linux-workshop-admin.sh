@@ -142,7 +142,7 @@ _check-ssh-setup() {
   local test_dir=${wsroot}/git-checks
   local git_home="/srv/git"
   local repo_dir="${git_home}/repositories/carrot-cruncher.git"
-  cat ${git_home}/ssh-keys/id_rsa.pub >> /home/git/.ssh/authorized_keys && rm -f ${git_home}/ssh-keys/id_rsa.pub || log-error "No key to copy"
+  cat ${git_home}/ssh-keys/id_rsa.pub >> /home/git/.ssh/authorized_keys && rm -f ${git_home}/ssh-keys/id_rsa.pub || log-warn "No key to copy"
   [[ -d ${test_dir} ]] || mkdir -m 777 ${test_dir}
   [[ ! -d ${test_dir}/carrot-cruncher ]] || rm -rf /${test_dir}/*
   if su - appuser -c "git clone 'git@localhost:${repo_dir}' ${test_dir}/carrot-cruncher"; then

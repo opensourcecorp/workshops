@@ -165,13 +165,16 @@ _solve-challenge-7() {
 
 _solve-challenge-8() {
   _solve-challenge-7
+  sleep 5 # give time for ssh key to copy
   local user="appuser"
   local RELEASE_BRANCH=release/bunnies_v1
-  pushd "/opt/git/carrot-cruncher" >/dev/null
-  su - "${user}" -c "pushd "/opt/git/carrot-cruncher" >/dev/null; git checkout ${RELEASE_BRANCH} && git pull"
-  su - "${user}" -c "pushd "/opt/git/carrot-cruncher" >/dev/null; git checkout main && git merge ${RELEASE_BRANCH}"
-  su - "${user}" -c "pushd "/opt/git/carrot-cruncher" >/dev/null; git push origin main"
-  popd >/dev/null
+  su - "${user}" -c "pushd /tmp >/dev/null; \\
+  git clone git@localhost:/srv/git/repositories/carrot-cruncher.git && \\
+  pushd carrot-cruncher >/dev/null && \\
+  git merge origin/${RELEASE_BRANCH} && \\
+  git push origin main && \\
+  popd >/dev/null && \\
+  rm -rf /tmp/carrot-cruncher"
 }
 
 ################################################################################
@@ -197,106 +200,110 @@ _solve-challenge-8() {
 
 # This test also end ups implicitly tests two challenges' scores at once, which is
 # good
-# @test "challenge 2" {
-#   # Fails before solution
-#   [[ ! -f "/home/appuser/challenge_3.md" ]]
-#   [[ ! -L /usr/local/bin/run-app ]]
+@test "challenge 2" {
+  # Fails before solution
+  [[ ! -f "/home/appuser/challenge_3.md" ]]
+  [[ ! -L /usr/local/bin/run-app ]]
 
-#   # Passes after solution
-#   _solve-challenge-2
-#   local score="$(_get-score)"
-#   sleep 1
-#   printf 'DEBUG: Score from challenge 2: %s\n' "${score}"
-#   [[ "${score}" -ge 200 ]] # challenge 1 + 2 score
-#   [[ -f "/home/appuser/challenge_3.md" ]]
-# }
+  # Passes after solution
+  _solve-challenge-2
+  local score="$(_get-score)"
+  sleep 1
+  printf 'DEBUG: Score from challenge 2: %s\n' "${score}"
+  [[ "${score}" -ge 200 ]] # challenge 1 + 2 score
+  [[ -f "/home/appuser/challenge_3.md" ]]
+}
 
-# @test "challenge 3" {
-#   # Fails before solution
-#   systemctl is-active app.service && return 1
-#   systemctl is-enabled app.service && return 1
+@test "challenge 3" {
+  # Fails before solution
+  systemctl is-active app.service && return 1
+  systemctl is-enabled app.service && return 1
 
-#   # Passes after solution
-#   _solve-challenge-3
-#   local score="$(_get-score)"
-#   sleep 1
-#   printf 'DEBUG: Score from challenge 3: %s\n' "${score}"
-#   systemctl is-active app.service || return 1
-#   systemctl is-enabled app.service || return 1
-#   [[ -f "/home/appuser/challenge_4.md" ]]
-# }
+  # Passes after solution
+  _solve-challenge-3
+  local score="$(_get-score)"
+  sleep 1
+  printf 'DEBUG: Score from challenge 3: %s\n' "${score}"
+  systemctl is-active app.service || return 1
+  systemctl is-enabled app.service || return 1
+  [[ -f "/home/appuser/challenge_4.md" ]]
+}
 
-# @test "challenge 4" {
-#   # Fails before solution
-#   [[ ! -f "/home/appuser/challenge_5.md" ]]
-#   systemctl is-active app-deb.service && return 1
-#   systemctl is-enabled app-deb.service && return 1
+@test "challenge 4" {
+  # Fails before solution
+  [[ ! -f "/home/appuser/challenge_5.md" ]]
+  systemctl is-active app-deb.service && return 1
+  systemctl is-enabled app-deb.service && return 1
 
-#   # Passes after solution
-#   _solve-challenge-4
-#   local score="$(_get-score)"
-#   sleep 1
-#   printf 'DEBUG: Score from challenge 4: %s\n' "${score}"
-#   systemctl is-active app-deb.service || return 1
-#   systemctl is-enabled app-deb.service || return 1
-#   [[ -f "/home/appuser/challenge_5.md" ]]
-# }
+  # Passes after solution
+  _solve-challenge-4
+  local score="$(_get-score)"
+  sleep 1
+  printf 'DEBUG: Score from challenge 4: %s\n' "${score}"
+  systemctl is-active app-deb.service || return 1
+  systemctl is-enabled app-deb.service || return 1
+  [[ -f "/home/appuser/challenge_5.md" ]]
+}
 
-# @test "challenge 5" {
-#   # Fails before solution
-#   # [[ ! -f "/home/appuser/challenge_6.md" ]]
+@test "challenge 5" {
+  # Fails before solution
+  # [[ ! -f "/home/appuser/challenge_6.md" ]]
 
-#   # Passes after solution
-#   _solve-challenge-5
-#   local score="$(_get-score)"
-#   sleep 1
-#   printf 'DEBUG: Score from challenge 5: %s\n' "${score}"
-#   counter=0
-#   until timeout 1s curl -fsSL "${db_addr}:8000" ; do
-#     printf 'Web app not reachable, trying again...\n' >&2
-#     counter="$((counter + 1))"
-#     if [[ "${counter}" -ge 30 ]] ; then
-#       return 1
-#     fi
-#     sleep 5
-#   done
-#   # [[ -f "/home/appuser/challenge_6.md" ]]
-# }
+  # Passes after solution
+  _solve-challenge-5
+  local score="$(_get-score)"
+  sleep 1
+  printf 'DEBUG: Score from challenge 5: %s\n' "${score}"
+  counter=0
+  until timeout 1s curl -fsSL "${db_addr}:8000" ; do
+    printf 'Web app not reachable, trying again...\n' >&2
+    counter="$((counter + 1))"
+    if [[ "${counter}" -ge 30 ]] ; then
+      return 1
+    fi
+    sleep 5
+  done
+  # [[ -f "/home/appuser/challenge_6.md" ]]
+}
 
 @test "challenge 7" {
   # Fails before solution
-  [[ ! -f "/home/appuser/challenge_8.md" ]]
+  [[ ! -f "/home/appuser/challenge_7.md" ]]
   
   # Passes after solution
   _solve-challenge-7
   sleep 10
   su - "appuser" -c "pushd /opt/git/carrot-cruncher >/dev/null; git config --global --add safe.directory /opt/git/carrot-cruncher; git fetch"
-  [[ -f "/home/appuser/challenge_8.md" ]]
+  [[ -f "/home/appuser/challenge_7.md" ]]
 }
 
-@test "challenge 8" {
-  # Fails before solution
-  [[ ! -f "/home/appuser/challenge_9.md" ]]
+# @test "challenge 8" {
+#   # Fails before solution
+#   [[ ! -f "/home/appuser/challenge_8.md" ]]
   
-  # Passes after solution
-  local git_dir=/srv/git/repositories/carrot-cruncher.git
-  _solve-challenge-8
-  pushd "${git_dir}" >/dev/null
-  git config --global --add safe.directory /srv/git/repositories/carrot-cruncher.git
-  if [ "$(git rev-parse main)" = "$(git rev-parse release/bunnies_v1)" ] ; then
-    return 1
-  fi
-  popd >/dev/null
-  [[ -f "/home/appuser/challenge_9.md" ]]
-}
-
-# @test "simulate score accumulation" {
-#   _solve-challenge-1
-#   # each of these assignments does NOT increment the score var, but assigning it
-#   # suppresses the useless output from the first call anyway
-#   score="$(_get-score)"
-#   score="$(_get-score)"
-#   score="$(_get-score)"
-#   printf 'DEBUG: Score after accumulation: %s\n' "${score}"
-#   [[ "${score}" -ge 300 ]]
+#   # Passes after solution
+#   local git_dir=/srv/git/repositories/carrot-cruncher.git
+#   local backup_dir=/tmp/git.backup/
+#   mkdir ${backup_dir} && cp -r ${git_dir}/* "${backup_dir}/"
+#   _solve-challenge-8
+#   pushd "${git_dir}" >/dev/null
+#   git config --global --add safe.directory ${git_dir}
+#   if [ ! "$(git rev-parse main)" = "$(git rev-parse release/bunnies_v1)" ] ; then
+#     return 1
+#   fi
+#   sleep 5
+#   popd >/dev/null
+#   rm -rf ${git_dir}/* && cp -r ${backup_dir}/* ${git_dir}/
+#   [[ -f "/home/appuser/challenge_8.md" ]]
 # }
+
+@test "simulate score accumulation" {
+  _solve-challenge-1
+  # each of these assignments does NOT increment the score var, but assigning it
+  # suppresses the useless output from the first call anyway
+  score="$(_get-score)"
+  score="$(_get-score)"
+  score="$(_get-score)"
+  printf 'DEBUG: Score after accumulation: %s\n' "${score}"
+  [[ "${score}" -ge 300 ]]
+}
