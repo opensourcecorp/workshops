@@ -135,6 +135,7 @@ module "team_servers" {
   EOF
 
   tags = local.tags
+  iam_instance_profile = aws_iam_instance_profile.this.id
 }
 
 resource "aws_key_pair" "main" {
