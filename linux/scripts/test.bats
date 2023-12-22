@@ -247,7 +247,7 @@ _solve-challenge-8() {
 
 @test "challenge 5" {
   # Fails before solution
-  # [[ ! -f "/home/appuser/challenge_6.md" ]]
+  [[ ! -f "/home/appuser/challenge_6.md" ]]
 
   # Passes after solution
   _solve-challenge-5
@@ -263,13 +263,13 @@ _solve-challenge-8() {
     fi
     sleep 5
   done
-  # [[ -f "/home/appuser/challenge_6.md" ]]
+  [[ -f "/home/appuser/challenge_6.md" ]]
 }
 
-@test "challenge 7" {
+@test "challenge 6" {
   # Fails before solution
   [[ ! -f "/home/appuser/challenge_7.md" ]]
-  
+
   # Passes after solution
   _solve-challenge-7
   sleep 10
@@ -277,10 +277,10 @@ _solve-challenge-8() {
   [[ -f "/home/appuser/challenge_7.md" ]]
 }
 
-# @test "challenge 8" {
+# @test "challenge 7" {
 #   # Fails before solution
 #   [[ ! -f "/home/appuser/challenge_8.md" ]]
-  
+
 #   # Passes after solution
 #   local git_dir=/srv/git/repositories/carrot-cruncher.git
 #   local backup_dir=/tmp/git.backup/
