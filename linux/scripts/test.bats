@@ -147,7 +147,7 @@ _solve-challenge-5() {
   ufw allow out 8000
 }
 
-_solve-challenge-7() {
+_solve-challenge-6() {
   local ssh_dir="/home/appuser/.ssh"
   local public_key_file="${ssh_dir}/id_rsa.pub"
   local private_key_file="${ssh_dir}/id_rsa"
@@ -163,8 +163,8 @@ _solve-challenge-7() {
   su - "${user}" -c "ssh-keyscan -H localhost >> ${known_hosts_file}"
 }
 
-_solve-challenge-8() {
-  _solve-challenge-7
+_solve-challenge-7() {
+  _solve-challenge-6
   sleep 5 # give time for ssh key to copy
   local user="appuser"
   local RELEASE_BRANCH=release/bunnies_v1
@@ -271,31 +271,34 @@ _solve-challenge-8() {
   [[ ! -f "/home/appuser/challenge_7.md" ]]
 
   # Passes after solution
-  _solve-challenge-7
+  _solve-challenge-6
   sleep 10
   su - "appuser" -c "pushd /opt/git/carrot-cruncher >/dev/null; git config --global --add safe.directory /opt/git/carrot-cruncher; git fetch"
   [[ -f "/home/appuser/challenge_7.md" ]]
 }
 
-# @test "challenge 7" {
-#   # Fails before solution
-#   [[ ! -f "/home/appuser/challenge_8.md" ]]
+@test "challenge 7" {
+  # Fails before solution
+  [[ ! -f "/home/appuser/challenge_8.md" ]]
 
-#   # Passes after solution
-#   local git_dir=/srv/git/repositories/carrot-cruncher.git
-#   local backup_dir=/tmp/git.backup/
-#   mkdir ${backup_dir} && cp -r ${git_dir}/* "${backup_dir}/"
-#   _solve-challenge-8
-#   pushd "${git_dir}" >/dev/null
-#   git config --global --add safe.directory ${git_dir}
-#   if [ ! "$(git rev-parse main)" = "$(git rev-parse release/bunnies_v1)" ] ; then
-#     return 1
-#   fi
-#   sleep 5
-#   popd >/dev/null
-#   rm -rf ${git_dir}/* && cp -r ${backup_dir}/* ${git_dir}/
-#   [[ -f "/home/appuser/challenge_8.md" ]]
-# }
+  # Passes after solution
+  local git_dir=/srv/git/repositories/carrot-cruncher.git
+  local backup_dir=/tmp/git.backup/
+  mkdir ${backup_dir} && cp -r ${git_dir}/* "${backup_dir}/"
+  _solve-challenge-7
+  local score="$(_get-score)"
+  sleep 1
+  printf 'DEBUG: Score from challenge 7: %s\n' "${score}"
+  pushd "${git_dir}" >/dev/null
+  git config --global --add safe.directory ${git_dir}
+  if [ ! "$(git rev-parse main)" = "$(git rev-parse release/bunnies_v1)" ] ; then
+    return 1
+  fi
+  sleep 5
+  popd >/dev/null
+  rm -rf ${git_dir}/* && cp -r ${backup_dir}/* ${git_dir}/
+  [[ -f "/home/appuser/challenge_8.md" ]]
+}
 
 @test "simulate score accumulation" {
   _solve-challenge-1
