@@ -139,21 +139,28 @@ _check-webapp-reachable() {
 }
 
 _check-ssh-setup() {
+  set -x
   local test_dir=${wsroot}/git-checks
   local git_home="/srv/git"
   local repo_dir="${git_home}/repositories/carrot-cruncher.git"
-  cat ${git_home}/ssh-keys/id_rsa.pub >> /home/git/.ssh/authorized_keys && rm -f ${git_home}/ssh-keys/id_rsa.pub || log-warn "No key to copy"
+  su - appuser -c "git config --global --add safe.directory ${test_dir};"
+  if [[ -f ${git_home}/ssh-keys/id_rsa.pub ]]; then
+    cat ${git_home}/ssh-keys/id_rsa.pub >> /home/git/.ssh/authorized_keys && rm -f ${git_home}/ssh-keys/id_rsa.pub 
+  fi
   [[ -d ${test_dir} ]] || mkdir -m 777 ${test_dir}
-  [[ ! -d ${test_dir}/carrot-cruncher ]] || rm -rf /${test_dir}/*
+  [[ ! -d ${test_dir}/carrot-cruncher ]] || rm -rf /${test_dir:?}/*
   if su - appuser -c "git clone 'git@localhost:${repo_dir}' ${test_dir}/carrot-cruncher"; then
-    rm -rf /${test_dir}/*
+    rm -rf /${test_dir:?}/* /${test_dir:?}/.git
+    set +x
     _score-for-challenge 6
   else
+    set +x
     log-error "SSH Keys not setup successfully"
   fi
 }
 
 _check-git-branch-merged-correct() {
+  set -x
   local test_dir=${wsroot}/git-checks
   local repo_dir="/srv/git/repositories/carrot-cruncher.git"
   # pushd "${repo_dir}" > /dev/null
@@ -164,15 +171,18 @@ _check-git-branch-merged-correct() {
   #   log-error "commits don't match"
   # fi
   pushd "${test_dir}" > /dev/null
+  su - appuser -c "git config --global --add safe.directory ${test_dir};"
   # Clone if the directory is empty
   if [ ! "$(ls -A ${test_dir})" ]; then
       su - appuser -c "git clone 'git@localhost:${repo_dir}' ${test_dir}"
   fi
   su - appuser -c "cd ${test_dir}; git fetch; git checkout main; git pull origin main"
   if grep -q carrot main.go; then
+    set +x
     _score-for-challenge 7
   else
-      log-error "feature branch not merged correctly into main.\n"
+    set +x
+    log-error "feature branch not merged correctly into main.\n"
   fi
   popd > /dev/null
 }

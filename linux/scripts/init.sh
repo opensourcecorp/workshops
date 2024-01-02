@@ -99,8 +99,8 @@ log-info 'Set up systemd timer(s) & service(s)'
 cp "${wsroot}"/services/* /etc/systemd/system/
 systemctl daemon-reload
 systemctl disable linux-workshop-admin.service
-systemctl enable linux-workshop-admin.timer
-systemctl start linux-workshop-admin.timer
+# systemctl enable linux-workshop-admin.timer
+# systemctl start linux-workshop-admin.timer
 
 ###
 _db_init() {

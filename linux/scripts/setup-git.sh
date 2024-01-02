@@ -38,8 +38,8 @@ function _setup_ssh_keys_for_git_user() {
   fi
   chmod 600 "${authorized_keys_file}"
   chown "${GIT_USER}:${GIT_USER}" "${authorized_keys_file}"
-  [[ -d /home/${APP_USER}/.ssh ]] || mkdir /home/${APP_USER}/.ssh
-  cat <<EOF >/home/${APP_USER}/.ssh/config
+  [[ -d /home/${APP_USER}/.ssh ]] || mkdir /home/"${APP_USER}"/.ssh
+  cat <<EOF >/home/"${APP_USER}"/.ssh/config
 HOST localhost
       USER ${GIT_USER}
       PORT ${SSH_PORT}
@@ -63,7 +63,7 @@ function _setup_git_user() {
   fi
   _setup_ssh_keys_for_git_user
   # _add_to_known_hosts
-  echo $(which git-shell) >>/etc/shells
+  which git-shell >>/etc/shells
   chsh --shell "$(command -v /bin/bash)" "${GIT_USER}"
 }
 
@@ -73,12 +73,12 @@ function _init_git_repo() {
   mkdir -p "${REPO_DIR}"
   [[ -d "${GIT_HOME}/ssh-keys" ]] || mkdir "${GIT_HOME}/ssh-keys"
   chown -R "${GIT_USER}:${GIT_USER}" "${GIT_HOME}"
-  pushd "${REPO_DIR}" >/dev/null
-  su - ${GIT_USER} -c "git config --global init.defaultBranch ${DEFAULT_BRANCH}"
-  su - ${GIT_USER} -c "git config --global user.email 'bugs@bigbadbunnies.com'"
-  su - ${GIT_USER} -c "git config --global user.name 'Bugs Bunny'"
-  su - ${GIT_USER} -c "pushd "${REPO_DIR}" >/dev/null; git init --bare"
-  popd >/dev/null
+  pushd "${REPO_DIR}" >/dev/null || exit
+  su - "${GIT_USER}" -c "git config --global init.defaultBranch ${DEFAULT_BRANCH}"
+  su - "${GIT_USER}" -c "git config --global user.email 'bugs@bigbadbunnies.com'"
+  su - "${GIT_USER}" -c "git config --global user.name 'Bugs Bunny'"
+  su - "${GIT_USER}" -c "pushd ""${REPO_DIR}"" >/dev/null; git init --bare"
+  popd >/dev/null || exit
 }
 
 function _setup_local_clone() {
@@ -89,36 +89,36 @@ function _setup_local_clone() {
   fi
   mkdir "${WORK_DIR}"
   chmod 777 "${WORK_DIR}"
-  pushd "${WORK_DIR}" >/dev/null
-  su - ${GIT_USER} -c "GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=accept-new' git clone '${GIT_USER}@localhost:${REPO_DIR}' ${clone_dir}"
+  pushd "${WORK_DIR}" >/dev/null || exit
+  su - "${GIT_USER}" -c "GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=accept-new' git clone '${GIT_USER}@localhost:${REPO_DIR}' ${clone_dir}"
   git config --global --add safe.directory /opt/git/carrot-cruncher
-  pushd "${clone_dir}"
+  pushd "${clone_dir}" >/dev/null || exit
   cp -r "${APP_DIR}"/* .
   sed -i 's/PrintLine/Println/g' main.go
-  su - ${GIT_USER} -c "pushd ${clone_dir}; git add .; git commit -m 'Initial commit'; git push origin"
-  popd >/dev/null
+  su - "${GIT_USER}" -c "pushd ${clone_dir}; git add .; git commit -m 'Initial commit'; git push origin"
+  popd >/dev/null || exit
 }
 
 function _create_release_branch() {
   local clone_dir="${WORK_DIR}/${REPO_NAME}"
   local branch_2="v1.0.2-rc-tmp-bugfix-2.0.1"
-  pushd "${clone_dir}" >/dev/null
+  pushd "${clone_dir}" >/dev/null || exit
   log-info "setting up release branch"
-  su - ${GIT_USER} -c "pushd ${clone_dir}; git checkout -b '${BRANCH_NAME}'"
+  su - "${GIT_USER}" -c "pushd ${clone_dir}; git checkout -b '${BRANCH_NAME}'"
   sed -i -e 's/printing/picking/g' -e 's/money/carrots/g' -e 's/CHA-CHING/CRUNCH/g' main.go
   echo -e "Name: Bugs Bunny\nSecurity Question Answer: 'Crunchy King'\nSSN: 1234-BUNNY" >banking.txt
-  su - ${GIT_USER} -c "pushd ${clone_dir}; git add .; git commit -m 'Prepare release branch'"
+  su - "${GIT_USER}" -c "pushd ${clone_dir}; git add .; git commit -m 'Prepare release branch'"
   rm banking.txt
-  su - ${GIT_USER} -c "pushd ${clone_dir}; git add .; git commit -m 'oops did not mean to add that...'"
-  su - ${GIT_USER} -c "pushd ${clone_dir}; git push --set-upstream origin '${BRANCH_NAME}'"
-  su - ${GIT_USER} -c "pushd ${clone_dir}; git checkout '${DEFAULT_BRANCH}'"
-  su - ${GIT_USER} -c "pushd ${clone_dir}; git checkout -b '${branch_2}'"
+  su - "${GIT_USER}" -c "pushd ${clone_dir}; git add .; git commit -m 'oops did not mean to add that...'"
+  su - "${GIT_USER}" -c "pushd ${clone_dir}; git push --set-upstream origin '${BRANCH_NAME}'"
+  su - "${GIT_USER}" -c "pushd ${clone_dir}; git checkout '${DEFAULT_BRANCH}'"
+  su - "${GIT_USER}" -c "pushd ${clone_dir}; git checkout -b '${branch_2}'"
   sed -i -e 's/printing/uh/g' -e 's/money/oh/g' -e 's/CHA-CHING/NO-NO-NOOOOO/g' main.go
-  su - ${GIT_USER} -c "pushd ${clone_dir}; git add .; git commit -m 'I think we might be on to something...'"
-  su - ${GIT_USER} -c "pushd ${clone_dir}; git push --set-upstream origin '${branch_2}'"
-  su - ${GIT_USER} -c "pushd ${clone_dir}; git checkout '${DEFAULT_BRANCH}'"
-  su - ${GIT_USER} -c "pushd ${clone_dir}; git branch -D ${BRANCH_NAME} ${branch_2}"
-  popd >/dev/null
+  su - "${GIT_USER}" -c "pushd ${clone_dir}; git add .; git commit -m 'I think we might be on to something...'"
+  su - "${GIT_USER}" -c "pushd ${clone_dir}; git push --set-upstream origin '${branch_2}'"
+  su - "${GIT_USER}" -c "pushd ${clone_dir}; git checkout '${DEFAULT_BRANCH}'"
+  su - "${GIT_USER}" -c "pushd ${clone_dir}; git branch -D ${BRANCH_NAME} ${branch_2}"
+  popd >/dev/null || exit
 }
 
 function _polish_off() {
@@ -131,7 +131,7 @@ printf '%s\n' "provide interactive shell access."
 exit 128
 EOF
   chmod 777 /home/git/git-shell-commands/no-interactive-login
-  chown -R ${APP_USER}:${APP_USER} /opt/git # git appuser ownership of git directory
+  chown -R "${APP_USER}":"${APP_USER}" /opt/git # git appuser ownership of git directory
 }
 
 function main() {

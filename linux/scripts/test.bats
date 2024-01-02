@@ -61,7 +61,7 @@ teardown() {
   ufw deny out 8000
 
   # Challenge 7
-  rm -rf /home/appuser/.ssh/
+  rm -rf /home/appuser/.ssh/*
   _reset-score
 }
 
@@ -69,8 +69,8 @@ teardown_file() {
   teardown
   rm -f /home/appuser/challenge_{2..200}.md # just to be sure to catch any non-0 or 1 challenges
   rm -f /home/appuser/congrats.md
-  rm -r "${wsroot}"/team_has_been_congratulated
-  systemctl start linux-workshop-admin.timer
+  rm -rf "${wsroot}"/team_has_been_congratulated
+  # systemctl start linux-workshop-admin.timer
 }
 
 _reset-score() {
@@ -165,16 +165,19 @@ _solve-challenge-6() {
 
 _solve-challenge-7() {
   _solve-challenge-6
-  sleep 5 # give time for ssh key to copy
+  systemctl start linux-workshop-admin.service --wait # trigger admin service to copy ssh key
+  sleep 5
   local user="appuser"
   local RELEASE_BRANCH=release/bunnies_v1
+  [[ -d /tmp/carrot-cruncher ]] && rm -rf /tmp/carrot-cruncher
   su - "${user}" -c "pushd /tmp >/dev/null; \\
+  git config --global --add safe.directory /tmp/;
   git clone git@localhost:/srv/git/repositories/carrot-cruncher.git && \\
   pushd carrot-cruncher >/dev/null && \\
   git merge origin/${RELEASE_BRANCH} && \\
   git push origin main && \\
-  popd >/dev/null && \\
-  rm -rf /tmp/carrot-cruncher"
+  popd >/dev/null"
+  rm -rf /tmp/carrot-cruncher
 }
 
 ################################################################################
@@ -252,7 +255,7 @@ _solve-challenge-7() {
   # Passes after solution
   _solve-challenge-5
   local score="$(_get-score)"
-  sleep 1
+  sleep 5
   printf 'DEBUG: Score from challenge 5: %s\n' "${score}"
   counter=0
   until timeout 1s curl -fsSL "${db_addr}:8000" ; do
@@ -272,7 +275,9 @@ _solve-challenge-7() {
 
   # Passes after solution
   _solve-challenge-6
-  sleep 10
+  local score="$(_get-score)"
+  sleep 5
+  printf 'DEBUG: Score from challenge 6: %s\n' "${score}"
   su - "appuser" -c "pushd /opt/git/carrot-cruncher >/dev/null; git config --global --add safe.directory /opt/git/carrot-cruncher; git fetch"
   [[ -f "/home/appuser/challenge_7.md" ]]
 }
@@ -284,7 +289,9 @@ _solve-challenge-7() {
   # Passes after solution
   local git_dir=/srv/git/repositories/carrot-cruncher.git
   local backup_dir=/tmp/git.backup/
-  mkdir ${backup_dir} && cp -r ${git_dir}/* "${backup_dir}/"
+  if [[ ! -d ${backup_dir} ]]; then 
+    mkdir ${backup_dir} && cp -r ${git_dir}/* "${backup_dir}/"
+  fi
   _solve-challenge-7
   local score="$(_get-score)"
   sleep 1
@@ -297,6 +304,7 @@ _solve-challenge-7() {
   sleep 5
   popd >/dev/null
   rm -rf ${git_dir}/* && cp -r ${backup_dir}/* ${git_dir}/
+  chown -R git:git ${git_dir}
   [[ -f "/home/appuser/challenge_8.md" ]]
 }
 
