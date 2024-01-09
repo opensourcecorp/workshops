@@ -16,4 +16,4 @@ the system reboots* -- meaning that if the server is restarted for any reason,
 the app service needs to start again *without you starting it manually*.
 
 If for any reason you need to check out more detailed logs of the service, you
-can also use the separate `journald` command to inspect them.
+can also use the separate `journalctl` command to inspect them.

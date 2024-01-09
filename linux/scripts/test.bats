@@ -57,8 +57,8 @@ teardown() {
   }
   rm -f /etc/systemd/system/app-deb.service
   systemctl daemon-reload
-  rm -f /opt/app/dist/debian/app/usr/bin/app
-  rm -f /opt/app/dist/debian/app.deb
+  rm -f /opt/app/dist/linux/app/usr/bin/app
+  rm -f /opt/app/dist/linux/app.deb
   apt-get remove -y app
 
   # Challenge 5
@@ -83,7 +83,7 @@ teardown_file() {
   teardown
   rm -f /home/appuser/challenge_{2..200}.md # just to be sure to catch any non-0 or 1 challenges
   rm -f /home/appuser/congrats.md
-  rm -rf "${wsroot}"/team_has_been_congratulated
+  rm -f "${wsroot}"/team_has_been_congratulated
   rm -rf /tmp/git.backup/ # keep git challenges from meessing up setup
   # systemctl start linux-workshop-admin.timer
 }
@@ -98,6 +98,9 @@ _reset-score() {
 _get-score() {
   systemctl reset-failed # to reset systemd restart rate-limiter, if other means fail to do so
   systemctl start linux-workshop-admin.service --wait
+  # Need to stop again becaue starting the .service restarts the timer because
+  # of its 'Want' directive
+  systemctl stop linux-workshop-admin.timer
   local score="$(psql -U postgres -h "${db_addr}" -tAc 'SELECT SUM(score) FROM scoring;')"
   printf '%s' "${score}"
 }
@@ -135,10 +138,10 @@ EOF
 
 _solve-challenge-4() {
   _solve-challenge-3
-  cp /opt/app/app /opt/app/dist/debian/app/usr/bin/app
-  dpkg-deb --build /opt/app/dist/debian/app
-  apt-get install -y /opt/app/dist/debian/app.deb
-  cat <<EOF >/etc/systemd/system/app-deb.service
+  cp /opt/app/app /opt/app/dist/linux/app/usr/bin/app
+  dpkg-deb --build /opt/app/dist/linux/app
+  apt-get install -y /opt/app/dist/linux/app.deb
+  cat <<EOF > /etc/systemd/system/app-deb.service
 [Unit]
 Description=Prints money!
 

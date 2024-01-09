@@ -15,7 +15,8 @@ look at the `/opt/app` directory again, you may have noticed that there is a
 `dist/` subdirectory there. You need to:
 
 - use that `dist/` directory tree, and the right setup & commands, to build a
-  Debian Package out of the app
+  Debian Package out of the app (note: you should use the `tree` command on that
+  `dist` directory to see the whole existing tree!)
 
 - install the built package with the Debian package manager
 
