@@ -134,7 +134,7 @@ if ! (cd /srv/git/repositories/carrot-cruncher.git && git show-ref --verify --qu
   if /tmp/scripts/setup-git.sh; then
       log-info "Git server setup completed successfully."
   else
-      log-error "Git server setup failed."
+      log-fatal "Git server setup failed."
   fi
 fi
 

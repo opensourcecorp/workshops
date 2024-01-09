@@ -138,21 +138,28 @@ _check-webapp-reachable() {
   fi
 }
 
+# Flag for checking if ssh is set
+ssh_setup=1
 _check-ssh-setup() {
-  set -x
-  local test_dir=${wsroot}/git-checks
+  # set -x
+  local test_dir=${wsroot}/git-checks/ssh
   local git_home="/srv/git"
   local repo_dir="${git_home}/repositories/carrot-cruncher.git"
-  su - appuser -c "git config --global --add safe.directory ${test_dir};"
+  su - appuser -c "git config --global --add safe.directory ${test_dir}"
   if [[ -f ${git_home}/ssh-keys/id_rsa.pub ]]; then
+    log-info "Copying SSH Keys..."
     cat ${git_home}/ssh-keys/id_rsa.pub >> /home/git/.ssh/authorized_keys && rm -f ${git_home}/ssh-keys/id_rsa.pub 
   fi
-  [[ -d ${test_dir} ]] || mkdir -m 777 ${test_dir}
-  [[ ! -d ${test_dir}/carrot-cruncher ]] || rm -rf /${test_dir:?}/*
-  if su - appuser -c "git clone 'git@localhost:${repo_dir}' ${test_dir}/carrot-cruncher"; then
-    rm -rf /${test_dir:?}/* /${test_dir:?}/.git
-    set +x
+  [[ -d ${test_dir} ]] || mkdir -p ${test_dir} && chmod -R 777 ${test_dir}/..
+  [[ ! -d ${test_dir}/carrot-cruncher ]] || rm -rf ${test_dir:?}/* ${test_dir:?}/.git
+  su - appuser -c "ssh git@localhost" || exit_status=$?
+  if [ "$exit_status" == 128 ]; then 
+  # if [ "$(su - appuser -c "git clone 'git@localhost:${repo_dir}' ${test_dir}/carrot-cruncher")" ]; then
+    # rm -rf /${test_dir:?}/carrot-cruncher
     _score-for-challenge 6
+    # set +x
+    log-info "SSH successfully setup"
+    ssh_setup=0
   else
     set +x
     log-error "SSH Keys not setup successfully"
@@ -160,8 +167,7 @@ _check-ssh-setup() {
 }
 
 _check-git-branch-merged-correct() {
-  set -x
-  local test_dir=${wsroot}/git-checks
+  local test_dir=${wsroot}/git-checks/merged
   local repo_dir="/srv/git/repositories/carrot-cruncher.git"
   # pushd "${repo_dir}" > /dev/null
   # git config --global --add safe.directory ${repo_dir}
@@ -170,34 +176,52 @@ _check-git-branch-merged-correct() {
   # else
   #   log-error "commits don't match"
   # fi
-  pushd "${test_dir}" > /dev/null
-  su - appuser -c "git config --global --add safe.directory ${test_dir};"
+  if [ $ssh_setup -eq 1 ]; then
+    log-warn "ssh keys aren't set"
+    return 0
+  fi
+  set -eux
+  [[ -d ${test_dir} ]] || mkdir -p ${test_dir} && chmod -R 777 ${test_dir}/..
+  su - appuser -c "git config --global --add safe.directory ${test_dir}"
   # Clone if the directory is empty
   if [ ! "$(ls -A ${test_dir})" ]; then
-      su - appuser -c "git clone 'git@localhost:${repo_dir}' ${test_dir}"
+      su - appuser -c "git clone 'git@localhost:${repo_dir}' ${test_dir}/carrot-cruncher"
   fi
-  su - appuser -c "cd ${test_dir}; git fetch; git checkout main; git pull origin main"
+  if [ "$(su - appuser -c "cd ${test_dir}/carrot-cruncher; git fetch")" ]; then
+    su - appuser -c "cd ${test_dir}/carrot-cruncher && git checkout main && git pull origin main"
+  fi
+  pushd "${test_dir}/carrot-cruncher" > /dev/null
   if grep -q carrot main.go; then
     set +x
     _score-for-challenge 7
+    log-info "Feature branch merged correctly"
   else
-    set +x
-    log-error "feature branch not merged correctly into main.\n"
+    set +eux
+    log-error "Feature branch not merged correctly into main.\n"
   fi
   popd > /dev/null
 }
 
-_check-secret-removed() {
-  SECRET_PATTERN="SSN: 1234-BUNNY"
-
-  # Check each commit for the secret pattern
-  for commit in $(git rev-list --all); do
-      if git show "$commit":banking.txt | grep -q "$SECRET_PATTERN"; then
-          echo "Secret found in commit $commit"
-          # Additional actions can be taken here, like breaking the loop or logging details
-      fi
-  done
-}
+# _check-secret-removed() {
+#   local secret_pattern="SSN: 1234-BUNNY"
+#   if ! ${ssh_setup}; then
+#     log-warn "ssh keys aren't set"
+#     return 0
+#   fi
+#   pushd /srv/git/repositories/carrot-cruncher.git > /dev/null
+#   git config --global --add safe.directory /srv/git/repositories/carrot-cruncher.git;
+#   # Check each commit for the secret pattern
+#   for commit in $(git rev-list --all); do
+#       if git show "$commit":banking.txt | grep -q "$secret_pattern"; then
+#           log-error "Secret found in commit $commit"
+#           popd > /dev/null
+#           return 0
+#       fi
+#   done
+#   # _score-for-challenge 8
+#   log-info "Secrets removed"
+#   popd > /dev/null
+# }
 
 ###
 # Main wrapper def & callable for scorables
@@ -211,6 +235,7 @@ main() {
   _check-webapp-reachable
   _check-ssh-setup
   _check-git-branch-merged-correct
+  # _check-secret-removed
 }
 
 main

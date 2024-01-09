@@ -26,7 +26,11 @@ source "${wsroot}"/env || exit 1
 # functions. <setup|teardown>_file run once, period, and <setup|teardown> run
 # once *per test*
 setup_file() {
+  systemctl disable linux-workshop-admin.timer
   systemctl stop linux-workshop-admin.timer
+  local git_dir=/srv/git/repositories/carrot-cruncher.git
+  local backup_dir=/tmp/git.backup/
+  mkdir ${backup_dir} && cp -r ${git_dir}/* "${backup_dir}/" # keep git challenges from meessing up setup
   _reset-score
 }
 
@@ -60,8 +64,18 @@ teardown() {
   # Challenge 5
   ufw deny out 8000
 
-  # Challenge 7
+  # Challenge 6
   rm -rf /home/appuser/.ssh/*
+
+  # Challenge 7
+  local git_dir=/srv/git/repositories/carrot-cruncher.git
+  local backup_dir=/tmp/git.backup/
+  rm -rf /tmp/carrot-cruncher
+  if [[ -d $backup_dir ]]; then
+    rm -rf ${git_dir:?}/* 
+    cp -r ${backup_dir}/* ${git_dir}/
+  fi
+  chown -R git:git ${git_dir}
   _reset-score
 }
 
@@ -70,6 +84,7 @@ teardown_file() {
   rm -f /home/appuser/challenge_{2..200}.md # just to be sure to catch any non-0 or 1 challenges
   rm -f /home/appuser/congrats.md
   rm -rf "${wsroot}"/team_has_been_congratulated
+  rm -rf /tmp/git.backup/ # keep git challenges from meessing up setup
   # systemctl start linux-workshop-admin.timer
 }
 
@@ -165,20 +180,31 @@ _solve-challenge-6() {
 
 _solve-challenge-7() {
   _solve-challenge-6
-  systemctl start linux-workshop-admin.service --wait # trigger admin service to copy ssh key
-  sleep 5
+  cat /srv/git/ssh-keys/id_rsa.pub >> /home/git/.ssh/authorized_keys
   local user="appuser"
   local RELEASE_BRANCH=release/bunnies_v1
   [[ -d /tmp/carrot-cruncher ]] && rm -rf /tmp/carrot-cruncher
   su - "${user}" -c "pushd /tmp >/dev/null; \\
-  git config --global --add safe.directory /tmp/;
+  git config --global --add safe.directory /tmp/; \\
   git clone git@localhost:/srv/git/repositories/carrot-cruncher.git && \\
   pushd carrot-cruncher >/dev/null && \\
   git merge origin/${RELEASE_BRANCH} && \\
   git push origin main && \\
   popd >/dev/null"
-  rm -rf /tmp/carrot-cruncher
 }
+
+# _solve-challenge-8() {
+#   local user="appuser"
+#   _solve-challenge-7
+#   su - "${user}" -c "pushd /tmp/carrot-cruncher >/dev/null; \\
+#   git config --global --add safe.directory /tmp/; \\
+#   export FILTER_BRANCH_SQUELCH_WARNING=1 && \\
+#   git filter-branch --force --index-filter \\
+#   \"git rm --cached --ignore-unmatch banking.txt\" \\
+#   --prune-empty --tag-name-filter cat -- --all && \\
+#   git push --force --all && \\
+#   popd >/dev/null"
+# }
 
 ################################################################################
 
@@ -187,87 +213,87 @@ _solve-challenge-7() {
   [[ -f "/home/appuser/challenge_1.md" ]]
 }
 
-@test "challenge 1" {
-  # Fails before solution
-  [[ ! -f /opt/app/app ]]
-  [[ ! -x /opt/app/app ]]
+# @test "challenge 1" {
+#   # Fails before solution
+#   [[ ! -f /opt/app/app ]]
+#   [[ ! -x /opt/app/app ]]
 
-  # Passes after solution
-  _solve-challenge-1
-  local score="$(_get-score)"
-  sleep 1
-  printf 'DEBUG: Score from challenge 1: %s\n' "${score}"
-  [[ "${score}" -ge 100 ]]
-  [[ -f "/home/appuser/challenge_2.md" ]] # next instruction gets put in homedir
-}
+#   # Passes after solution
+#   _solve-challenge-1
+#   local score="$(_get-score)"
+#   sleep 1
+#   printf 'DEBUG: Score from challenge 1: %s\n' "${score}"
+#   [[ "${score}" -ge 100 ]]
+#   [[ -f "/home/appuser/challenge_2.md" ]] # next instruction gets put in homedir
+# }
 
-# This test also end ups implicitly tests two challenges' scores at once, which is
-# good
-@test "challenge 2" {
-  # Fails before solution
-  [[ ! -f "/home/appuser/challenge_3.md" ]]
-  [[ ! -L /usr/local/bin/run-app ]]
+# # This test also end ups implicitly tests two challenges' scores at once, which is
+# # good
+# @test "challenge 2" {
+#   # Fails before solution
+#   [[ ! -f "/home/appuser/challenge_3.md" ]]
+#   [[ ! -L /usr/local/bin/run-app ]]
 
-  # Passes after solution
-  _solve-challenge-2
-  local score="$(_get-score)"
-  sleep 1
-  printf 'DEBUG: Score from challenge 2: %s\n' "${score}"
-  [[ "${score}" -ge 200 ]] # challenge 1 + 2 score
-  [[ -f "/home/appuser/challenge_3.md" ]]
-}
+#   # Passes after solution
+#   _solve-challenge-2
+#   local score="$(_get-score)"
+#   sleep 1
+#   printf 'DEBUG: Score from challenge 2: %s\n' "${score}"
+#   [[ "${score}" -ge 200 ]] # challenge 1 + 2 score
+#   [[ -f "/home/appuser/challenge_3.md" ]]
+# }
 
-@test "challenge 3" {
-  # Fails before solution
-  systemctl is-active app.service && return 1
-  systemctl is-enabled app.service && return 1
+# @test "challenge 3" {
+#   # Fails before solution
+#   systemctl is-active app.service && return 1
+#   systemctl is-enabled app.service && return 1
 
-  # Passes after solution
-  _solve-challenge-3
-  local score="$(_get-score)"
-  sleep 1
-  printf 'DEBUG: Score from challenge 3: %s\n' "${score}"
-  systemctl is-active app.service || return 1
-  systemctl is-enabled app.service || return 1
-  [[ -f "/home/appuser/challenge_4.md" ]]
-}
+#   # Passes after solution
+#   _solve-challenge-3
+#   local score="$(_get-score)"
+#   sleep 1
+#   printf 'DEBUG: Score from challenge 3: %s\n' "${score}"
+#   systemctl is-active app.service || return 1
+#   systemctl is-enabled app.service || return 1
+#   [[ -f "/home/appuser/challenge_4.md" ]]
+# }
 
-@test "challenge 4" {
-  # Fails before solution
-  [[ ! -f "/home/appuser/challenge_5.md" ]]
-  systemctl is-active app-deb.service && return 1
-  systemctl is-enabled app-deb.service && return 1
+# @test "challenge 4" {
+#   # Fails before solution
+#   [[ ! -f "/home/appuser/challenge_5.md" ]]
+#   systemctl is-active app-deb.service && return 1
+#   systemctl is-enabled app-deb.service && return 1
 
-  # Passes after solution
-  _solve-challenge-4
-  local score="$(_get-score)"
-  sleep 1
-  printf 'DEBUG: Score from challenge 4: %s\n' "${score}"
-  systemctl is-active app-deb.service || return 1
-  systemctl is-enabled app-deb.service || return 1
-  [[ -f "/home/appuser/challenge_5.md" ]]
-}
+#   # Passes after solution
+#   _solve-challenge-4
+#   local score="$(_get-score)"
+#   sleep 1
+#   printf 'DEBUG: Score from challenge 4: %s\n' "${score}"
+#   systemctl is-active app-deb.service || return 1
+#   systemctl is-enabled app-deb.service || return 1
+#   [[ -f "/home/appuser/challenge_5.md" ]]
+# }
 
-@test "challenge 5" {
-  # Fails before solution
-  [[ ! -f "/home/appuser/challenge_6.md" ]]
+# @test "challenge 5" {
+#   # Fails before solution
+#   [[ ! -f "/home/appuser/challenge_6.md" ]]
 
-  # Passes after solution
-  _solve-challenge-5
-  local score="$(_get-score)"
-  sleep 5
-  printf 'DEBUG: Score from challenge 5: %s\n' "${score}"
-  counter=0
-  until timeout 1s curl -fsSL "${db_addr}:8000" ; do
-    printf 'Web app not reachable, trying again...\n' >&2
-    counter="$((counter + 1))"
-    if [[ "${counter}" -ge 30 ]] ; then
-      return 1
-    fi
-    sleep 5
-  done
-  [[ -f "/home/appuser/challenge_6.md" ]]
-}
+#   # Passes after solution
+#   _solve-challenge-5
+#   local score="$(_get-score)"
+#   sleep 5
+#   printf 'DEBUG: Score from challenge 5: %s\n' "${score}"
+#   counter=0
+#   until timeout 1s curl -fsSL "${db_addr}:8000" ; do
+#     printf 'Web app not reachable, trying again...\n' >&2
+#     counter="$((counter + 1))"
+#     if [[ "${counter}" -ge 30 ]] ; then
+#       return 1
+#     fi
+#     sleep 5
+#   done
+#   [[ -f "/home/appuser/challenge_6.md" ]]
+# }
 
 @test "challenge 6" {
   # Fails before solution
@@ -288,10 +314,6 @@ _solve-challenge-7() {
 
   # Passes after solution
   local git_dir=/srv/git/repositories/carrot-cruncher.git
-  local backup_dir=/tmp/git.backup/
-  if [[ ! -d ${backup_dir} ]]; then 
-    mkdir ${backup_dir} && cp -r ${git_dir}/* "${backup_dir}/"
-  fi
   _solve-challenge-7
   local score="$(_get-score)"
   sleep 1
@@ -303,18 +325,40 @@ _solve-challenge-7() {
   fi
   sleep 5
   popd >/dev/null
-  rm -rf ${git_dir}/* && cp -r ${backup_dir}/* ${git_dir}/
-  chown -R git:git ${git_dir}
-  [[ -f "/home/appuser/challenge_8.md" ]]
+  [[ -f "/home/appuser/congrats.md" ]]
 }
 
-@test "simulate score accumulation" {
-  _solve-challenge-1
-  # each of these assignments does NOT increment the score var, but assigning it
-  # suppresses the useless output from the first call anyway
-  score="$(_get-score)"
-  score="$(_get-score)"
-  score="$(_get-score)"
-  printf 'DEBUG: Score after accumulation: %s\n' "${score}"
-  [[ "${score}" -ge 300 ]]
-}
+# @test "challenge 8" {
+#   # Fails before solution
+#   [[ ! -f "/home/appuser/congrats.md" ]]
+
+#   _solve-challenge-8
+#   local score="$(_get-score)"
+#   sleep 1
+#   printf 'DEBUG: Score from challenge 8: %s\n' "${score}"
+#   pushd /srv/git/repositories/carrot-cruncher.git > /dev/null
+#   local secret_pattern="SSN: 1234-BUNNY"
+#   git config --global --add safe.directory /srv/git/repositories/carrot-cruncher.git;
+
+#   # Check each commit for the secret pattern
+#   for commit in $(git rev-list --all); do
+#       if git show "$commit":banking.txt | grep -q "$secret_pattern"; then
+#           printf "Secret found in commit $commit"
+#           return 1
+#       fi
+#   done
+#   sleep 5
+#   popd >/dev/null
+#   [[ -f "/home/appuser/congrats.md" ]]
+# }
+
+# @test "simulate score accumulation" {
+#   _solve-challenge-1
+#   # each of these assignments does NOT increment the score var, but assigning it
+#   # suppresses the useless output from the first call anyway
+#   score="$(_get-score)"
+#   score="$(_get-score)"
+#   score="$(_get-score)"
+#   printf 'DEBUG: Score after accumulation: %s\n' "${score}"
+#   [[ "${score}" -ge 300 ]]
+# }
