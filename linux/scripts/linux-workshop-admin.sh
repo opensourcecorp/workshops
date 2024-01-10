@@ -142,15 +142,13 @@ _check-webapp-reachable() {
 ssh_setup=1
 _check-ssh-setup() {
   local test_dir=${wsroot}/git-checks/ssh
-  local git_home="/srv/git"
-  local repo_dir="${git_home}/repositories/carrot-cruncher.git"
+  local git_remote="/srv/git"
+  local repo_dir="${git_remote}/repositories/carrot-cruncher.git"
   su - appuser -c "git config --global --add safe.directory ${test_dir}"
-  if [[ -f ${git_home}/ssh-keys/id_rsa.pub ]]; then
+  if [[ -f ${git_remote}/ssh-keys/id_rsa.pub ]]; then
     log-info "Copying SSH Keys..."
-    cat ${git_home}/ssh-keys/id_rsa.pub >> /home/git/.ssh/authorized_keys && rm -f ${git_home}/ssh-keys/id_rsa.pub 
+    cat ${git_remote}/ssh-keys/id_rsa.pub >> /home/git/.ssh/authorized_keys && rm -f ${git_remote}/ssh-keys/id_rsa.pub 
   fi
-  [[ -d ${test_dir} ]] || mkdir -p ${test_dir} && chmod -R 777 ${test_dir}/..
-  [[ ! -d ${test_dir}/carrot-cruncher ]] || rm -rf ${test_dir:?}/* ${test_dir:?}/.git
   su - appuser -c "ssh git@localhost" || exit_status=$?
   if [ "$exit_status" == 128 ]; then 
     _score-for-challenge 6

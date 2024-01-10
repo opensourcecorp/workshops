@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Install ezlog
 command -v git > /dev/null || { apt-get update && apt-get install -y git ;}
-git config --global http.sslVerify false # Workaround for Vagrant installs
+git config --global http.sslVerify false # Workaround for corporate proxy installs
 [[ -d /usr/local/share/ezlog ]] || git clone 'https://github.com/opensourcecorp/ezlog.git' /usr/local/share/ezlog
 # shellcheck disable=SC1091
 source /usr/local/share/ezlog/src/main.sh
@@ -130,18 +130,12 @@ cp "${wsroot}"/instructions/challenge_{0,1}.md /home/appuser/
 ### Setup a local git server and clone to repo
 if ! (cd /srv/git/repositories/carrot-cruncher.git && git show-ref --verify --quiet "refs/heads/release/bunnies_v1" && [[ -f /home/git/git-shell-commands/no-interactive-login ]]) ; then
   sudo chmod +x /tmp/scripts/setup-git.sh
-  # if /tmp/scripts/setup-git.sh > /tmp/setup-git.log 2>&1; then
   if /tmp/scripts/setup-git.sh; then
       log-info "Git server setup completed successfully."
   else
       log-fatal "Git server setup failed."
   fi
 fi
-
-# Ideas
-
-# BUT ALSO, somehow the good branch is still failing lints (maybe)
-# note to self: need to put anything for a linter on the .bashrc-defined PATH for appuser during init
 
 rm -rf /tmp/{scripts,services,instructions,dummy-app-src}
 log-info 'All done!'
