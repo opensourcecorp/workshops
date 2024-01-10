@@ -147,10 +147,10 @@ _check-ssh-setup() {
   su - appuser -c "git config --global --add safe.directory ${test_dir}"
   if [[ -f ${git_remote}/ssh-keys/id_rsa.pub ]]; then
     log-info "Copying SSH Keys..."
-    cat ${git_remote}/ssh-keys/id_rsa.pub >> /home/git/.ssh/authorized_keys && rm -f ${git_remote}/ssh-keys/id_rsa.pub 
+    cat ${git_remote}/ssh-keys/id_rsa.pub >> /home/git/.ssh/authorized_keys && rm -f ${git_remote}/ssh-keys/id_rsa.pub
   fi
   su - appuser -c "ssh git@localhost" || exit_status=$?
-  if [ "$exit_status" == 128 ]; then 
+  if [ "$exit_status" == 128 ]; then
     _score-for-challenge 6
     log-info "SSH successfully setup"
     ssh_setup=0
@@ -175,14 +175,15 @@ _check-git-branch-merged-correct() {
   fi
   pushd "${test_dir}/carrot-cruncher" > /dev/null
   if grep -q carrot main.go; then
+    popd > /dev/null
     rm -rf /${test_dir:?}/carrot-cruncher
     _score-for-challenge 7
     log-info "Feature branch merged correctly"
   else
+    popd > /dev/null
     rm -rf /${test_dir:?}/carrot-cruncher
     log-error "Feature branch not merged correctly into main.\n"
   fi
-  popd > /dev/null
   ### Secondary check for exact commit matches. Haven't gotten working yet, but enforces
   ### actually merging vs. copy/pasting code from branches
   # pushd "${repo_dir}" > /dev/null

@@ -59,7 +59,7 @@ teardown() {
   systemctl daemon-reload
   rm -f /opt/app/dist/linux/app/usr/bin/app
   rm -f /opt/app/dist/linux/app.deb
-  apt-get remove -y app
+  apt-get remove -y app || true
 
   # Challenge 5
   ufw deny out 8000
@@ -72,7 +72,7 @@ teardown() {
   local backup_dir=/tmp/git.backup/
   rm -rf /tmp/carrot-cruncher
   if [[ -d $backup_dir ]]; then
-    rm -rf ${git_dir:?}/* 
+    rm -rf ${git_dir:?}/*
     cp -r ${backup_dir}/* ${git_dir}/
   fi
   chown -R git:git ${git_dir}
@@ -178,7 +178,7 @@ _solve-challenge-6() {
   chmod 700 "${ssh_dir}"
   su - "${user}" -c "ssh-keygen -t rsa -f ${private_key_file} -q -N ''"
   cp "${public_key_file}" "/srv/git/ssh-keys/"
-  su - "${user}" -c "ssh-keyscan -H localhost >> ${known_hosts_file}"
+  su - "${user}" -c "ssh-keyscan -H localhost >> ${known_hosts_file}" 2>/dev/null
 }
 
 _solve-challenge-7() {
@@ -355,15 +355,4 @@ _solve-challenge-7() {
 #   sleep 5
 #   popd >/dev/null
 #   [[ -f "/home/appuser/congrats.md" ]]
-# }
-
-# @test "simulate score accumulation" {
-#   _solve-challenge-1
-#   # each of these assignments does NOT increment the score var, but assigning it
-#   # suppresses the useless output from the first call anyway
-#   score="$(_get-score)"
-#   score="$(_get-score)"
-#   score="$(_get-score)"
-#   printf 'DEBUG: Score after accumulation: %s\n' "${score}"
-#   [[ "${score}" -ge 300 ]]
 # }
