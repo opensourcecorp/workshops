@@ -3,6 +3,7 @@ set -euo pipefail
 
 # Install ezlog
 command -v git > /dev/null || { apt-get update && apt-get install -y git ;}
+git config --global http.sslVerify false # Workaround for corporate proxy installs
 [[ -d /usr/local/share/ezlog ]] || git clone 'https://github.com/opensourcecorp/ezlog.git' /usr/local/share/ezlog
 # shellcheck disable=SC1091
 source /usr/local/share/ezlog/src/main.sh

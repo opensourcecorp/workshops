@@ -3,6 +3,7 @@ set -euo pipefail
 
 # Install ezlog
 command -v git > /dev/null || { apt-get update && apt-get install -y git ;}
+git config --global http.sslVerify false # Workaround for corporate proxy installs
 [[ -d /usr/local/share/ezlog ]] || git clone 'https://github.com/opensourcecorp/ezlog.git' /usr/local/share/ezlog
 # shellcheck disable=SC1091
 source /usr/local/share/ezlog/src/main.sh
@@ -58,7 +59,6 @@ cp -r /tmp/{scripts,services,instructions} "${wsroot}"/
 mkdir -p /opt/app
 cp -r /tmp/dummy-app-src/* /opt/app
 chown -R appuser:appuser /opt/app
-rm -rf /tmp/{scripts,services,instructions,dummy-app-src}
 
 ###
 log-info 'Installing any needed system packages'
@@ -126,17 +126,16 @@ timeout 180s bash -c _db_init
 log-info 'Dumping the first instruction(s) to the appuser homedir'
 cp "${wsroot}"/instructions/challenge_{0,1}.md /home/appuser/
 
-## TODO: ideas for other scorable challenges for teams:
 
-# Simulate a git repo's history a la:
-# (at time of writing, this was on the branch 'feature/add-git-scoring-step')
+### Setup a local git server and clone to repo
+if ! (cd /srv/git/repositories/carrot-cruncher.git && git show-ref --verify --quiet "refs/heads/release/bunnies_v1" && [[ -f /home/git/git-shell-commands/no-interactive-login ]]) ; then
+  sudo chmod +x /tmp/scripts/setup-git.sh
+  if /tmp/scripts/setup-git.sh; then
+      log-info "Git server setup completed successfully."
+  else
+      log-fatal "Git server setup failed."
+  fi
+fi
 
-# ...
-
-# mess up the current branch (maybe it was a feature branch that got yeeted)?
-# Have a different branch be the "good" one (`release`, `main` etc)
-
-# BUT ALSO, somehow the good branch is still failing lints (maybe)
-# note to self: need to put anything for a linter on the .bashrc-defined PATH for appuser during init
-
+rm -rf /tmp/{scripts,services,instructions,dummy-app-src}
 log-info 'All done!'

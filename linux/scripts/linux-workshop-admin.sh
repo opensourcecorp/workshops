@@ -138,10 +138,88 @@ _check-webapp-reachable() {
   fi
 }
 
+# Flag for checking if ssh is set
+ssh_setup=1
+_check-ssh-setup() {
+  local test_dir=${wsroot}/git-checks/ssh
+  local git_remote="/srv/git"
+  local repo_dir="${git_remote}/repositories/carrot-cruncher.git"
+  su - appuser -c "git config --global --add safe.directory ${test_dir}"
+  if [[ -f ${git_remote}/ssh-keys/id_rsa.pub ]]; then
+    log-info "Copying SSH Keys..."
+    cat ${git_remote}/ssh-keys/id_rsa.pub >> /home/git/.ssh/authorized_keys && rm -f ${git_remote}/ssh-keys/id_rsa.pub
+  fi
+  su - appuser -c "ssh git@localhost" || exit_status=$?
+  if [ "$exit_status" == 128 ]; then
+    _score-for-challenge 6
+    log-info "SSH successfully setup"
+    ssh_setup=0
+  else
+    log-error "SSH Keys not setup successfully"
+  fi
+}
+
+_check-git-branch-merged-correct() {
+  local test_dir=${wsroot}/git-checks/merged
+  local repo_dir="/srv/git/repositories/carrot-cruncher.git"
+  if [ $ssh_setup -eq 1 ]; then
+    log-warn "ssh keys aren't set"
+    return 0
+  fi
+  [[ -d ${test_dir} ]] || mkdir -p ${test_dir} && chmod -R 777 ${test_dir}/..
+  su - appuser -c "git config --global --add safe.directory ${test_dir}"
+  [[ ! -d ${test_dir}/carrot-cruncher ]] || rm -rf ${test_dir:?}/carrot-cruncher
+  su - appuser -c "git clone 'git@localhost:${repo_dir}' ${test_dir}/carrot-cruncher"
+  if [ "$(su - appuser -c "cd ${test_dir}/carrot-cruncher; git fetch")" ]; then
+    su - appuser -c "cd ${test_dir}/carrot-cruncher && git checkout main && git pull origin main"
+  fi
+  pushd "${test_dir}/carrot-cruncher" > /dev/null
+  if grep -q carrot main.go; then
+    popd > /dev/null
+    rm -rf /${test_dir:?}/carrot-cruncher
+    _score-for-challenge 7
+    log-info "Feature branch merged correctly"
+  else
+    popd > /dev/null
+    rm -rf /${test_dir:?}/carrot-cruncher
+    log-error "Feature branch not merged correctly into main.\n"
+  fi
+  ### Secondary check for exact commit matches. Haven't gotten working yet, but enforces
+  ### actually merging vs. copy/pasting code from branches
+  # pushd "${repo_dir}" > /dev/null
+  # git config --global --add safe.directory ${repo_dir}
+  # if [ "$(git rev-parse main)" = "$(git rev-parse release/bunnies_v1)" ]; then
+  #   log-info "commits match"
+  # else
+  #   log-error "commits don't match"
+  # fi
+}
+
+### Challenge 8 Check. WIP
+# _check-secret-removed() {
+#   local secret_pattern="SSN: 1234-BUNNY"
+#   if ! ${ssh_setup}; then
+#     log-warn "ssh keys aren't set"
+#     return 0
+#   fi
+#   pushd /srv/git/repositories/carrot-cruncher.git > /dev/null
+#   git config --global --add safe.directory /srv/git/repositories/carrot-cruncher.git;
+#   # Check each commit for the secret pattern
+#   for commit in $(git rev-list --all); do
+#       if git show "$commit":banking.txt | grep -q "$secret_pattern"; then
+#           log-error "Secret found in commit $commit"
+#           popd > /dev/null
+#           return 0
+#       fi
+#   done
+#   # _score-for-challenge 8
+#   log-info "Secrets removed"
+#   popd > /dev/null
+# }
+
 ###
 # Main wrapper def & callable for scorables
 ###
-
 main() {
   log-info 'Starting score check...'
   _check-binary-built
@@ -149,6 +227,9 @@ main() {
   _check-systemd-service-running
   _check-debfile-service-running
   _check-webapp-reachable
+  _check-ssh-setup
+  _check-git-branch-merged-correct
+  # _check-secret-removed
 }
 
 main

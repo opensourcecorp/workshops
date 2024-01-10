@@ -15,6 +15,9 @@ yeet-aws:
 	@printf 'Waiting 30s for EC2 instances to hopefully process userdata...\n' && sleep 30
 	@make -s provision-aws
 
+connect-aws:
+	ssh -p 2332 admin@$(shell terraform -chdir=./terraform output -json | jq -r '.instance_ips.value[]')
+
 provision-local:
 # Don't re-provision DB at the same time, since it throws off team server tests
 	@vagrant provision db
