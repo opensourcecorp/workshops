@@ -141,7 +141,6 @@ _check-webapp-reachable() {
 # Flag for checking if ssh is set
 ssh_setup=1
 _check-ssh-setup() {
-  set -x
   local test_dir=${wsroot}/git-checks/ssh
   local git_home="/srv/git"
   local repo_dir="${git_home}/repositories/carrot-cruncher.git"
@@ -154,14 +153,10 @@ _check-ssh-setup() {
   [[ ! -d ${test_dir}/carrot-cruncher ]] || rm -rf ${test_dir:?}/* ${test_dir:?}/.git
   su - appuser -c "ssh git@localhost" || exit_status=$?
   if [ "$exit_status" == 128 ]; then 
-  # if [ "$(su - appuser -c "git clone 'git@localhost:${repo_dir}' ${test_dir}/carrot-cruncher")" ]; then
-    # rm -rf /${test_dir:?}/carrot-cruncher
-    set +x
     _score-for-challenge 6
     log-info "SSH successfully setup"
     ssh_setup=0
   else
-    set +x
     log-error "SSH Keys not setup successfully"
   fi
 }
@@ -169,18 +164,10 @@ _check-ssh-setup() {
 _check-git-branch-merged-correct() {
   local test_dir=${wsroot}/git-checks/merged
   local repo_dir="/srv/git/repositories/carrot-cruncher.git"
-  # pushd "${repo_dir}" > /dev/null
-  # git config --global --add safe.directory ${repo_dir}
-  # if [ "$(git rev-parse main)" = "$(git rev-parse release/bunnies_v1)" ]; then
-  #   log-info "commits match"
-  # else
-  #   log-error "commits don't match"
-  # fi
   if [ $ssh_setup -eq 1 ]; then
     log-warn "ssh keys aren't set"
     return 0
   fi
-  set -eux
   [[ -d ${test_dir} ]] || mkdir -p ${test_dir} && chmod -R 777 ${test_dir}/..
   su - appuser -c "git config --global --add safe.directory ${test_dir}"
   [[ ! -d ${test_dir}/carrot-cruncher ]] || rm -rf ${test_dir:?}/carrot-cruncher
@@ -190,18 +177,26 @@ _check-git-branch-merged-correct() {
   fi
   pushd "${test_dir}/carrot-cruncher" > /dev/null
   if grep -q carrot main.go; then
-    set +eux
     rm -rf /${test_dir:?}/carrot-cruncher
     _score-for-challenge 7
     log-info "Feature branch merged correctly"
   else
-    set +eux
     rm -rf /${test_dir:?}/carrot-cruncher
     log-error "Feature branch not merged correctly into main.\n"
   fi
   popd > /dev/null
+  ### Secondary check for exact commit matches. Haven't gotten working yet, but enforces
+  ### actually merging vs. copy/pasting code from branches
+  # pushd "${repo_dir}" > /dev/null
+  # git config --global --add safe.directory ${repo_dir}
+  # if [ "$(git rev-parse main)" = "$(git rev-parse release/bunnies_v1)" ]; then
+  #   log-info "commits match"
+  # else
+  #   log-error "commits don't match"
+  # fi
 }
 
+### Challenge 8 Check. WIP
 # _check-secret-removed() {
 #   local secret_pattern="SSN: 1234-BUNNY"
 #   if ! ${ssh_setup}; then

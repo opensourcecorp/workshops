@@ -196,6 +196,7 @@ _solve-challenge-7() {
   popd >/dev/null"
 }
 
+### Challenge 8 Check. WIP
 # _solve-challenge-8() {
 #   local user="appuser"
 #   _solve-challenge-7
@@ -331,6 +332,7 @@ _solve-challenge-7() {
   [[ -f "/home/appuser/congrats.md" ]]
 }
 
+### Challenge 8 Check. WIP
 # @test "challenge 8" {
 #   # Fails before solution
 #   [[ ! -f "/home/appuser/congrats.md" ]]
