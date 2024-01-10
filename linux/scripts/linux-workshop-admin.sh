@@ -141,7 +141,7 @@ _check-webapp-reachable() {
 # Flag for checking if ssh is set
 ssh_setup=1
 _check-ssh-setup() {
-  # set -x
+  set -x
   local test_dir=${wsroot}/git-checks/ssh
   local git_home="/srv/git"
   local repo_dir="${git_home}/repositories/carrot-cruncher.git"
@@ -156,8 +156,8 @@ _check-ssh-setup() {
   if [ "$exit_status" == 128 ]; then 
   # if [ "$(su - appuser -c "git clone 'git@localhost:${repo_dir}' ${test_dir}/carrot-cruncher")" ]; then
     # rm -rf /${test_dir:?}/carrot-cruncher
+    set +x
     _score-for-challenge 6
-    # set +x
     log-info "SSH successfully setup"
     ssh_setup=0
   else
@@ -183,20 +183,20 @@ _check-git-branch-merged-correct() {
   set -eux
   [[ -d ${test_dir} ]] || mkdir -p ${test_dir} && chmod -R 777 ${test_dir}/..
   su - appuser -c "git config --global --add safe.directory ${test_dir}"
-  # Clone if the directory is empty
-  if [ ! "$(ls -A ${test_dir})" ]; then
-      su - appuser -c "git clone 'git@localhost:${repo_dir}' ${test_dir}/carrot-cruncher"
-  fi
+  [[ ! -d ${test_dir}/carrot-cruncher ]] || rm -rf ${test_dir:?}/carrot-cruncher
+  su - appuser -c "git clone 'git@localhost:${repo_dir}' ${test_dir}/carrot-cruncher"
   if [ "$(su - appuser -c "cd ${test_dir}/carrot-cruncher; git fetch")" ]; then
     su - appuser -c "cd ${test_dir}/carrot-cruncher && git checkout main && git pull origin main"
   fi
   pushd "${test_dir}/carrot-cruncher" > /dev/null
   if grep -q carrot main.go; then
-    set +x
+    set +eux
+    rm -rf /${test_dir:?}/carrot-cruncher
     _score-for-challenge 7
     log-info "Feature branch merged correctly"
   else
     set +eux
+    rm -rf /${test_dir:?}/carrot-cruncher
     log-error "Feature branch not merged correctly into main.\n"
   fi
   popd > /dev/null
