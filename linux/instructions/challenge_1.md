@@ -11,3 +11,5 @@ a Go binary.
 
 Take note of any error messages when trying to build it, and fix any issues you
 find.
+
+NOTE APP NEEDS TO BE CALLED `app`, NOT `main`

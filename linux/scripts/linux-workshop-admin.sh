@@ -54,8 +54,8 @@ _score-for-challenge() {
 # challenges.
 _get-last-challenge-completed() {
   local last_challenge_completed
-  last_challenge_completed="$(find /home/appuser -type f -name '*.md' | grep -E -o '[0-9]+' | sort -h | tail -n1)"
-  max_possible_challenge_completed="$(find "${wsroot}"/instructions -type f -name '*.md' | grep -E -o '[0-9]+' | sort -h | tail -n1)"
+  last_challenge_completed="$(find /home/appuser -type f -name 'challenge_*.md' | grep -E -o '[0-9]+' | sort -h | tail -n1)"
+  max_possible_challenge_completed="$(find "${wsroot}"/instructions -type f -name 'challenge_*.md' | grep -E -o '[0-9]+' | sort -h | tail -n1)"
   if [[ -f /home/appuser/congrats.md ]] ; then
     last_challenge_completed="${max_possible_challenge_completed}"
   else
