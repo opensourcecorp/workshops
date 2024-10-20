@@ -20,9 +20,9 @@ number is:
 
 1. Higher than `6000`
 
-1. *Not* `8080`
+2. *Not* `8080`
 
-1. *Not* managed by the `iptables` tool.
+3. *Not* managed by the `iptables` tool.
 
 Finally, you will want to figure out what firewall issue your own server has
 that seems to be causing problems, and fix it.
