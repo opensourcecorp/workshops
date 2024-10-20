@@ -19,7 +19,6 @@ variable "custom_security_group_ingress" {
 variable "event_name" {
   description = "Name of the event that the workshop is being run for, e.g. 'STL-Public-Library-Hackathon'"
   type        = string
-  default     = "testing"
 }
 
 variable "num_teams" {
