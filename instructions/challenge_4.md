@@ -24,4 +24,5 @@ look at the `/opt/app` directory again, you may have noticed that there is a
   correctly-installed app binary.
 
 Once you do that, be sure to check the `systemd` and/or `journald` logs of the
-new `app-deb.service` to make sure it's running successfully!
+new `app-deb.service` to make sure it's running successfully! (and, just like
+the last one, that it would keep running after a reboot)
